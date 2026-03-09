@@ -61,20 +61,20 @@ Quem vai desenvolver algo novo:
 **Antes de começar, atualizar a main**<br>
 git checkout main
 git pull origin main
-<br>
+<br><br>
 **Criar sua branch**<br>
 git checkout -b nome_branch
-<br>
+<br><br>
 **Trabalhar normalmente**<br>
 git add .<br>
 git commit -m "feat: adicionado formulário de login"
-<br>
+<br><br>
 **Enviar branch pro GitHub**<br>
 git push -u origin nome_branch
-<br>
+<br><br>
 **Abrir Pull Request no GitHub**<br>
 Aí o grupo revisa e faz o merge
-<br>
+<br><br>
 # BOAS PRÁTICAS
 1. Não sair programando diretamente no Main
 2. Cada pessoa pega uma parte diferente do sistema
@@ -87,41 +87,42 @@ Aí o grupo revisa e faz o merge
 9. Antes de abrir Pull Request, testar o que foi feito
 10. Não deixem muitos dias sem enviar alterações
 
-<br>
+<br><br>
 ## COMANDOS MAIS UTILIZADOS
-**Clonar o projeto (Antes de clonar, acesse a pasta onde quer clonar)**<br>
-git clone URL_DO_REPOSITORIO
+**Clonar o projeto (Antes de clonar, acesse a pasta onde quer clonar)**
 <br>
+git clone URL_DO_REPOSITORIO
+<br><br>
 **Entrar na Pasta**<br>
 cd nome-do-projeto
-
+<br><br>
 **Ver em qual branch está**<br>
 git branch
-
+<br><br>
 **Baixar alterações da main**<br>
 git checkout main<br>
 git pull origin main
-
+<br><br>
 **Criar uma branch nova**<br>
 git checkout -b nome-da-branch
-
+<br><br>
 **Ver status dos arquivos**<br>
 git status
-
+<br><br>
 **Enviar alterações**<br>
 git add .<br>
 git commit -m "mensagem"<br>
 git push -u origin nome-da-branch
-
+<br><br>
 **Baixar alterações do repositório**<br>
 git pull
-
+<br><br>
 **Trazer mudanças da main para sua branch**<br>
 git checkout nome_da_branch<br>
 git merge main
-
+<br><br>
 **Trocar de branch**<br>
 git checkout main
-
+<br><br>
 **Ver histórico de commits**<br>
 git log --oneline
