@@ -35,3 +35,4 @@ Note that most tasks that are not specific to a single project can be run with `
 For example, `core:clean` removes `build` folder only from the `core` project.
 "# eqweqw" 
 "# LlamaNation" 
+"# LlamaNation" 
