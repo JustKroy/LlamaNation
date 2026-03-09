@@ -8,20 +8,25 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
 public class Hud {
+    private Texture imgCoracao;
+    private Texture imgMoeda;
+
     private BitmapFont font;
-    private Texture texBotaoBranco; // Usado para desenhar o fundo colorido do botão
+    private Texture texBotaoBranco;
 
     public Rectangle btnHitbox;
     public boolean mostrarHitbox = false;
 
     public Hud() {
         font = new BitmapFont();
-        font.getData().setScale(2f);
+        font.getData().setScale(2.2f);
 
-        // Criando o botão na loja
-        btnHitbox = new Rectangle(1580, 480, 160, 50);
+        imgCoracao = new Texture("coracao.png");
+        imgMoeda = new Texture("moeda.png");
 
-        // Criando um pixel branco na memória para usarmos como fundo do botão
+        // Botão de Hitbox agora fica mais para baixo para não atrapalhar nada
+        btnHitbox = new Rectangle(1600, 50, 240, 60);
+
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.WHITE);
         pixmap.fill();
@@ -29,7 +34,6 @@ public class Hud {
         pixmap.dispose();
     }
 
-    // Método chamado pela GameScreen para checar se o botão foi clicado
     public void verificarClique(float x, float y) {
         if (btnHitbox.contains(x, y)) {
             mostrarHitbox = !mostrarHitbox;
@@ -39,32 +43,41 @@ public class Hud {
     public void desenhar(SpriteBatch batch, int vidas, int dinheiro, int waveAtual) {
         font.setColor(Color.WHITE);
 
-        // Desenha as informações básicas do jogador (ajuste a posição se precisar)
-        font.draw(batch, "Vidas: " + vidas, 50, 1050);
-        font.draw(batch, "Dinheiro: $" + dinheiro, 250, 1050);
-        font.draw(batch, "Wave: " + waveAtual, 500, 1050);
+        // --- VIDA (Canto Superior Esquerdo - Coração Maior) ---
+        // Aumentei para 70x70 para ficar bem visível
+        batch.draw(imgCoracao, 20, 815, 300, 300);
+        font.draw(batch, "" + vidas, 70, 1030);
 
-        // --- DESENHO DO BOTÃO DE HITBOX ---
-        // 1. Cor do fundo
+        // --- DINHEIRO (Topo da Loja - Canto Superior Direito) ---
+        // Coloquei bem no cantinho para liberar o espaço das lhamas
+        batch.draw(imgMoeda, 1410, 992, 50, 50);
+        font.draw(batch, "" +dinheiro, 1465, 1030);
+
+        // --- WAVE (Logo abaixo do dinheiro) ---
+        font.getData().setScale(1.8f); // Wave um pouco menor para dar charme
+        font.draw(batch, "Wave: " + waveAtual, 1600, 970);
+        font.getData().setScale(2.2f);
+
+        // --- BOTÃO DE HITBOX (Lá no rodapé da direita) ---
         if (mostrarHitbox) {
-            batch.setColor(0, 0.7f, 0, 1); // Verde (Ligado)
+            batch.setColor(0, 0.7f, 0, 1);
         } else {
-            batch.setColor(0.8f, 0, 0, 1); // Vermelho (Desligado)
+            batch.setColor(0.8f, 0, 0, 1);
         }
 
-        // 2. Desenha o fundo esticando o pixel branco
         batch.draw(texBotaoBranco, btnHitbox.x, btnHitbox.y, btnHitbox.width, btnHitbox.height);
-        batch.setColor(Color.WHITE); // Volta a cor para branco para não bugar o resto do jogo
+        batch.setColor(Color.WHITE);
 
-        // 3. Desenha o texto do botão centralizado
         font.getData().setScale(1.5f);
-        String textoBtn = mostrarHitbox ? "Hitboxes ON" : "Hitboxes OFF";
-        font.draw(batch, textoBtn, btnHitbox.x + 15, btnHitbox.y + 35);
-        font.getData().setScale(2f); // Volta o tamanho da fonte ao normal
+        String textoBtn = mostrarHitbox ? "Hitboxes: ON" : "Hitboxes: OFF";
+        font.draw(batch, textoBtn, btnHitbox.x + 20, btnHitbox.y + 40);
+        font.getData().setScale(2.2f);
     }
 
     public void dispose() {
         font.dispose();
         texBotaoBranco.dispose();
+        imgCoracao.dispose();
+        imgMoeda.dispose();
     }
 }

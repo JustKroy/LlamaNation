@@ -3,11 +3,12 @@ package com.TowerDefense.jogo;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.MathUtils; // A calculadora do LibGDX
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-
+import com.badlogic.gdx.utils.Array;
 public class Projetil {
+    // ... resto do seu código ...
     public Vector2 posicao;
     public Vector2 velocidade;
     public Rectangle hitbox;
@@ -81,5 +82,25 @@ public class Projetil {
                 1.0f, 1.0f,
                 rotacao);
         }
+    }
+    // O projétil faz a matemática e devolve qual inimigo ele acertou (ou null se não acertou ninguém)
+    public Inimigo checarColisao(Array<Inimigo> listaInimigos) {
+        if (!ativo) return null;
+
+        for (Inimigo in : listaInimigos) {
+            float centroTiroX = posicao.x + metade;
+            float centroTiroY = posicao.y + metade;
+            float centroInimigoX = in.posicao.x + 25;
+            float centroInimigoY = in.posicao.y + 25;
+
+            float distancia = Vector2.dst(centroTiroX, centroTiroY, centroInimigoX, centroInimigoY);
+
+            if (distancia <= 20) {
+                in.vida -= this.dano;
+                this.ativo = false; // O tiro some ao bater
+                return in; // Retorna o inimigo atingido
+            }
+        }
+        return null;
     }
 }
