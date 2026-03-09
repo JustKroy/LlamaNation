@@ -1,25 +1,25 @@
 # BRANDELLI
-Llama Padrão - Desenho e Animação (Design, Habilidades, Modelo)
-Llama ninja - Desenho
+Llama Padrão - Desenho e Animação (Design, Habilidades, Modelo)<br>
+Llama ninja - Desenho<br>
 Botões e HUD
 
 # THIAGO
-Llama Maga - Desenho e Animação (Design, Habilidades, Modelo)
-Llama Robô - Desenho e Animação
+Llama Maga - Desenho e Animação (Design, Habilidades, Modelo)<br>
+Llama Robô - Desenho e Animação<br>
 Llama Ninja - Animação
 
 # AUGUSTO
-Caramujos
+Caramujos<br>
 
 # GUSTAVO
-Botões e HUD
+Botões e HUD<br>
 
 # OTÁVIO
-Adicionar botões de sáida e configs
+Adicionar botões de sáida e configs<br>
 
 # RAFAEL
-Documentação
-Designação de Tarefas
+Documentação<br>
+Designação de Tarefas<br>
 Menu de Heróis
 
 ## TAREFAS FUTURAS
