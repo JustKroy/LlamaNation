@@ -28,3 +28,7 @@ Menu de Heróis
 - Label nome da llama quando selecionada
 - Botão select hero
 - Botão Voltar
+
+## IDEIAS
+### LHAMAS
+Lhama RPG, que dependendo do valor do D20 tem padroes  de ataque diferentes
