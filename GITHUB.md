@@ -1,11 +1,11 @@
 # GITHUB
 
 ## BRANCH
-Como se fosse a sua área de trabalho dentro do repositório do **Github**
-Cada nova funcionalidade ou correção deve ser feita em uma branch separada.
+Como se fosse a sua área de trabalho dentro do repositório do **Github**<br>
+Cada nova funcionalidade ou correção deve ser feita em uma branch separada.<br>
 
-CADA PARTICIPANTE TRABALHA NA PRÓPRIA BRANCH
-DEPOIS ABRE UM PULL REQUEST PARA JUNTAR AO MAIN
+CADA PARTICIPANTE TRABALHA NA PRÓPRIA BRANCH<br>
+DEPOIS ABRE UM PULL REQUEST PARA JUNTAR AO MAIN<br>
 
 ### NOMES DE BRANCH
 - feature/login
@@ -39,7 +39,7 @@ DEPOIS ABRE UM PULL REQUEST PARA JUNTAR AO MAIN
 - aaa
 
 ## PULL REQUEST
-Solicitação para juntar o seu branch ao main.
+Solicitação para juntar o seu branch ao main.<br>
 Toda alteração entra na main por revisão do grupo ou pelo menos com conferência de outra pessoa.
 
 ### FLUXO
@@ -58,23 +58,23 @@ Quem vai desenvolver algo novo:
 11. Atualizar a main local
 
 ### WORKFLOW
-**Antes de começar, atualizar a main**
+**Antes de começar, atualizar a main**<br>
 git checkout main
 git pull origin main
-
-**Criar sua branch**
+<br>
+**Criar sua branch**<br>
 git checkout -b nome_branch
-
-**Trabalhar normalmente**
-git add .
+<br>
+**Trabalhar normalmente**<br>
+git add .<br>
 git commit -m "feat: adicionado formulário de login"
-
-**Enviar branch pro GitHub**
+<br>
+**Enviar branch pro GitHub**<br>
 git push -u origin nome_branch
-
-**Abrir Pull Request no GitHub**
+<br>
+**Abrir Pull Request no GitHub**<br>
 Aí o grupo revisa e faz o merge
-
+<br>
 # BOAS PRÁTICAS
 1. Não sair programando diretamente no Main
 2. Cada pessoa pega uma parte diferente do sistema
@@ -87,41 +87,41 @@ Aí o grupo revisa e faz o merge
 9. Antes de abrir Pull Request, testar o que foi feito
 10. Não deixem muitos dias sem enviar alterações
 
-
+<br>
 ## COMANDOS MAIS UTILIZADOS
-**Clonar o projeto (Antes de clonar, acesse a pasta onde quer clonar)**
+**Clonar o projeto (Antes de clonar, acesse a pasta onde quer clonar)**<br>
 git clone URL_DO_REPOSITORIO
-
-**Entrar na Pasta**
+<br>
+**Entrar na Pasta**<br>
 cd nome-do-projeto
 
-**Ver em qual branch está**
+**Ver em qual branch está**<br>
 git branch
 
-**Baixar alterações da main**
-git checkout main
+**Baixar alterações da main**<br>
+git checkout main<br>
 git pull origin main
 
-**Criar uma branch nova**
+**Criar uma branch nova**<br>
 git checkout -b nome-da-branch
 
-**Ver status dos arquivos**
+**Ver status dos arquivos**<br>
 git status
 
-**Enviar alterações**
-git add .
-git commit -m "mensagem"
+**Enviar alterações**<br>
+git add .<br>
+git commit -m "mensagem"<br>
 git push -u origin nome-da-branch
 
-**Baixar alterações do repositório**
+**Baixar alterações do repositório**<br>
 git pull
 
-**Trazer mudanças da main para sua branch**
-git checkout nome_da_branch
+**Trazer mudanças da main para sua branch**<br>
+git checkout nome_da_branch<br>
 git merge main
 
-**Trocar de branch**
+**Trocar de branch**<br>
 git checkout main
 
-**Ver histórico de commits**
+**Ver histórico de commits**<br>
 git log --oneline
