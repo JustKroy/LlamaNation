@@ -17,4 +17,6 @@ Botões e HUD
 Adicionar botões de sáida e configs
 
 # RAFAEL
+Documentação
+Designação de Tarefas
 Menu de Heróis
