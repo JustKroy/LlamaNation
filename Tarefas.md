@@ -23,4 +23,8 @@ Designação de Tarefas<br>
 Menu de Heróis
 
 ## TAREFAS FUTURAS
-- 
+### BOTÕES TELA DE HERÓIS
+- Um framezinho colocando cada llama dentro dele
+- Label nome da llama quando selecionada
+- Botão select hero
+- Botão Voltar
