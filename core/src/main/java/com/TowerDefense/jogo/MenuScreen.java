@@ -62,7 +62,7 @@ public class MenuScreen extends ScreenAdapter {
 
             if (btnHeroes.contains(posMouse.x, posMouse.y)) {
                 // Aqui você pode colocar para ir para uma tela de heróis no futuro
-                System.out.println("Clicou em Heróis!");
+                game.setScreen(new HeroScreen(game)); // Inicia o jogo
             }
         }
 
