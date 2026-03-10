@@ -16,7 +16,11 @@ Botões e HUD<br>
 
 # OTÁVIO
 Adicionar botões de sáida e configs<br>
-
+Clique para arrastar
+Numeração para pixel no jogo
+botão de configurações dentro do jogo
+adição de velocidade de ataque
+hit box das arvores e casas
 # RAFAEL
 Documentação<br>
 Designação de Tarefas<br>
