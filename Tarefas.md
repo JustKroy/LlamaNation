@@ -30,7 +30,7 @@ Menu de Heróis
 - Botão Voltar
 - Botão Return to Desktop
 - Botão quadrado com uma camiseta dentro
-- Botão quadrado com um livro dentro
+- Botão quadrado com uma espada dentro
 
 ## IDEIAS
 ### LHAMAS
