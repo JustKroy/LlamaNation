@@ -29,6 +29,8 @@ Menu de Heróis
 - Botão select hero
 - Botão Voltar
 - Botão Return to Desktop
+- Botão quadrado com uma camiseta dentro
+- Botão quadrado com um livro dentro
 
 ## IDEIAS
 ### LHAMAS
