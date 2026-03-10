@@ -27,11 +27,13 @@ Designação de Tarefas<br>
 Menu de Heróis
 
 ## TAREFAS FUTURAS
+### UI GLOBAIS
+- Cursor
+- Botão Voltar
 ### BOTÕES TELA DE HERÓIS
 - Um framezinho colocando cada llama dentro dele
 - Label nome da llama quando selecionada
 - Botão select hero
-- Botão Voltar
 - Botão Return to Desktop
 - Botão quadrado com uma camiseta dentro
 - Botão quadrado com uma espada dentro
