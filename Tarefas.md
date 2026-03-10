@@ -28,6 +28,7 @@ Menu de Heróis
 - Label nome da llama quando selecionada
 - Botão select hero
 - Botão Voltar
+- Botão Return to Desktop
 
 ## IDEIAS
 ### LHAMAS
