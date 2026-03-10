@@ -55,7 +55,7 @@ public class Hud {
 
         // --- WAVE (Logo abaixo do dinheiro) ---
         font.getData().setScale(1.8f); // Wave um pouco menor para dar charme
-        font.draw(batch, "Wave: " + waveAtual, 1600, 970);
+        font.draw(batch, "Wave: " + waveAtual, 1410, 982);
         font.getData().setScale(2.2f);
 
         // --- BOTÃO DE HITBOX (Lá no rodapé da direita) ---
