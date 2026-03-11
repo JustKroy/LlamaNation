@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 
 public class ConstrutorDeTorres {
     private Texture imgLhama, imgLhamaNinja, imgCuspe, imgKunai;
@@ -20,6 +21,12 @@ public class ConstrutorDeTorres {
     private Texture texBotaoVender;
     private Rectangle areaMenuEsquerdo;
     public Rectangle btnVender;
+
+    // Variável do fundo da loja
+    private Texture texFundoLoja;
+
+    // Ferramenta para medir os textos
+    private GlyphLayout layout;
 
     private boolean posicionando = false;
     private boolean posicaoValida = false;
@@ -40,7 +47,11 @@ public class ConstrutorDeTorres {
         font.getData().setScale(0.23f);
         font.setColor(Color.WHITE);
 
+        layout = new GlyphLayout(); // Inicializa a ferramenta de medir texto
+
         imgMoedaPequena = new Texture("moeda.png");
+
+        texFundoLoja = new Texture("Loja.png");
 
         Pixmap pixFundo = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixFundo.setColor(new Color(0.1f, 0.1f, 0.1f, 0.8f));
@@ -58,9 +69,9 @@ public class ConstrutorDeTorres {
         areaMenuEsquerdo = new Rectangle(20, 300, 260, 350);
         btnVender = new Rectangle(50, 320, 200, 50);
 
-        int inicioX = 1480;
-        int inicioY = 750;
-        int espacoX = 160;
+        int inicioX = 1500;
+        int inicioY = 680;
+        int espacoX = 200;
         int espacoY = 160;
 
         for (int i = 0; i < 6; i++) {
@@ -154,20 +165,47 @@ public class ConstrutorDeTorres {
     }
 
     public void desenharLojaEArrasto(SpriteBatch batch, Vector2 posMouse, Hud hud) {
+
+        batch.draw(texFundoLoja, 1400, 0, 520, 1080);
+
         font.getData().setScale(0.55f);
 
+        // --- SLOT 0: LHAMA NORMAL ---
+        String precoNormal = "50";
         float propLhama = (float) imgLhama.getWidth() / imgLhama.getHeight();
-        batch.draw(imgLhama, slotsLoja[0].x, slotsLoja[0].y, slotsLoja[0].height * propLhama, slotsLoja[0].height);
+        float largLhama = slotsLoja[0].height * propLhama;
 
+        // 1. Desenha a Lhama na posição ORIGINAL (slotsLoja[0].x)
+        batch.draw(imgLhama, slotsLoja[0].x, slotsLoja[0].y, largLhama, slotsLoja[0].height);
+
+        // 2. Mede o texto e centraliza embaixo da Lhama
+        layout.setText(font, precoNormal);
+        float larguraBloco0 = 25 + 5 + layout.width;
+        float meioDaLhama0 = slotsLoja[0].x + (largLhama / 2f); // Descobre onde é o centro da Lhama
+        float xPreco0 = meioDaLhama0 - (larguraBloco0 / 2f);
+
+        batch.draw(imgMoedaPequena, xPreco0, slotsLoja[0].y - 30, 25, 25);
+        font.draw(batch, precoNormal, xPreco0 + 30, slotsLoja[0].y - 10);
+
+        // --- SLOT 1: LHAMA NINJA ---
+        String precoNinja = "150";
         float propNinja = (float) imgLhamaNinja.getWidth() / imgLhamaNinja.getHeight();
-        batch.draw(imgLhamaNinja, slotsLoja[1].x, slotsLoja[1].y, slotsLoja[1].height * propNinja, slotsLoja[1].height);
+        float largNinja = slotsLoja[1].height * propNinja;
 
-        batch.draw(imgMoedaPequena, slotsLoja[0].x + 10, slotsLoja[0].y + 5, 25, 25);
-        font.draw(batch, "50", slotsLoja[0].x + 40, slotsLoja[0].y + 27);
+        // 1. Desenha a Lhama Ninja na posição ORIGINAL (slotsLoja[1].x)
+        batch.draw(imgLhamaNinja, slotsLoja[1].x, slotsLoja[1].y, largNinja, slotsLoja[1].height);
 
-        batch.draw(imgMoedaPequena, slotsLoja[1].x + 10, slotsLoja[1].y + 5, 25, 25);
-        font.draw(batch, "150", slotsLoja[1].x + 40, slotsLoja[1].y + 27);
+        // 2. Mede o texto e centraliza embaixo da Lhama Ninja
+        layout.setText(font, precoNinja);
+        float larguraBloco1 = 25 + 5 + layout.width;
+        float meioDaLhama1 = slotsLoja[1].x + (largNinja / 2f);
+        float xPreco1 = meioDaLhama1 - (larguraBloco1 / 2f);
 
+        batch.draw(imgMoedaPequena, xPreco1, slotsLoja[1].y - 30, 25, 25);
+        font.draw(batch, precoNinja, xPreco1 + 30, slotsLoja[1].y - 10);
+
+
+        // --- INTERFACE DA TORRE SELECIONADA ---
         if (torreSelecionada != null) {
             batch.draw(texFundoMenu, areaMenuEsquerdo.x, areaMenuEsquerdo.y, areaMenuEsquerdo.width, areaMenuEsquerdo.height);
 
@@ -190,6 +228,7 @@ public class ConstrutorDeTorres {
             font.draw(batch, String.valueOf(valorVenda), btnVender.x + 125, btnVender.y + 35);
         }
 
+        // --- EFEITO DE ARRASTAR A TORRE ---
         if (posicionando && texturaPosicionando != null && !hud.pausado) {
             batch.setColor(1, posicaoValida ? 1 : 0.3f, posicaoValida ? 1 : 0.3f, 0.7f);
             float propArrastando = (float) texturaPosicionando.getWidth() / texturaPosicionando.getHeight();
@@ -227,5 +266,6 @@ public class ConstrutorDeTorres {
         imgMoedaPequena.dispose();
         texFundoMenu.dispose();
         texBotaoVender.dispose();
+        texFundoLoja.dispose();
     }
-}
+}   

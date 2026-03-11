@@ -10,45 +10,40 @@ import com.badlogic.gdx.utils.Array;
 
 public class Projetil {
 
-    // --- FÍSICA E POSIÇÃO ---
     public Vector2 posicao;
     public Vector2 velocidade;
     public Rectangle hitbox;
     public boolean ativo = true;
 
-    // --- INFORMAÇÕES DO TIRO ---
     public Inimigo alvo;
     public int dano;
 
-    // --- IMAGEM E ROTAÇÃO ---
     public TextureRegion textura;
     private float rotacao;
     private float velocidadeTiro = 800f;
 
-    // --- TAMANHOS ---
-    public float tamanho;
-    public float metade;
+    // --- VARIÁVEIS SEPARADAS PARA KUNAI / CUSPE ---
+    public float largura;
+    public float altura;
+    public float metadeX;
+    public float metadeY;
 
-    // --- VARIÁVEL NOVA ---
     private float anguloOffset;
 
-    // --- CONSTRUTOR ---
-    public Projetil(float bocaX, float bocaY, Inimigo alvo, Texture imgProjetil, int dano, float tamanhoOriginal, float anguloOffset) {
-
-        // --- AQUI DIMINUÍMOS O TAMANHO ---
-        // Multiplicamos por 0.4f (40% do tamanho). Se quiser maior, use 0.6f. Se quiser menor, 0.2f.
-        this.tamanho = tamanhoOriginal * 0.4f;
-
-        this.metade = this.tamanho / 2;
+    // Construtor atualizado para receber largura e altura!
+    public Projetil(float bocaX, float bocaY, Inimigo alvo, Texture imgProjetil, int dano, float largura, float altura, float anguloOffset) {
+        this.largura = largura;
+        this.altura = altura;
+        this.metadeX = largura / 2f;
+        this.metadeY = altura / 2f;
         this.anguloOffset = anguloOffset;
 
-        // Posiciona o tiro centralizado na boca da lhama
-        this.posicao = new Vector2(bocaX - metade, bocaY - metade);
+        this.posicao = new Vector2(bocaX - metadeX, bocaY - metadeY);
 
         this.alvo = alvo;
         this.dano = dano;
         this.textura = new TextureRegion(imgProjetil);
-        this.hitbox = new Rectangle(posicao.x, posicao.y, tamanho, tamanho);
+        this.hitbox = new Rectangle(posicao.x, posicao.y, largura, altura);
 
         mirarNoAlvo();
     }
@@ -58,8 +53,8 @@ public class Projetil {
             float centroAlvoX = alvo.posicao.x + 25;
             float centroAlvoY = alvo.posicao.y + 25;
 
-            float centroTiroX = posicao.x + metade;
-            float centroTiroY = posicao.y + metade;
+            float centroTiroX = posicao.x + metadeX;
+            float centroTiroY = posicao.y + metadeY;
 
             float deltaX = centroAlvoX - centroTiroX;
             float deltaY = centroAlvoY - centroTiroY;
@@ -86,11 +81,12 @@ public class Projetil {
 
     public void desenhar(SpriteBatch batch) {
         if (ativo) {
+            // Desenha com a largura e altura corretas (retângulo ou quadrado)
             batch.draw(textura,
                 posicao.x, posicao.y,
-                metade, metade,
-                tamanho, tamanho,
-                0.2f, 0.2f,
+                metadeX, metadeY,
+                largura, altura,
+                1.0f, 1.0f,
                 rotacao);
         }
     }
@@ -99,14 +95,13 @@ public class Projetil {
         if (!ativo) return null;
 
         for (Inimigo in : listaInimigos) {
-            float centroTiroX = posicao.x + metade;
-            float centroTiroY = posicao.y + metade;
+            float centroTiroX = posicao.x + metadeX;
+            float centroTiroY = posicao.y + metadeY;
             float centroInimigoX = in.posicao.x + 25;
             float centroInimigoY = in.posicao.y + 25;
 
             float distancia = Vector2.dst(centroTiroX, centroTiroY, centroInimigoX, centroInimigoY);
 
-            // Ajustado para 15 pixels pois o tiro agora é menor
             if (distancia <= 15) {
                 in.vida -= this.dano;
                 this.ativo = false;
