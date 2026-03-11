@@ -963,3 +963,582 @@ batch.end();
 FIM DO DICIONÁRIO
 ========================================
 */
+/*
+=========================================================
+DICIONÁRIO LIBGDX
+TROCAR IMAGEM AO CLICAR EM QUADRADOS (SELEÇÃO DE HERÓI)
+=========================================================
+
+Objetivo:
+Quando o jogador clicar em um dos quadrados vermelhos (esquerda),
+a imagem exibida no quadrado grande (direita) deve mudar.
+
+Esse sistema é usado em:
+- seleção de personagem
+- seleção de skin
+- inventário
+- seleção de torre
+
+---------------------------------------------------------
+1. TEXTURE
+---------------------------------------------------------
+Representa a imagem carregada na memória.
+
+Exemplo:
+
+Texture hero1 = new Texture("hero1.png");
+Texture hero2 = new Texture("hero2.png");
+
+Essas serão as imagens que aparecerão no quadrado grande.
+
+
+---------------------------------------------------------
+2. RECTANGLE
+---------------------------------------------------------
+Representa a área clicável de cada quadrado.
+
+Exemplo:
+
+Rectangle hero1Slot = new Rectangle(20,700,200,200);
+Rectangle hero2Slot = new Rectangle(20,450,200,200);
+
+Isso corresponde aos quadrados vermelhos da esquerda.
+
+
+---------------------------------------------------------
+3. VARIÁVEL DE IMAGEM SELECIONADA
+---------------------------------------------------------
+Criamos uma variável que guarda a imagem atual.
+
+Exemplo:
+
+Texture heroSelecionado;
+
+Inicialização:
+
+heroSelecionado = hero1;
+
+
+---------------------------------------------------------
+4. CAPTURAR POSIÇÃO DO MOUSE
+---------------------------------------------------------
+Usamos Vector2 para pegar a posição do mouse.
+
+Vector2 posMouse = new Vector2();
+
+Converter posição:
+
+posMouse = viewport.unproject(
+        new Vector2(Gdx.input.getX(), Gdx.input.getY())
+);
+
+
+---------------------------------------------------------
+5. DETECTAR CLIQUE
+---------------------------------------------------------
+Usamos:
+
+Gdx.input.justTouched()
+
+Exemplo:
+
+if(Gdx.input.justTouched()){
+
+    if(hero1Slot.contains(posMouse.x,posMouse.y)){
+        heroSelecionado = hero1;
+    }
+
+    if(hero2Slot.contains(posMouse.x,posMouse.y)){
+        heroSelecionado = hero2;
+    }
+
+}
+
+
+---------------------------------------------------------
+6. DESENHAR A IMAGEM GRANDE
+---------------------------------------------------------
+No render:
+
+batch.draw(heroSelecionado,1050,600,350,300);
+
+Agora a imagem exibida depende da seleção.
+
+
+---------------------------------------------------------
+7. DESENHAR OS QUADRADOS DA ESQUERDA
+---------------------------------------------------------
+
+batch.draw(hero1,20,700,200,200);
+batch.draw(hero2,20,450,200,200);
+
+
+---------------------------------------------------------
+8. EXEMPLO COMPLETO
+---------------------------------------------------------
+
+Texture hero1;
+Texture hero2;
+Texture heroSelecionado;
+
+Rectangle hero1Slot;
+Rectangle hero2Slot;
+
+Vector2 posMouse = new Vector2();
+
+
+public HeroScreen(){
+
+    hero1 = new Texture("hero1.png");
+    hero2 = new Texture("hero2.png");
+
+    heroSelecionado = hero1;
+
+    hero1Slot = new Rectangle(20,700,200,200);
+    hero2Slot = new Rectangle(20,450,200,200);
+}
+
+
+@Override
+public void render(float delta){
+
+    posMouse = viewport.unproject(
+            new Vector2(Gdx.input.getX(),Gdx.input.getY())
+    );
+
+    if(Gdx.input.justTouched()){
+
+        if(hero1Slot.contains(posMouse.x,posMouse.y)){
+            heroSelecionado = hero1;
+        }
+
+        if(hero2Slot.contains(posMouse.x,posMouse.y)){
+            heroSelecionado = hero2;
+        }
+
+    }
+
+    batch.begin();
+
+    batch.draw(hero1,20,700,200,200);
+    batch.draw(hero2,20,450,200,200);
+
+    batch.draw(heroSelecionado,1050,600,350,300);
+
+    batch.end();
+}
+
+
+---------------------------------------------------------
+9. BOAS PRÁTICAS
+---------------------------------------------------------
+
+✔ usar Rectangle para áreas clicáveis
+✔ sempre converter mouse com viewport.unproject()
+✔ armazenar seleção em uma variável
+✔ desenhar a imagem selecionada separadamente
+
+---------------------------------------------------------
+10. EXTENSÃO PROFISSIONAL
+---------------------------------------------------------
+
+Jogos normalmente adicionam:
+
+- borda no item selecionado
+- animação de destaque
+- som de seleção
+- efeito hover
+
+Exemplo:
+
+heroSelecionadoIndex = 0,1,2,3...
+
+Isso permite trabalhar com arrays.
+
+
+---------------------------------------------------------
+11. VERSÃO COM ARRAY (MAIS PROFISSIONAL)
+---------------------------------------------------------
+
+Texture[] heroes;
+Rectangle[] slots;
+
+int heroSelecionado = 0;
+
+Ao clicar:
+
+heroSelecionado = i;
+
+Desenhar:
+
+batch.draw(heroes[heroSelecionado],1050,600,350,300);
+
+Isso permite adicionar quantos heróis quiser.
+
+
+=========================================================
+RESUMO
+=========================================================
+
+Quadrado vermelho clicado
+          ↓
+detecta contains()
+          ↓
+troca variável heroSelecionado
+          ↓
+imagem grande desenhada muda
+
+
+Isso é a base de qualquer sistema de seleção em jogos.
+=========================================================
+*/
+/*
+=========================================================
+DICIONÁRIO LIBGDX
+TROCAR IMAGEM USANDO A CLASSE BOTAO
+=========================================================
+
+Objetivo:
+Ao clicar em um Botao da esquerda, a imagem grande da direita muda.
+
+Nesse caso:
+- os quadrados vermelhos da esquerda = objetos Botao
+- a imagem grande verde = uma Texture variável
+- ao clicar no botão, trocamos essa variável
+
+=========================================================
+1. IDEIA PRINCIPAL
+=========================================================
+
+Cada botão representa um herói.
+
+Exemplo:
+btnLlama
+btnNinja
+btnMage
+btnRobo
+
+Quando clicar em um deles:
+imagemSelecionada = imagemDoHeroi
+
+Depois, no render():
+batch.draw(imagemSelecionada, x, y, largura, altura);
+
+=========================================================
+2. CLASSE BOTAO
+=========================================================
+
+A classe Botao continua responsável por:
+- desenhar o botão
+- detectar hover
+- detectar clique
+
+Exemplo:
+
+public class Botao {
+
+    private Texture imagem;
+    private Texture hover;
+    private Rectangle area;
+
+    public Botao(Texture imagem, Texture hover, float x, float y, float largura, float altura) {
+        this.imagem = imagem;
+        this.hover = hover;
+        this.area = new Rectangle(x, y, largura, altura);
+    }
+
+    public boolean estaSobre(Vector2 mouse) {
+        return area.contains(mouse.x, mouse.y);
+    }
+
+    public boolean foiClicado(Vector2 mouse) {
+        return area.contains(mouse.x, mouse.y);
+    }
+
+    public void exibir(SpriteBatch batch, Vector2 mouse) {
+        if (estaSobre(mouse)) {
+            batch.draw(hover, area.x, area.y, area.width, area.height);
+        } else {
+            batch.draw(imagem, area.x, area.y, area.width, area.height);
+        }
+    }
+
+    public void dispose() {
+        imagem.dispose();
+        hover.dispose();
+    }
+}
+
+=========================================================
+3. VARIÁVEL DA IMAGEM PRINCIPAL
+=========================================================
+
+Criamos uma variável para guardar a imagem que aparece
+no quadrado grande da direita.
+
+Exemplo:
+
+private Texture imgSelecionada;
+
+Essa variável muda quando um botão é clicado.
+
+=========================================================
+4. CRIANDO AS IMAGENS DOS HERÓIS
+=========================================================
+
+private Texture imgLlama;
+private Texture imgNinja;
+private Texture imgMage;
+private Texture imgRobo;
+
+Essas imagens serão mostradas no quadro grande.
+
+=========================================================
+5. CRIANDO OS BOTÕES
+=========================================================
+
+private Botao btnLlama;
+private Botao btnNinja;
+private Botao btnMage;
+private Botao btnRobo;
+
+No construtor:
+
+imgLlama = new Texture("llama.png");
+imgNinja = new Texture("llamaNinja.png");
+imgMage = new Texture("llamaMage.png");
+imgRobo = new Texture("llamaRobo.png");
+
+btnLlama = new Botao(
+    new Texture("slotLlama.png"),
+    new Texture("slotLlamaHover.png"),
+    20, 700, 200, 200
+);
+
+btnNinja = new Botao(
+    new Texture("slotNinja.png"),
+    new Texture("slotNinjaHover.png"),
+    20, 450, 200, 200
+);
+
+btnMage = new Botao(
+    new Texture("slotMage.png"),
+    new Texture("slotMageHover.png"),
+    270, 700, 200, 200
+);
+
+btnRobo = new Botao(
+    new Texture("slotRobo.png"),
+    new Texture("slotRoboHover.png"),
+    270, 450, 200, 200
+);
+
+=========================================================
+6. DEFINIR UMA IMAGEM INICIAL
+=========================================================
+
+No construtor, escolha a primeira imagem que já aparece.
+
+imgSelecionada = imgLlama;
+
+Assim o quadrado grande não fica vazio.
+
+=========================================================
+7. ATUALIZAR POSIÇÃO DO MOUSE
+=========================================================
+
+No render():
+
+posMouse = viewport.unproject(
+    new Vector2(Gdx.input.getX(), Gdx.input.getY())
+);
+
+Isso precisa acontecer em todo frame.
+
+=========================================================
+8. DETECTAR CLIQUE NOS BOTÕES
+=========================================================
+
+if (Gdx.input.justTouched()) {
+
+    if (btnLlama.foiClicado(posMouse)) {
+        imgSelecionada = imgLlama;
+    }
+
+    if (btnNinja.foiClicado(posMouse)) {
+        imgSelecionada = imgNinja;
+    }
+
+    if (btnMage.foiClicado(posMouse)) {
+        imgSelecionada = imgMage;
+    }
+
+    if (btnRobo.foiClicado(posMouse)) {
+        imgSelecionada = imgRobo;
+    }
+}
+
+=========================================================
+9. DESENHAR OS BOTÕES
+=========================================================
+
+batch.begin();
+
+btnLlama.exibir(batch, posMouse);
+btnNinja.exibir(batch, posMouse);
+btnMage.exibir(batch, posMouse);
+btnRobo.exibir(batch, posMouse);
+
+batch.end();
+
+=========================================================
+10. DESENHAR A IMAGEM GRANDE
+=========================================================
+
+Ainda no render(), desenhamos a imagem atual:
+
+batch.draw(imgSelecionada, 1050, 600, 350, 300);
+
+Essa linha sempre usa a textura guardada em imgSelecionada.
+
+=========================================================
+11. EXEMPLO COMPLETO DA LÓGICA
+=========================================================
+
+private Texture imgLlama;
+private Texture imgNinja;
+private Texture imgMage;
+private Texture imgRobo;
+
+private Texture imgSelecionada;
+
+private Botao btnLlama;
+private Botao btnNinja;
+private Botao btnMage;
+private Botao btnRobo;
+
+private Vector2 posMouse = new Vector2();
+
+public HeroScreen(Main game) {
+
+    imgLlama = new Texture("llama.png");
+    imgNinja = new Texture("llamaNinja.png");
+    imgMage = new Texture("llamaMage.png");
+    imgRobo = new Texture("llamaRobo.png");
+
+    imgSelecionada = imgLlama;
+
+    btnLlama = new Botao(
+        new Texture("slotLlama.png"),
+        new Texture("slotLlamaHover.png"),
+        20, 700, 200, 200
+    );
+
+    btnNinja = new Botao(
+        new Texture("slotNinja.png"),
+        new Texture("slotNinjaHover.png"),
+        20, 450, 200, 200
+    );
+
+    btnMage = new Botao(
+        new Texture("slotMage.png"),
+        new Texture("slotMageHover.png"),
+        270, 700, 200, 200
+    );
+
+    btnRobo = new Botao(
+        new Texture("slotRobo.png"),
+        new Texture("slotRoboHover.png"),
+        270, 450, 200, 200
+    );
+}
+
+@Override
+public void render(float delta) {
+
+    posMouse = viewport.unproject(
+        new Vector2(Gdx.input.getX(), Gdx.input.getY())
+    );
+
+    if (Gdx.input.justTouched()) {
+
+        if (btnLlama.foiClicado(posMouse)) {
+            imgSelecionada = imgLlama;
+        }
+
+        if (btnNinja.foiClicado(posMouse)) {
+            imgSelecionada = imgNinja;
+        }
+
+        if (btnMage.foiClicado(posMouse)) {
+            imgSelecionada = imgMage;
+        }
+
+        if (btnRobo.foiClicado(posMouse)) {
+            imgSelecionada = imgRobo;
+        }
+    }
+
+    batch.begin();
+
+    btnLlama.exibir(batch, posMouse);
+    btnNinja.exibir(batch, posMouse);
+    btnMage.exibir(batch, posMouse);
+    btnRobo.exibir(batch, posMouse);
+
+    batch.draw(imgSelecionada, 1050, 600, 350, 300);
+
+    batch.end();
+}
+
+=========================================================
+12. VANTAGEM DESSA FORMA
+=========================================================
+
+Sem classe Botao:
+- você cria vários Rectangle
+- vários batch.draw
+- vários contains
+
+Com classe Botao:
+- cada quadrado já sabe se foi clicado
+- o código fica mais limpo
+- fica mais fácil adicionar novos heróis
+
+=========================================================
+13. MELHORIA PROFISSIONAL
+=========================================================
+
+Em vez de usar várias variáveis separadas, você pode usar arrays:
+
+Texture[] imagensHerois;
+Botao[] botoesHerois;
+
+int indiceSelecionado = 0;
+
+Ao clicar:
+indiceSelecionado = i;
+
+Ao desenhar:
+batch.draw(imagensHerois[indiceSelecionado], 1050, 600, 350, 300);
+
+Isso é melhor quando houver muitos heróis.
+
+=========================================================
+14. RESUMO FINAL
+=========================================================
+
+Botao clicado
+    ↓
+troca a Texture guardada em imgSelecionada
+    ↓
+o batch.draw(imgSelecionada, ...) mostra a nova imagem
+
+Ou seja:
+o botão não troca a imagem diretamente;
+ele apenas muda a variável que o quadro grande usa.
+
+=========================================================
+FIM
+=========================================================
+*/

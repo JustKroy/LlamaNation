@@ -36,7 +36,7 @@ public class Botao {
 
     public void Exibir(SpriteBatch batch, Vector2 mouse) {
         if (estaSobre(mouse)) {
-            batch.draw(imagem, area.x, area.y, area.width, area.height);
+            batch.draw(hover, area.x, area.y, area.width, area.height);
         } else {
             batch.draw(imagem, area.x, area.y, area.width, area.height);
         }
