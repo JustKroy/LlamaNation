@@ -4,8 +4,9 @@ Llama ninja - Desenho<br>
 Botões e HUD
 
 # THIAGO
-Llama Maga - Desenho e Animação (Design, Habilidades, Modelo)<br>
-Llama Cyborg - Desenho e Animação(Design, Habilidades, Modelo)<br>
+Llama Maga - Desenho, Animação e ataque (Design, Habilidades, Modelo)<br>
+Llama Cyborg - Desenho, Animação e ataque (Design, Habilidades, Modelo)<br>
+Llama Anjo - Desenho, Animação e ataque (Design, Habilidades, Modelo)<br>
 Llama Ninja - Animação
 
 # AUGUSTO
