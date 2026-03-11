@@ -5,7 +5,7 @@ Botões e HUD
 
 # THIAGO
 Llama Maga - Desenho e Animação (Design, Habilidades, Modelo)<br>
-Llama Robô - Desenho e Animação<br>
+Llama Cyborg - Desenho e Animação(Design, Habilidades, Modelo)<br>
 Llama Ninja - Animação
 
 # AUGUSTO
