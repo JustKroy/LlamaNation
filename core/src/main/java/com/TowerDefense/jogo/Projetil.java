@@ -3,34 +3,48 @@ package com.TowerDefense.jogo;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils; // A calculadora do LibGDX
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+
 public class Projetil {
-    // ... resto do seu código ...
+
+    // --- FÍSICA E POSIÇÃO ---
     public Vector2 posicao;
     public Vector2 velocidade;
     public Rectangle hitbox;
     public boolean ativo = true;
+
+    // --- INFORMAÇÕES DO TIRO ---
     public Inimigo alvo;
     public int dano;
 
+    // --- IMAGEM E ROTAÇÃO ---
     public TextureRegion textura;
     private float rotacao;
     private float velocidadeTiro = 800f;
 
+    // --- TAMANHOS ---
     public float tamanho;
     public float metade;
+
     // --- VARIÁVEL NOVA ---
     private float anguloOffset;
 
-    // Construtor atualizado para receber o offset
-    public Projetil(float bocaX, float bocaY, Inimigo alvo, Texture imgProjetil, int dano, float tamanho, float anguloOffset) {
-        this.tamanho = tamanho;
-        this.metade = tamanho / 2;
-        this.anguloOffset = anguloOffset; // Guarda o offset vindo da torre
+    // --- CONSTRUTOR ---
+    public Projetil(float bocaX, float bocaY, Inimigo alvo, Texture imgProjetil, int dano, float tamanhoOriginal, float anguloOffset) {
+
+        // --- AQUI DIMINUÍMOS O TAMANHO ---
+        // Multiplicamos por 0.4f (40% do tamanho). Se quiser maior, use 0.6f. Se quiser menor, 0.2f.
+        this.tamanho = tamanhoOriginal * 0.4f;
+
+        this.metade = this.tamanho / 2;
+        this.anguloOffset = anguloOffset;
+
+        // Posiciona o tiro centralizado na boca da lhama
         this.posicao = new Vector2(bocaX - metade, bocaY - metade);
+
         this.alvo = alvo;
         this.dano = dano;
         this.textura = new TextureRegion(imgProjetil);
@@ -50,10 +64,7 @@ public class Projetil {
             float deltaX = centroAlvoX - centroTiroX;
             float deltaY = centroAlvoY - centroTiroY;
 
-            // --- LÓGICA DE ROTAÇÃO ARRUMADA ---
-            // Usamos o anguloOffset que a torre nos passou (0 para guspe, -45 para kunai)
             this.rotacao = (MathUtils.atan2(deltaY, deltaX) * MathUtils.radiansToDegrees) + anguloOffset;
-
             this.velocidade = new Vector2(deltaX, deltaY).nor().scl(velocidadeTiro);
         }
     }
@@ -65,6 +76,7 @@ public class Projetil {
 
         posicao.x += velocidade.x * delta;
         posicao.y += velocidade.y * delta;
+
         hitbox.setPosition(posicao.x, posicao.y);
 
         if (posicao.x < -100 || posicao.x > 2000 || posicao.y < -100 || posicao.y > 1200) {
@@ -74,16 +86,15 @@ public class Projetil {
 
     public void desenhar(SpriteBatch batch) {
         if (ativo) {
-            // Se o guspe 250 ficar cortado, aumente o tamanho da textura gerada no construtor.
             batch.draw(textura,
                 posicao.x, posicao.y,
                 metade, metade,
                 tamanho, tamanho,
-                1.0f, 1.0f,
+                0.2f, 0.2f,
                 rotacao);
         }
     }
-    // O projétil faz a matemática e devolve qual inimigo ele acertou (ou null se não acertou ninguém)
+
     public Inimigo checarColisao(Array<Inimigo> listaInimigos) {
         if (!ativo) return null;
 
@@ -95,10 +106,11 @@ public class Projetil {
 
             float distancia = Vector2.dst(centroTiroX, centroTiroY, centroInimigoX, centroInimigoY);
 
-            if (distancia <= 20) {
+            // Ajustado para 15 pixels pois o tiro agora é menor
+            if (distancia <= 15) {
                 in.vida -= this.dano;
-                this.ativo = false; // O tiro some ao bater
-                return in; // Retorna o inimigo atingido
+                this.ativo = false;
+                return in;
             }
         }
         return null;

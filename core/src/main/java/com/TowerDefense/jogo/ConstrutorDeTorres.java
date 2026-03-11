@@ -1,20 +1,31 @@
 package com.TowerDefense.jogo;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.Gdx;
 
 public class ConstrutorDeTorres {
     private Texture imgLhama, imgLhamaNinja, imgCuspe, imgKunai;
-    private boolean arrastando = false;
+    private BitmapFont font;
+    private Texture imgMoedaPequena;
+
+    private Texture texFundoMenu;
+    private Texture texBotaoVender;
+    private Rectangle areaMenuEsquerdo;
+    public Rectangle btnVender;
+
+    private boolean posicionando = false;
     private boolean posicaoValida = false;
-    private Texture texturaArrastando = null;
+    private Texture texturaPosicionando = null;
     public Torre torreSelecionada = null;
 
-    // Criamos um Array para guardar as 6 posições da loja
     public Rectangle[] slotsLoja = new Rectangle[6];
 
     public ConstrutorDeTorres() {
@@ -23,52 +34,63 @@ public class ConstrutorDeTorres {
         imgCuspe = new Texture("guspe.png");
         imgKunai = new Texture("kunai.png");
 
-        // --- CONFIGURAR A GRELHA DA LOJA (2 Colunas, 3 Linhas) ---
-        int inicioX = 1480; // Posição X da primeira coluna
-        int inicioY = 750;  // Posição Y da primeira linha (no topo)
-        int espacoX = 160;  // Largura do item (120) + Espaçamento (40)
-        int espacoY = 160;  // Altura do item (120) + Espaçamento (40)
+        font = new BitmapFont(Gdx.files.internal("fontes.fnt"));
+        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+
+        font.getData().setScale(0.23f);
+        font.setColor(Color.WHITE);
+
+        imgMoedaPequena = new Texture("moeda.png");
+
+        Pixmap pixFundo = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixFundo.setColor(new Color(0.1f, 0.1f, 0.1f, 0.8f));
+        pixFundo.fill();
+        texFundoMenu = new Texture(pixFundo);
+
+        Pixmap pixBotao = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixBotao.setColor(new Color(0.8f, 0.2f, 0.2f, 1f));
+        pixBotao.fill();
+        texBotaoVender = new Texture(pixBotao);
+
+        pixFundo.dispose();
+        pixBotao.dispose();
+
+        areaMenuEsquerdo = new Rectangle(20, 300, 260, 350);
+        btnVender = new Rectangle(50, 320, 200, 50);
+
+        int inicioX = 1480;
+        int inicioY = 750;
+        int espacoX = 160;
+        int espacoY = 160;
 
         for (int i = 0; i < 6; i++) {
-            int coluna = i % 2; // Alterna entre 0 e 1 (Colunas)
-            int linha = i / 2;  // Vai de 0 a 2 (Linhas)
+            int coluna = i % 2;
+            int linha = i / 2;
             slotsLoja[i] = new Rectangle(inicioX + (coluna * espacoX), inicioY - (linha * espacoY), 120, 120);
         }
     }
 
     public int atualizar(Vector2 posMouse, boolean justTouched, boolean isTouched, int dinheiro, Array<Torre> listaTorres, Mapa mapa, Hud hud) {
+
         if (justTouched) {
             hud.verificarClique(posMouse.x, posMouse.y);
-            torreSelecionada = null;
-
-            for (Torre t : listaTorres) {
-                if (t.hitbox.contains(posMouse.x, posMouse.y)) torreSelecionada = t;
-            }
-
-            // Verifica se clicou num dos 2 primeiros slots da loja (Lhama Normal e Ninja)
-            if (slotsLoja[0].contains(posMouse.x, posMouse.y) && dinheiro >= 50) {
-                arrastando = true; texturaArrastando = imgLhama;
-            } else if (slotsLoja[1].contains(posMouse.x, posMouse.y) && dinheiro >= 150) {
-                arrastando = true; texturaArrastando = imgLhamaNinja;
-            }
-            // Os slots 2, 3, 4 e 5 estão vazios por enquanto, prontos para novas lhamas!
         }
+
+        if (hud.pausado) return dinheiro;
 
         float arrastoLargura = 80f;
         float arrastoAltura = 80f;
 
-        // Calcula a largura dinâmica da imagem que está a ser arrastada
-        if (texturaArrastando != null) {
-            float proporcao = (float) texturaArrastando.getWidth() / texturaArrastando.getHeight();
+        if (texturaPosicionando != null) {
+            float proporcao = (float) texturaPosicionando.getWidth() / texturaPosicionando.getHeight();
             arrastoLargura = arrastoAltura * proporcao;
         }
 
-        if (arrastando) {
+        if (posicionando) {
             posicaoValida = true;
-            // Hitbox dinâmica baseada no tamanho do arrasto
             Rectangle hitboxTemp = new Rectangle(posMouse.x - (arrastoLargura / 2), posMouse.y - (arrastoAltura / 2), arrastoLargura, arrastoAltura);
 
-            if (posMouse.x > 1400) posicaoValida = false; // Impede largar em cima da loja
+            if (posMouse.x > 1400) posicaoValida = false;
 
             for (Rectangle rectCaminho : mapa.hitboxesCaminho) {
                 if (rectCaminho.overlaps(hitboxTemp)) posicaoValida = false;
@@ -78,49 +100,108 @@ public class ConstrutorDeTorres {
             }
         }
 
-        if (arrastando && !isTouched) {
-            if (posicaoValida) {
-                Texture tiroCerto = (texturaArrastando == imgLhamaNinja) ? imgKunai : imgCuspe;
-                float spawnX = posMouse.x - (arrastoLargura / 2);
-                float spawnY = posMouse.y - (arrastoAltura / 2);
+        if (justTouched) {
+            if (posicionando && texturaPosicionando != null) {
+                if (posicaoValida) {
+                    Texture tiroCerto = (texturaPosicionando == imgLhamaNinja) ? imgKunai : imgCuspe;
+                    float spawnX = posMouse.x - (arrastoLargura / 2);
+                    float spawnY = posMouse.y - (arrastoAltura / 2);
 
-                if (texturaArrastando == imgLhamaNinja) {
-                    listaTorres.add(new LhamaNinja(spawnX, spawnY, texturaArrastando, tiroCerto));
-                    dinheiro -= 150;
-                } else {
-                    listaTorres.add(new LhamaNormal(spawnX, spawnY, texturaArrastando, tiroCerto));
-                    dinheiro -= 50;
+                    if (texturaPosicionando == imgLhamaNinja) {
+                        listaTorres.add(new LhamaNinja(spawnX, spawnY, texturaPosicionando, tiroCerto));
+                        dinheiro -= 150;
+                    } else {
+                        listaTorres.add(new LhamaNormal(spawnX, spawnY, texturaPosicionando, tiroCerto));
+                        dinheiro -= 50;
+                    }
+                }
+                posicionando = false;
+                texturaPosicionando = null;
+                return dinheiro;
+            }
+
+            if (torreSelecionada != null && btnVender.contains(posMouse.x, posMouse.y)) {
+                int valorVenda = (torreSelecionada.textura == imgLhamaNinja) ? (int)(150 * 0.6f) : (int)(50 * 0.6f);
+                dinheiro += valorVenda;
+                listaTorres.removeValue(torreSelecionada, true);
+                torreSelecionada = null;
+                return dinheiro;
+            }
+
+            Torre novaSelecao = null;
+            for (Torre t : listaTorres) {
+                if (t.hitbox.contains(posMouse.x, posMouse.y)) {
+                    novaSelecao = t;
                 }
             }
-            arrastando = false;
-            texturaArrastando = null;
+
+            if (novaSelecao != null) {
+                torreSelecionada = novaSelecao;
+            } else if (torreSelecionada != null && areaMenuEsquerdo.contains(posMouse.x, posMouse.y)) {
+            } else {
+                torreSelecionada = null;
+            }
+
+            if (slotsLoja[0].contains(posMouse.x, posMouse.y) && dinheiro >= 50) {
+                posicionando = true; texturaPosicionando = imgLhama;
+                torreSelecionada = null;
+            } else if (slotsLoja[1].contains(posMouse.x, posMouse.y) && dinheiro >= 150) {
+                posicionando = true; texturaPosicionando = imgLhamaNinja;
+                torreSelecionada = null;
+            }
         }
         return dinheiro;
     }
 
-    public void desenharLojaEArrasto(SpriteBatch batch, Vector2 posMouse) {
-        // Lhama Normal (Slot 0)
+    public void desenharLojaEArrasto(SpriteBatch batch, Vector2 posMouse, Hud hud) {
+        font.getData().setScale(0.55f);
+
         float propLhama = (float) imgLhama.getWidth() / imgLhama.getHeight();
         batch.draw(imgLhama, slotsLoja[0].x, slotsLoja[0].y, slotsLoja[0].height * propLhama, slotsLoja[0].height);
 
-        // Lhama Ninja (Slot 1)
         float propNinja = (float) imgLhamaNinja.getWidth() / imgLhamaNinja.getHeight();
         batch.draw(imgLhamaNinja, slotsLoja[1].x, slotsLoja[1].y, slotsLoja[1].height * propNinja, slotsLoja[1].height);
 
-        // Desenhar a lhama a ser arrastada
-        if (arrastando && texturaArrastando != null) {
+        batch.draw(imgMoedaPequena, slotsLoja[0].x + 10, slotsLoja[0].y + 5, 25, 25);
+        font.draw(batch, "50", slotsLoja[0].x + 40, slotsLoja[0].y + 27);
+
+        batch.draw(imgMoedaPequena, slotsLoja[1].x + 10, slotsLoja[1].y + 5, 25, 25);
+        font.draw(batch, "150", slotsLoja[1].x + 40, slotsLoja[1].y + 27);
+
+        if (torreSelecionada != null) {
+            batch.draw(texFundoMenu, areaMenuEsquerdo.x, areaMenuEsquerdo.y, areaMenuEsquerdo.width, areaMenuEsquerdo.height);
+
+            float propTorre = (float) torreSelecionada.textura.getWidth() / torreSelecionada.textura.getHeight();
+            batch.draw(torreSelecionada.textura, 100, 520, 100 * propTorre, 100);
+
+            font.getData().setScale(0.73f);
+            String nomeLhama = (torreSelecionada.textura == imgLhamaNinja) ? "Ninja Llama" : "Llama";
+            font.draw(batch, nomeLhama, 40, 490);
+
+            font.getData().setScale(0.45f);
+            font.draw(batch, "Attack Damage: " + torreSelecionada.dano, 40, 440);
+
+            int valorVenda = (torreSelecionada.textura == imgLhamaNinja) ? (int)(150 * 0.6f) : (int)(50 * 0.6f);
+
+            batch.draw(texBotaoVender, btnVender.x, btnVender.y, btnVender.width, btnVender.height);
+
+            font.draw(batch, "SELL:", btnVender.x + 25, btnVender.y + 35);
+            batch.draw(imgMoedaPequena, btnVender.x + 95, btnVender.y + 12, 25, 25);
+            font.draw(batch, String.valueOf(valorVenda), btnVender.x + 125, btnVender.y + 35);
+        }
+
+        if (posicionando && texturaPosicionando != null && !hud.pausado) {
             batch.setColor(1, posicaoValida ? 1 : 0.3f, posicaoValida ? 1 : 0.3f, 0.7f);
-            float propArrastando = (float) texturaArrastando.getWidth() / texturaArrastando.getHeight();
+            float propArrastando = (float) texturaPosicionando.getWidth() / texturaPosicionando.getHeight();
             float arrastoLargura = 80f * propArrastando;
 
-            batch.draw(texturaArrastando, posMouse.x - (arrastoLargura / 2), posMouse.y - 40, arrastoLargura, 80);
+            batch.draw(texturaPosicionando, posMouse.x - (arrastoLargura / 2), posMouse.y - 40, arrastoLargura, 80);
             batch.setColor(1, 1, 1, 1);
         }
     }
 
-    public void desenharHitboxes(ShapeRenderer shape, Vector2 posMouse) {
-        // Desenha fundos escuros transparentes para mostrar os 6 espaços vazios na loja
-        shape.setColor(0.2f, 0.2f, 0.2f, 0.5f); // Cinzento escuro transparente
+    public void desenharHitboxes(ShapeRenderer shape, Vector2 posMouse, Hud hud) {
+        shape.setColor(0.2f, 0.2f, 0.2f, 0.5f);
         for (int i = 0; i < 6; i++) {
             shape.rect(slotsLoja[i].x, slotsLoja[i].y, slotsLoja[i].width, slotsLoja[i].height);
         }
@@ -130,9 +211,9 @@ public class ConstrutorDeTorres {
             shape.circle(torreSelecionada.posicao.x + (torreSelecionada.larguraDesenho / 2), torreSelecionada.posicao.y + (torreSelecionada.alturaDesenho / 2), torreSelecionada.raio);
         }
 
-        if (arrastando) {
+        if (posicionando && !hud.pausado) {
             shape.setColor(posicaoValida ? 1 : 1, posicaoValida ? 1 : 0, 0, 0.2f);
-            float raioP = (texturaArrastando == imgLhamaNinja) ? 250f : 200f;
+            float raioP = (texturaPosicionando == imgLhamaNinja) ? 250f : 200f;
             shape.circle(posMouse.x, posMouse.y, raioP);
         }
     }
@@ -142,5 +223,9 @@ public class ConstrutorDeTorres {
         imgLhamaNinja.dispose();
         imgCuspe.dispose();
         imgKunai.dispose();
+        font.dispose();
+        imgMoedaPequena.dispose();
+        texFundoMenu.dispose();
+        texBotaoVender.dispose();
     }
 }
