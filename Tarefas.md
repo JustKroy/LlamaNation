@@ -10,9 +10,11 @@ Llama Ninja - Animação
 
 # AUGUSTO
 Caramujos<br>
+Apresentação<br>
 
 # GUSTAVO
 Botões e HUD<br>
+Apresentação<br>
 
 # OTÁVIO
 Adicionar botões de sáida e configs<br>
@@ -30,6 +32,7 @@ Menu de Heróis
 ### UI GLOBAIS
 - Cursor
 - Botão Voltar
+- Hover de Todos Botões
 ### BOTÕES TELA DE HERÓIS
 - Um framezinho colocando cada llama dentro dele
 - Label nome da llama quando selecionada
