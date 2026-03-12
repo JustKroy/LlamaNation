@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-public class LhamaNormal extends Torre {
+public class LlamaCyborg extends Torre {
 
     private Animation<TextureRegion> animacaoAtirando;
     private float tempoEstado = 0f;
@@ -15,38 +15,43 @@ public class LhamaNormal extends Torre {
     private boolean estaAtacando = false;
     private Inimigo alvoFixo;
 
-    public LhamaNormal(float x, float y, Texture sheetLlama, Texture imgAtaque) {
-        super(x, y, sheetLlama, imgAtaque);
+    public LlamaCyborg(float x, float y, Texture sheetCyborg, Texture imgAtaque) {
+        super(x, y, sheetCyborg, imgAtaque);
 
-        this.dano = 50;
-        this.raio = 200f;
-        this.cooldown = 1.0f;
-        this.velocidadeProjetil = 800f;
+        // 1. Dano reduzido
+        this.dano = 60;
 
-        this.tamanhoProjetil = 10f;
+        this.raio = 300f;
+
+        // 2. Cooldown reduzido (atira mais rápido)
+        this.cooldown = 0.1f;
+
+        this.velocidadeProjetil = 1000f;
+
+        // --- AJUSTE DO TAMANHO DO TIRO ---
+        this.tamanhoProjetil = 5f;
         this.offsetProjetil = 0f;
 
-        // Força a altura padrão (80px)
+        // --- FORÇAR ALTURA PADRÃO (80px) ---
         this.alturaDesenho = 80f;
+        float larguraDeUmFrameOriginal = (float) sheetCyborg.getWidth() / 18f;
+        float proporcao = larguraDeUmFrameOriginal / (float) sheetCyborg.getHeight();
 
-        // --- 9 FRAMES ---
-        float larguraDeUmFrameOriginal = (float) sheetLlama.getWidth() / 9f;
-        float proporcao = larguraDeUmFrameOriginal / (float) sheetLlama.getHeight();
-
+        // Define a largura baseada na proporção para não esticar
         this.larguraDesenho = this.alturaDesenho * proporcao;
+
+        // Atualiza a hitbox para o tamanho final do desenho
         this.hitbox.set(x, y, larguraDesenho, alturaDesenho);
 
-        // Recorte dos 9 frames
-        TextureRegion[][] tmp = TextureRegion.split(sheetLlama, (int)larguraDeUmFrameOriginal, sheetLlama.getHeight());
-
-        // MUDANÇA AQUI: Array com tamanho 9 e o For indo até 9!
-        TextureRegion[] frames = new TextureRegion[9];
-        for (int i = 0; i < 9; i++) {
+        // Recorte dos 18 frames
+        TextureRegion[][] tmp = TextureRegion.split(sheetCyborg, (int)larguraDeUmFrameOriginal, sheetCyborg.getHeight());
+        TextureRegion[] frames = new TextureRegion[18];
+        for (int i = 0; i < 18; i++) {
             frames[i] = tmp[0][i];
         }
 
-        // Velocidade da animação (0.08f = tempo que cada frame fica na tela)
-        animacaoAtirando = new Animation<>(0.08f, frames);
+        // 3. Animação acelerada (0.03f em vez de 0.06f)
+        animacaoAtirando = new Animation<>(0.03f, frames);
     }
 
     @Override
@@ -79,16 +84,22 @@ public class LhamaNormal extends Torre {
             tempoEstado += delta;
             int frameAtual = animacaoAtirando.getKeyFrameIndex(tempoEstado);
 
-            // --- ATIRA NO FRAME 6 (índice 5) ---
-            if (frameAtual == 5 && !jaAtirouNesteCiclo) {
+            if (frameAtual == 10 && !jaAtirouNesteCiclo) {
 
-                float recuoHorizontal = 10f; // Ajuste pra puxar o cuspe pra boca
-                float alturaDoTiro = 0.65f; // Ajuste a altura pra sair da cabeça
+                // --- AJUSTE FINO DO SPAWN DO TIRO ---
+                // Aumente este valor para trazer o tiro mais para perto do centro da lhama
+                float recuoHorizontal = 30f;
+
+                // Mude este valor (0 a 1) para subir ou descer o tiro.
+                // 0.5 é no meio da barriga. 0.7 costuma ser na altura da cabeça/olho.
+                float alturaDoTiro = 0.70f;
 
                 float saidaX;
                 if (viradaParaEsquerda) {
+                    // Se olha pra esquerda, nasce do lado esquerdo, mas puxamos pra direita (pra dentro)
                     saidaX = posicao.x + recuoHorizontal;
                 } else {
+                    // Se olha pra direita, nasce do lado direito, mas puxamos pra esquerda (pra dentro)
                     saidaX = (posicao.x + larguraDesenho) - recuoHorizontal;
                 }
 
@@ -97,7 +108,7 @@ public class LhamaNormal extends Torre {
                 float propProjetil = (float) imgProjetil.getWidth() / imgProjetil.getHeight();
                 float larguraTiro = tamanhoProjetil * propProjetil;
 
-                // ATENÇÃO: Verifique se sua classe Projetil exige essa quantidade exata de parâmetros!
+                // Criar o projetil
                 listaProjeteis.add(new Projetil(saidaX, saidaY, alvoFixo, imgProjetil, dano,
                     larguraTiro, tamanhoProjetil, offsetProjetil, velocidadeProjetil));
 
@@ -116,11 +127,12 @@ public class LhamaNormal extends Torre {
             animacaoAtirando.getKeyFrame(tempoEstado) :
             animacaoAtirando.getKeyFrames()[0];
 
+        // Substituímos os vários 'batch.draw' por um único que espelha a imagem automaticamente
         batch.draw(frame.getTexture(),
             posicao.x, posicao.y,
             larguraDesenho, alturaDesenho,
             frame.getRegionX(), frame.getRegionY(),
             frame.getRegionWidth(), frame.getRegionHeight(),
-            viradaParaEsquerda, false);
+            viradaParaEsquerda, false); // O true/false aqui que faz a mágica de girar!
     }
 }

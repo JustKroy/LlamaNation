@@ -19,6 +19,9 @@ public abstract class Torre {
     public float tamanhoProjetil;
     public float offsetProjetil;
 
+    // Velocidade padrão para torres que não definirem uma própria
+    public float velocidadeProjetil = 800f;
+
     public float tempoTiro = 0;
     public float alturaDesenho = 80f;
     public float larguraDesenho;
@@ -31,16 +34,20 @@ public abstract class Torre {
 
         float proporcao = (float) textura.getWidth() / textura.getHeight();
         this.larguraDesenho = this.alturaDesenho * proporcao;
+
+        // Inicializa a hitbox.
+        // Nota: Classes filhas como LlamaCyborg devem atualizar isso após dividir a largura por 11.
         this.hitbox = new Rectangle(x, y, larguraDesenho, alturaDesenho);
     }
 
     public void atualizar(float delta, Array<Inimigo> listaInimigos, Array<Projetil> listaProjeteis) {
         tempoTiro += delta;
 
-        for (Inimigo in : listaInimigos) {
-            float centroTorreX = posicao.x + (larguraDesenho / 2f);
-            float centroTorreY = posicao.y + (alturaDesenho / 2f);
+        // Ponto central para o cálculo do Range (Raio) bater com o círculo visual
+        float centroTorreX = posicao.x + (larguraDesenho / 2f);
+        float centroTorreY = posicao.y + (alturaDesenho / 2f);
 
+        for (Inimigo in : listaInimigos) {
             float centroInimigoX = in.posicao.x + 25f;
             float centroInimigoY = in.posicao.y + 25f;
 
@@ -53,25 +60,22 @@ public abstract class Torre {
                     float bocaX = viradaParaEsquerda ? posicao.x + (larguraDesenho * 0.2f) : posicao.x + (larguraDesenho * 0.8f);
                     float bocaY = posicao.y + (alturaDesenho * 0.55f);
 
-                    // --- MÁGICA DA PROPORÇÃO DO TIRO ---
                     float propProjetil = (float) imgProjetil.getWidth() / imgProjetil.getHeight();
-
                     float alturaTiro = tamanhoProjetil;
 
-                    // --- REDUTOR DO CUSPE (0.1f) ---
-                    // Como a Kunai tem um offset (ex: -45) e o cuspe é 0, usamos isso para separar os dois!
+                    // Pequeno ajuste de escala se o offset for zero (evita tiro gigante)
                     if (offsetProjetil == 0f) {
-                        alturaTiro = tamanhoProjetil * 0.05f; // Encolhe o cuspe para 10%
+                        alturaTiro = tamanhoProjetil * 0.6f;
                     }
 
                     float larguraTiro = alturaTiro * propProjetil;
 
-                    // Cria o projétil enviando a LARGURA e ALTURA separadas
-                    listaProjeteis.add(new Projetil(bocaX, bocaY, in, imgProjetil, dano, larguraTiro, alturaTiro, offsetProjetil));
+                    // CHAMADA CORRIGIDA: Agora com os 9 parâmetros!
+                    listaProjeteis.add(new Projetil(bocaX, bocaY, in, imgProjetil, dano, larguraTiro, alturaTiro, offsetProjetil, velocidadeProjetil));
 
                     tempoTiro = 0;
                 }
-                break;
+                break; // Ataca apenas um inimigo por vez
             }
         }
     }
