@@ -3,7 +3,6 @@
 # ARTUR CASAGRANDE BRANDELLI
 ## FUNÇÕES
 ---
-### Creative Director
 ### Level Designer
 ### Environment Artist
 ### Prop Artist
@@ -33,18 +32,15 @@
 ### Systems Designer
 ### Backend Developer
 ### Prop Artist
-### Composer
 ### Sound Designer
 # OTÁVIO ALVES RECKTENWALDT
 ## FUNÇÕES
 ---
 ### Game Director
-### Executive Producer
 ### Gameplay Programmer
-### NPC's Behavior Programmer
+### AI Programmer
 ### Physics Programmer
 ### Graphics Programmer
-### Software Architect
 ### Technical Artist
 ### UI Designer
 ### UX Designer
@@ -59,12 +55,10 @@
 ### Lead Programmer
 ### Graphics Programmer
 ### Technical Artist
-### UI Designer
-### UX Designer
+### Graphics Programmer
 ### Security Engineer
 ### Community Manager
 ### Social Media Manager
-### Marketing Manager
 # THIAGO MATTEI SARTOR
 ## FUNÇÕES
 ---
@@ -79,3 +73,9 @@
 ### VFX Artist
 ### Data Analyst
 ### Marketing Manager
+---
+# Decision Authority
+- Design decisions → Lead Game Designer
+- Technical decisions → Technical Director
+- Art decisions → Creative Director
+- Business decisions → Executive Producer
