@@ -7,7 +7,8 @@ Botões e HUD
 Llama Maga - Desenho, Animação e ataque (Design, Habilidades, Modelo)<br>
 Llama Cyborg - Desenho, Animação e ataque (Design, Habilidades, Modelo)<br>
 Llama Anjo - Desenho, Animação e ataque (Design, Habilidades, Modelo)<br>
-Llama Ninja - Animação
+Llama Ninja - Animação<br>
+Llama Padrâo - Animação
 
 # AUGUSTO
 Caramujos<br>
