@@ -49,8 +49,8 @@ public class GameScreen extends ScreenAdapter {
         this.mapa = new Mapa();
         this.hud = new Hud();
 
-        this.imgLhama = new Texture("lhama.png");
-        this.imgLhamaNinja = new Texture("lhamaninja.png");
+        this.imgLhama = new Texture("Llama.png");
+        this.imgLhamaNinja = new Texture("LlamaNinja.png");
         this.imgCuspe = new Texture("guspe.png");
         this.imgKunai = new Texture("kunai.png");
 

@@ -1542,3 +1542,365 @@ ele apenas muda a variável que o quadro grande usa.
 FIM
 =========================================================
 */
+/*
+=========================================================
+DICIONÁRIO LIBGDX
+CRIAÇÃO E ADMINISTRAÇÃO DE ARRAYS
+=========================================================
+
+Arrays permitem armazenar vários objetos do mesmo tipo
+em uma única estrutura.
+
+Em jogos LibGDX, arrays são usados para:
+
+- heróis
+- inimigos
+- torres
+- botões
+- projéteis
+- animações
+
+=========================================================
+1. ARRAY SIMPLES
+=========================================================
+
+Estrutura:
+
+Tipo[] nomeArray;
+
+Exemplo:
+
+Texture[] imagensHerois;
+
+=========================================================
+2. CRIAR ARRAY
+=========================================================
+
+Exemplo com 4 heróis:
+
+Texture[] imagensHerois = new Texture[4];
+
+Isso cria espaço para 4 texturas.
+
+=========================================================
+3. INSERIR ELEMENTOS
+=========================================================
+
+imagensHerois[0] = new Texture("llama.png");
+imagensHerois[1] = new Texture("llamaNinja.png");
+imagensHerois[2] = new Texture("llamaMage.png");
+imagensHerois[3] = new Texture("llamaRobo.png");
+
+=========================================================
+4. ACESSAR ELEMENTOS
+=========================================================
+
+batch.draw(imagensHerois[0], x, y);
+
+=========================================================
+5. USANDO ARRAY COM BOTÕES
+=========================================================
+
+Botao[] botoesHerois = new Botao[4];
+
+botoesHerois[0] = new Botao(...);
+botoesHerois[1] = new Botao(...);
+
+=========================================================
+6. PERCORRER ARRAY (LOOP)
+=========================================================
+
+for(int i = 0; i < imagensHerois.length; i++){
+
+    batch.draw(imagensHerois[i], x, y);
+
+}
+
+=========================================================
+7. ARRAY COM SELEÇÃO
+=========================================================
+
+int heroiSelecionado = 0;
+
+Quando clicar:
+
+heroiSelecionado = i;
+
+Desenhar:
+
+batch.draw(imagensHerois[heroiSelecionado], 1050,600,350,300);
+
+=========================================================
+8. DISPOSE EM ARRAYS
+=========================================================
+
+for(Texture img : imagensHerois){
+    img.dispose();
+}
+
+=========================================================
+9. VANTAGENS DOS ARRAYS
+=========================================================
+
+✔ menos código repetido
+✔ fácil adicionar novos elementos
+✔ lógica mais organizada
+✔ usado em sistemas profissionais
+
+=========================================================
+FIM
+=========================================================
+*/
+/*
+=========================================================
+DICIONÁRIO LIBGDX
+BOTÕES QUE TROCAM IMAGEM E BACKGROUND CIRCULAR
+=========================================================
+
+Objetivo:
+
+Quando clicar em um botão:
+
+- trocar a imagem principal
+- trocar o background circular atrás da imagem
+- usar camadas (layers)
+- aplicar transparência
+- aplicar gradiente
+
+=========================================================
+1. CONCEITO DE CAMADAS
+=========================================================
+
+A ordem de desenho determina as camadas.
+
+Exemplo:
+
+batch.draw(background);
+batch.draw(circulo);
+batch.draw(personagem);
+
+Último desenhado aparece na frente.
+
+=========================================================
+2. IMAGENS NECESSÁRIAS
+=========================================================
+
+Texture[] imagensHerois;
+Texture[] backgroundsCirculares;
+
+Exemplo:
+
+imagensHerois[0] = new Texture("llama.png");
+backgroundsCirculares[0] = new Texture("circleGreen.png");
+
+=========================================================
+3. BOTÕES
+=========================================================
+
+Botao[] botoesHerois = new Botao[4];
+
+Cada botão seleciona um herói.
+
+=========================================================
+4. VARIÁVEL DE SELEÇÃO
+=========================================================
+
+int heroiSelecionado = 0;
+
+=========================================================
+5. DETECTAR CLIQUE
+=========================================================
+
+if(Gdx.input.justTouched()){
+
+    for(int i = 0; i < botoesHerois.length; i++){
+
+        if(botoesHerois[i].foiClicado(posMouse)){
+
+            heroiSelecionado = i;
+
+        }
+
+    }
+
+}
+
+=========================================================
+6. DESENHAR BACKGROUND CIRCULAR
+=========================================================
+
+batch.draw(
+    backgroundsCirculares[heroiSelecionado],
+    1020,570,
+    410,360
+);
+
+=========================================================
+7. DESENHAR PERSONAGEM
+=========================================================
+
+batch.draw(
+    imagensHerois[heroiSelecionado],
+    1050,600,
+    350,300
+);
+
+=========================================================
+8. TRANSPARÊNCIA
+=========================================================
+
+batch.setColor(1,1,1,0.6f);
+
+batch.draw(backgroundCircular,...);
+
+batch.setColor(1,1,1,1);
+
+=========================================================
+9. GRADIENTE
+=========================================================
+
+Gradientes normalmente são feitos em:
+
+- Photoshop
+- Aseprite
+- Illustrator
+
+Depois exportados como PNG.
+
+=========================================================
+10. RESULTADO
+=========================================================
+
+Botão clicado
+↓
+índice selecionado muda
+↓
+imagem e fundo circular trocam
+
+=========================================================
+FIM
+=========================================================
+*/
+/*
+=========================================================
+DICIONÁRIO LIBGDX
+BORDAS EM BOTÕES
+=========================================================
+
+Bordas em botões podem ser feitas de várias formas.
+
+Métodos principais:
+
+1. imagem com borda
+2. ShapeRenderer
+3. múltiplas camadas
+
+=========================================================
+1. BORDA COM IMAGEM (MAIS USADO)
+=========================================================
+
+Criar um PNG com:
+
+- borda arredondada
+- fundo transparente
+
+Exemplo:
+
+play_button.png
+
+Depois:
+
+batch.draw(botao, x, y);
+
+=========================================================
+2. BORDA COM SHAPERENDERER
+=========================================================
+
+shape.begin(ShapeRenderer.ShapeType.Line);
+
+shape.setColor(Color.WHITE);
+
+shape.rect(x,y,width,height);
+
+shape.end();
+
+=========================================================
+3. BORDA COM CAMADAS
+=========================================================
+
+Desenhar duas imagens:
+
+fundo
+↓
+botão
+
+Exemplo:
+
+batch.draw(borda, x-5, y-5, width+10, height+10);
+batch.draw(botao, x, y, width, height);
+
+=========================================================
+4. ARREDONDAMENTO
+=========================================================
+
+Arredondamento geralmente é feito:
+
+- no software gráfico
+- exportado como PNG
+
+=========================================================
+5. COR DO BOTÃO
+=========================================================
+
+LibGDX permite mudar cor:
+
+batch.setColor(0.8f,0.8f,1f,1);
+
+batch.draw(botao,...);
+
+batch.setColor(1,1,1,1);
+
+=========================================================
+6. BOTÃO COM HOVER
+=========================================================
+
+if(botao.estaSobre(mouse)){
+
+    batch.setColor(1.2f,1.2f,1.2f,1);
+
+}
+
+=========================================================
+7. BOTÃO COM SOMBRA
+=========================================================
+
+batch.draw(sombra, x+5, y-5, width, height);
+
+batch.draw(botao, x, y, width, height);
+
+=========================================================
+8. BORDA PROFISSIONAL
+=========================================================
+
+Jogos profissionais usam:
+
+NinePatch
+
+Exemplo:
+
+NinePatch patch = new NinePatch(texture, 10,10,10,10);
+
+=========================================================
+9. RESULTADO
+=========================================================
+
+Borda
+↓
+Botão
+↓
+Texto
+
+=========================================================
+FIM
+=========================================================
+*/
