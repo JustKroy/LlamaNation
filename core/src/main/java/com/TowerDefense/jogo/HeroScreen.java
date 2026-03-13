@@ -19,14 +19,17 @@ public class HeroScreen extends ScreenAdapter {
     private Animation<TextureRegion> heroAnimacaoAtual; //Variável que permite mexer com animação
     private float tempoAnimacao; //Variável que permite mexer com animação (tempo)
     private HeroType heroSelecionado; //Variável que inicializa o tipo do herói
+    private BackgroundType backgroundSelecionado; //Variável que inicializa o tipo do background
 
-    //--------- IMG ---------
+
+        //--------- ARRAY ---------
     //Variável que permite carregar imagens
     private Texture[] imagensLlamas;
     private Texture[] HUDimg;
+    private Texture[] backgroundCircular;
     private Botao[] btnLlamas;
     private Botao[] HUDbtn;
-    private Texture heroSpriteSheetAtual, heroImagemEstatica;
+    private Texture heroSpriteSheetAtual, heroImagemEstatica, backgroundAtual;
 
     // Vetor para armazenar a posição do mouse convertida para o sistema do jogo
     private Vector2 posMouse = new Vector2();
@@ -56,6 +59,13 @@ public class HeroScreen extends ScreenAdapter {
             HUDimg[7] = new Texture("verde.png");
             HUDimg[8] = new Texture("icon_attributes.png");
             HUDimg[9] = new Texture("icon_skin.png");
+
+        //------------- BACKGROUND ------------
+        backgroundCircular = new Texture[4];
+            backgroundCircular[0] = new Texture("BackgroundClassicos.png");
+            backgroundCircular[1] = new Texture("BackgroundSupport.png");
+            backgroundCircular[2] = new Texture("BackgroundAerial.png");
+            backgroundCircular[3] = new Texture("BackgroundLendas.png");
 
         //-------- Botões ----------
         HUDbtn = new Botao[4];
@@ -126,7 +136,10 @@ public class HeroScreen extends ScreenAdapter {
             );
 
         //----------- PRÉ IMG ----------
+            backgroundSelecionado = BackgroundType.CLASSICO;
+            backgroundAtual = backgroundCircular[0];
             trocarHeroi(HeroType.LLAMA); //Inicializa o herói com LLAMA
+
     }
 
     //Função que inicializa imagem de acordo com o tipo(animação ou estática)
@@ -191,6 +204,48 @@ public class HeroScreen extends ScreenAdapter {
         tempoAnimacao = 0; //Limpa o tempo da animação
     }
 
+    public enum BackgroundType {
+        CLASSICO("BackgroundClassicos.png", 300, 300),
+        SUPPORT("BackgroundSupport.png", 300, 300),
+        AERIAL("BackgroundAerial.png", 300, 300),
+        LENDA("BackgroundLendas.png", 300, 300);
+
+        public final String background;
+        public final float largura;
+        public final float altura;
+
+        BackgroundType(String background, float largura, float altura) {
+            this.background = background;
+            this.largura = largura;
+            this.altura = altura;
+
+        }
+    }
+
+    public void trocarBackground(BackgroundType tipo) {
+        backgroundSelecionado = tipo;
+
+        switch (tipo) {
+
+            case CLASSICO:
+                backgroundAtual = backgroundCircular[0];
+                break;
+
+            case SUPPORT:
+                backgroundAtual = backgroundCircular[1];
+                break;
+
+            case AERIAL:
+                backgroundAtual = backgroundCircular[2];
+                break;
+
+            case LENDA:
+                backgroundAtual = backgroundCircular[3];
+                break;
+        }
+
+    }
+
     @Override
     public void render(float delta) {
 
@@ -233,12 +288,17 @@ public class HeroScreen extends ScreenAdapter {
             //Define a largura e altura do herói selecionado
             float largura = heroSelecionado.largura;
             float altura = heroSelecionado.altura;
+            float larguraB = backgroundSelecionado.largura;
+            float alturaB = backgroundSelecionado.altura;
+
 
             //Se estiver animado, desenha a animação, caso contrário, desenha a imagem estática
             if (heroAnimacaoAtual != null) {
                 TextureRegion frameAtual = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true); //Pega o frame atual da animação
+                batch.draw(backgroundAtual, 1030, 570, larguraB, alturaB);
                 batch.draw(frameAtual, 1050, 600, largura, altura); //Desenha
             } else {
+                batch.draw(backgroundAtual, 0, 0, larguraB, alturaB);
                 batch.draw(heroImagemEstatica, 1050, 600, largura, altura);
             }
 
@@ -267,10 +327,29 @@ public class HeroScreen extends ScreenAdapter {
                 game.setScreen(new MenuScreen(game));
             }
 
-            for(int i = 0; i < btnLlamas.length; i++) {
-                if(btnLlamas[i].foiClicado(posMouse)) {
-                    trocarHeroi(HeroType.values()[i]);
-                }
+            if(btnLlamas[0].foiClicado(posMouse)){
+                trocarHeroi(HeroType.LLAMA);
+                trocarBackground(BackgroundType.CLASSICO);
+            }
+
+            if(btnLlamas[1].foiClicado(posMouse)){
+                trocarHeroi(HeroType.MAGELLAMA);
+                trocarBackground(BackgroundType.SUPPORT);
+            }
+
+            if(btnLlamas[2].foiClicado(posMouse)){
+                trocarHeroi(HeroType.NINJALLAMA);
+                trocarBackground(BackgroundType.AERIAL);
+            }
+
+            if(btnLlamas[3].foiClicado(posMouse)){
+                trocarHeroi(HeroType.ROBOTLLAMA);
+                trocarBackground(BackgroundType.LENDA);
+            }
+
+            if(btnLlamas[4].foiClicado(posMouse)){
+                trocarHeroi(HeroType.ANJOLLAMA);
+                trocarBackground(BackgroundType.LENDA);
             }
 
         }
@@ -291,6 +370,10 @@ public class HeroScreen extends ScreenAdapter {
         }
 
         for (Texture img : HUDimg) {
+            img.dispose();
+        }
+
+        for (Texture img : backgroundCircular) {
             img.dispose();
         }
 
