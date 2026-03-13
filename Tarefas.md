@@ -33,16 +33,18 @@ Menu de Heróis
 ## TAREFAS FUTURAS
 ### UI GLOBAIS
 - Cursor
-- Botão Voltar
 - Hover de Todos Botões
 ### BOTÕES TELA DE HERÓIS
 - Um framezinho colocando cada llama dentro dele
 - Label nome da llama quando selecionada
 - Botão select hero
-- Botão Return to Desktop
-- Botão quadrado com uma camiseta dentro
-- Botão quadrado com uma espada dentro
+### BOTÕES TELA DE JOGO
+- Botão "Sell"
+- Botão "Leave Battle"
+- Botão "Continue" 
+
 
 ## IDEIAS
 ### LHAMAS
 Lhama RPG, que dependendo do valor do D20 tem padroes  de ataque diferentes
+Lhama Cozinheiro, que joga Sal nos Caramujos e eles derretem
