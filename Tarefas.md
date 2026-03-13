@@ -46,5 +46,5 @@ Menu de Heróis
 
 ## IDEIAS
 ### LHAMAS
-Lhama RPG, que dependendo do valor do D20 tem padroes  de ataque diferentes
-Lhama Cozinheiro, que joga Sal nos Caramujos e eles derretem
+- Lhama RPG, que dependendo do valor do D20 tem padroes  de ataque diferentes
+- Lhama Cozinheiro, que joga Sal nos Caracois e eles derretem
