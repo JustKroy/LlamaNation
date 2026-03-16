@@ -2,6 +2,7 @@ package com.TowerDefense.jogo;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -20,16 +21,16 @@ public class HeroScreen extends ScreenAdapter {
     private float tempoAnimacao; //Variável que permite mexer com animação (tempo)
     private HeroType heroSelecionado; //Variável que inicializa o tipo do herói
     private BackgroundType backgroundSelecionado; //Variável que inicializa o tipo do background
+    private Color corBackground; //Variável que permite mudar a cor do background
 
 
         //--------- ARRAY ---------
     //Variável que permite carregar imagens
     private Texture[] imagensLlamas;
     private Texture[] HUDimg;
-    private Texture[] backgroundCircular;
     private Botao[] btnLlamas;
     private Botao[] HUDbtn;
-    private Texture heroSpriteSheetAtual, heroImagemEstatica, backgroundAtual;
+    private Texture heroSpriteSheetAtual, heroImagemEstatica;
 
     // Vetor para armazenar a posição do mouse convertida para o sistema do jogo
     private Vector2 posMouse = new Vector2();
@@ -48,7 +49,7 @@ public class HeroScreen extends ScreenAdapter {
             imagensLlamas[2] = new Texture("LlamaNinja.png");
             imagensLlamas[3] = new Texture("LlamaRobo.png");
 
-        HUDimg = new Texture[10];
+        HUDimg = new Texture[11];
             HUDimg[0] = new Texture("backgroundHero.jpg");
             HUDimg[1] = new Texture("painel.jpg");
             HUDimg[2] = new Texture("frame_aerial.png");
@@ -59,13 +60,8 @@ public class HeroScreen extends ScreenAdapter {
             HUDimg[7] = new Texture("verde.png");
             HUDimg[8] = new Texture("icon_attributes.png");
             HUDimg[9] = new Texture("icon_skin.png");
-
-        //------------- BACKGROUND ------------
-        backgroundCircular = new Texture[4];
-            backgroundCircular[0] = new Texture("BackgroundClassicos.png");
-            backgroundCircular[1] = new Texture("BackgroundSupport.png");
-            backgroundCircular[2] = new Texture("BackgroundAerial.png");
-            backgroundCircular[3] = new Texture("BackgroundLendas.png");
+            HUDimg[10] = new Texture("glow.png");
+            HUDimg[10].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
         //-------- Botões ----------
         HUDbtn = new Botao[4];
@@ -136,8 +132,7 @@ public class HeroScreen extends ScreenAdapter {
             );
 
         //----------- PRÉ IMG ----------
-            backgroundSelecionado = BackgroundType.CLASSICO;
-            backgroundAtual = backgroundCircular[0];
+            trocarBackground(BackgroundType.CLASSICO); //Inicializa o background com CLASSICOS
             trocarHeroi(HeroType.LLAMA); //Inicializa o herói com LLAMA
 
     }
@@ -228,19 +223,19 @@ public class HeroScreen extends ScreenAdapter {
         switch (tipo) {
 
             case CLASSICO:
-                backgroundAtual = backgroundCircular[0];
+                corBackground = new Color(0.55f, 0.68f, 0.82f, 1f);
                 break;
 
             case SUPPORT:
-                backgroundAtual = backgroundCircular[1];
+                corBackground = new Color(0.60f, 0.78f, 0.60f, 1f);
                 break;
 
             case AERIAL:
-                backgroundAtual = backgroundCircular[2];
+                corBackground = new Color(0.68f, 0.60f, 0.85f, 1f);
                 break;
 
             case LENDA:
-                backgroundAtual = backgroundCircular[3];
+                corBackground = new Color(0.85f, 0.76f, 0.52f, 1f);
                 break;
         }
 
@@ -282,25 +277,34 @@ public class HeroScreen extends ScreenAdapter {
         //Desenha na tela
         batch.begin();
             batch.draw(HUDimg[0], 0, 0, 1920, 1080);
-            batch.draw(HUDimg[1], 0, 0, 500, 950);
-            batch.draw(HUDimg[2], 700, 950, 700, 120);
+
+            // glow externo
+            batch.setColor(corBackground.r, corBackground.g, corBackground.b, 0.28f);
+            batch.draw(HUDimg[10], 720, 260, 1000, 1000);
+
+            // glow interno
+            batch.setColor(corBackground.r, corBackground.g, corBackground.b, 0.32f);
+            batch.draw(HUDimg[10], 880, 420, 650, 650);
+
+            // volta a cor normal
+            batch.setColor(1f, 1f, 1f, 1f);
 
             //Define a largura e altura do herói selecionado
             float largura = heroSelecionado.largura;
             float altura = heroSelecionado.altura;
-            float larguraB = backgroundSelecionado.largura;
-            float alturaB = backgroundSelecionado.altura;
 
 
             //Se estiver animado, desenha a animação, caso contrário, desenha a imagem estática
             if (heroAnimacaoAtual != null) {
                 TextureRegion frameAtual = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true); //Pega o frame atual da animação
-                batch.draw(backgroundAtual, 1030, 570, larguraB, alturaB);
                 batch.draw(frameAtual, 1050, 600, largura, altura); //Desenha
             } else {
-                batch.draw(backgroundAtual, 0, 0, larguraB, alturaB);
                 batch.draw(heroImagemEstatica, 1050, 600, largura, altura);
             }
+
+            batch.draw(HUDimg[1], 0, 0, 500, 950);
+            batch.draw(HUDimg[2], 700, 950, 700, 120);
+
 
         //------------ BOTOES ------------
 
@@ -370,10 +374,6 @@ public class HeroScreen extends ScreenAdapter {
         }
 
         for (Texture img : HUDimg) {
-            img.dispose();
-        }
-
-        for (Texture img : backgroundCircular) {
             img.dispose();
         }
 
