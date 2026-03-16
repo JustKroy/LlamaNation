@@ -49,16 +49,50 @@ public class LhamaMage extends Torre {
         float centroTorreX = posicao.x + (larguraDesenho / 2f);
         float centroTorreY = posicao.y + (alturaDesenho / 2f);
 
-        Inimigo alvoAtual = null;
+        // --- INÍCIO DO CÉREBRO DE MIRA INTELIGENTE ---
+
+        // 1. Coleta quem está no raio
+        Array<Inimigo> inimigosNoRange = new Array<>();
         for (Inimigo in : listaInimigos) {
-            float centroInimigoX = in.posicao.x + 25f;
-            float centroInimigoY = in.posicao.y + 25f;
+            float centroInimigoX = in.posicao.x + (in.largura / 2f);
+            float centroInimigoY = in.posicao.y + (in.altura / 2f);
             if (Vector2.dst(centroTorreX, centroTorreY, centroInimigoX, centroInimigoY) <= raio) {
-                alvoAtual = in;
-                viradaParaEsquerda = (in.posicao.x < posicao.x);
-                break;
+                inimigosNoRange.add(in);
             }
         }
+
+        // 2. Filtra pelo botão (Primeiro, Último, Mais Forte)
+        Inimigo alvoAtual = null;
+
+        if (inimigosNoRange.size > 0) {
+            alvoAtual = inimigosNoRange.get(0);
+
+            for (int i = 1; i < inimigosNoRange.size; i++) {
+                Inimigo in = inimigosNoRange.get(i);
+
+                if (modoAlvoAtual == ModoAlvo.PRIMEIRO) {
+                    if (in.distanciaPercorrida > alvoAtual.distanciaPercorrida) {
+                        alvoAtual = in;
+                    }
+                }
+                else if (modoAlvoAtual == ModoAlvo.ULTIMO) {
+                    if (in.distanciaPercorrida < alvoAtual.distanciaPercorrida) {
+                        alvoAtual = in;
+                    }
+                }
+                else if (modoAlvoAtual == ModoAlvo.MAIS_FORTE) {
+                    if (in.vida > alvoAtual.vida) {
+                        alvoAtual = in;
+                    }
+                }
+            }
+        }
+
+        if (alvoAtual != null) {
+            viradaParaEsquerda = (alvoAtual.posicao.x < posicao.x);
+        }
+
+        // --- FIM DO CÉREBRO DE MIRA ---
 
         if (alvoAtual != null && tempoTiro >= cooldown && !estaAtacando) {
             estaAtacando = true;
@@ -91,7 +125,6 @@ public class LhamaMage extends Torre {
                 float larguraTiro = tamanhoProjetil * propProjetil;
 
                 // --- VELOCIDADE ÚNICA AQUI (500f) ---
-                // Agora passamos o valor no final da chamada!
                 Projetil magia = new Projetil(saidaX, saidaY, alvoFixo, imgProjetil, dano, larguraTiro, tamanhoProjetil, offsetProjetil, 500f);
 
                 listaProjeteis.add(magia);

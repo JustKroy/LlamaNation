@@ -10,13 +10,22 @@ public abstract class Inimigo {
 
     // --- POSIÇÃO E NAVEGAÇÃO ---
     public Vector2 posicao;
-    private Vector2 tempDirecao = new Vector2(); // Reutilizado para economizar memória
-    private int pontoAtual = 1;
+    private Vector2 tempDirecao = new Vector2();
 
-    // --- STATUS (Definidos pelos filhos, ex: CaramujoRapido) ---
-    protected int vida;
+    public int pontoAtual = 1;
+
+    // --- NOVA VARIÁVEL: O SEGREDO DA MIRA PERFEITA ---
+    // Guarda a distância exata em pixels que este inimigo já andou no mapa
+    public float distanciaPercorrida = 0;
+
+    // --- STATUS ---
+    public int vida;
     protected float velocidade;
-    protected int recompensaMoedas;
+    public int recompensaMoedas;
+
+    // --- TAMANHO VISUAL ---
+    public float largura = 50f;
+    public float altura = 50f;
 
     // --- ANIMAÇÃO ---
     protected Animation<TextureRegion> animacaoNormal;
@@ -36,47 +45,38 @@ public abstract class Inimigo {
         if (pontoAtual < caminho.size) {
             Vector2 alvo = caminho.get(pontoAtual);
 
-            // Calcula a direção usando o vetor temporário
             tempDirecao.set(alvo.x - posicao.x, alvo.y - posicao.y);
 
-            // Define a orientação visual
             if (tempDirecao.x < -0.1f) indoParaEsquerda = true;
             else if (tempDirecao.x > 0.1f) indoParaEsquerda = false;
 
-            // Distância que ele vai percorrer NESTE frame
             float distanciaFrame = velocidade * delta;
+            float distanciaAteAlvo = tempDirecao.len(); // Mede exatamente quanto falta pro ponto
 
-            // Se a distância para o alvo for menor que o passo do frame, ele chegou no ponto
-            if (tempDirecao.len() <= distanciaFrame) {
+            if (distanciaAteAlvo <= distanciaFrame) {
                 posicao.set(alvo);
                 pontoAtual++;
+
+                // Soma exatamente o pedacinho que ele andou pra chegar na curva
+                distanciaPercorrida += distanciaAteAlvo;
             } else {
-                // Normaliza e move
                 tempDirecao.nor().scl(distanciaFrame);
                 posicao.add(tempDirecao);
+
+                // Soma o passo normal que ele deu na reta
+                distanciaPercorrida += distanciaFrame;
             }
             return false;
         }
 
-        return true; // Chegou ao fim do caminho
+        return true;
     }
 
     public void desenhar(SpriteBatch batch) {
-        // Usa o frame correto baseado na direção
         TextureRegion frame = indoParaEsquerda ?
             animacaoVirada.getKeyFrame(tempoAnim, true) :
             animacaoNormal.getKeyFrame(tempoAnim, true);
 
-        // Dica: Use constantes para o tamanho (50, 50) se todos forem iguais
-        batch.draw(frame, posicao.x, posicao.y, 50, 50);
-    }
-
-    // Métodos úteis para o Gerenciador de Dano futuramente
-    public void tomarDano(int quantidade) {
-        this.vida -= quantidade;
-    }
-
-    public boolean estaMorto() {
-        return vida <= 0;
+        batch.draw(frame, posicao.x, posicao.y, largura, altura);
     }
 }

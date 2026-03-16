@@ -7,7 +7,7 @@ public class LhamaNinja extends Torre {
     public LhamaNinja(float x, float y, Texture textura, Texture imgProjetil) {
         super(x, y, textura, imgProjetil);
 
-        // Aqui definimos os status únicos da Lhama Ninja!
+
         this.raio = 250f;
         this.cooldown = 0.5f;
         this.dano = 75;

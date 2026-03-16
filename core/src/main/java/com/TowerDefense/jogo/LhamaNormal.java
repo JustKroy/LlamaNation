@@ -39,7 +39,7 @@ public class LhamaNormal extends Torre {
         // Recorte dos 9 frames
         TextureRegion[][] tmp = TextureRegion.split(sheetLlama, (int)larguraDeUmFrameOriginal, sheetLlama.getHeight());
 
-        // MUDANÇA AQUI: Array com tamanho 9 e o For indo até 9!
+        // Array com tamanho 9 e o For indo até 9!
         TextureRegion[] frames = new TextureRegion[9];
         for (int i = 0; i < 9; i++) {
             frames[i] = tmp[0][i];
@@ -56,23 +56,58 @@ public class LhamaNormal extends Torre {
         float centroTorreX = posicao.x + (larguraDesenho / 2f);
         float centroTorreY = posicao.y + (alturaDesenho / 2f);
 
-        Inimigo alvoAtual = null;
+        // --- INÍCIO DO CÉREBRO DE MIRA INTELIGENTE ---
+
+        // 1. Coleta quem está no raio
+        Array<Inimigo> inimigosNoRange = new Array<>();
         for (Inimigo in : listaInimigos) {
-            float centroInimigoX = in.posicao.x + 25f;
-            float centroInimigoY = in.posicao.y + 25f;
+            float centroInimigoX = in.posicao.x + (in.largura / 2f);
+            float centroInimigoY = in.posicao.y + (in.altura / 2f);
             if (Vector2.dst(centroTorreX, centroTorreY, centroInimigoX, centroInimigoY) <= raio) {
-                alvoAtual = in;
-                viradaParaEsquerda = (in.posicao.x < posicao.x);
-                break;
+                inimigosNoRange.add(in);
             }
         }
 
+        // 2. Filtra pelo botão (Primeiro, Último, Mais Forte)
+        Inimigo alvoAtual = null;
+
+        if (inimigosNoRange.size > 0) {
+            alvoAtual = inimigosNoRange.get(0);
+
+            for (int i = 1; i < inimigosNoRange.size; i++) {
+                Inimigo in = inimigosNoRange.get(i);
+
+                if (modoAlvoAtual == ModoAlvo.PRIMEIRO) {
+                    if (in.distanciaPercorrida > alvoAtual.distanciaPercorrida) {
+                        alvoAtual = in;
+                    }
+                }
+                else if (modoAlvoAtual == ModoAlvo.ULTIMO) {
+                    if (in.distanciaPercorrida < alvoAtual.distanciaPercorrida) {
+                        alvoAtual = in;
+                    }
+                }
+                else if (modoAlvoAtual == ModoAlvo.MAIS_FORTE) {
+                    if (in.vida > alvoAtual.vida) {
+                        alvoAtual = in;
+                    }
+                }
+            }
+        }
+
+        if (alvoAtual != null) {
+            viradaParaEsquerda = (alvoAtual.posicao.x < posicao.x);
+        }
+
+        // --- FIM DO CÉREBRO DE MIRA ---
+
+        // O resto continua igualzinho: cuida da animação e do cuspe!
         if (alvoAtual != null && tempoTiro >= cooldown && !estaAtacando) {
             estaAtacando = true;
             tempoTiro = 0;
             tempoEstado = 0f;
             jaAtirouNesteCiclo = false;
-            alvoFixo = alvoAtual;
+            alvoFixo = alvoAtual; // Trava a mira nele enquanto a animação roda
         }
 
         if (estaAtacando) {
@@ -97,7 +132,6 @@ public class LhamaNormal extends Torre {
                 float propProjetil = (float) imgProjetil.getWidth() / imgProjetil.getHeight();
                 float larguraTiro = tamanhoProjetil * propProjetil;
 
-                // ATENÇÃO: Verifique se sua classe Projetil exige essa quantidade exata de parâmetros!
                 listaProjeteis.add(new Projetil(saidaX, saidaY, alvoFixo, imgProjetil, dano,
                     larguraTiro, tamanhoProjetil, offsetProjetil, velocidadeProjetil));
 

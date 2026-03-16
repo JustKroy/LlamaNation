@@ -35,7 +35,7 @@ public class GameScreen extends ScreenAdapter {
     private Array<Projetil> listaProjeteis = new Array<>();
 
     // --- STATUS DO JOGADOR ---
-    private int vidas = 100, dinheiro = 1000;
+    private int vidas = 100, dinheiro = 100;
     private Vector2 posMouse = new Vector2(); // Guarda as coordenadas X e Y do mouse
 
     // --- CONSTRUTOR ---
@@ -79,6 +79,12 @@ public class GameScreen extends ScreenAdapter {
         // 2. A MAGIA DO PAUSE (O FREEZE)
         // ==========================================
         if (!hud.pausado) {
+
+            // --- AQUI ESTÁ A MÁGICA DA VELOCIDADE 3x ---
+            // Se o botão de acelerar estiver ativado na loja, nós multiplicamos o tempo (delta) por 3!
+            if (construtor.jogoAcelerado) {
+                delta = delta * 3f;
+            }
 
             // Faz o jogo "pensar" antes de desenhar
             ondas.atualizar(delta, listaInimigos, mapa); // Spawna inimigos se for a hora

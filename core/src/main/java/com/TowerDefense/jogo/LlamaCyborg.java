@@ -18,21 +18,16 @@ public class LlamaCyborg extends Torre {
     public LlamaCyborg(float x, float y, Texture sheetCyborg, Texture imgAtaque) {
         super(x, y, sheetCyborg, imgAtaque);
 
-        // 1. Dano reduzido
+        // Dano
         this.dano = 60;
-
-        this.raio = 300f;
-
-        // 2. Cooldown reduzido (atira mais rápido)
+        this.raio = 250f;
+        // Cooldawn
         this.cooldown = 0.1f;
-
         this.velocidadeProjetil = 1000f;
-
-        // --- AJUSTE DO TAMANHO DO TIRO ---
+        // Tiro
         this.tamanhoProjetil = 5f;
         this.offsetProjetil = 0f;
 
-        // --- FORÇAR ALTURA PADRÃO (80px) ---
         this.alturaDesenho = 80f;
         float larguraDeUmFrameOriginal = (float) sheetCyborg.getWidth() / 18f;
         float proporcao = larguraDeUmFrameOriginal / (float) sheetCyborg.getHeight();
@@ -61,16 +56,50 @@ public class LlamaCyborg extends Torre {
         float centroTorreX = posicao.x + (larguraDesenho / 2f);
         float centroTorreY = posicao.y + (alturaDesenho / 2f);
 
-        Inimigo alvoAtual = null;
+        // --- INÍCIO DO CÉREBRO DE MIRA INTELIGENTE ---
+
+        // 1. Coleta quem está no raio
+        Array<Inimigo> inimigosNoRange = new Array<>();
         for (Inimigo in : listaInimigos) {
-            float centroInimigoX = in.posicao.x + 25f;
-            float centroInimigoY = in.posicao.y + 25f;
+            float centroInimigoX = in.posicao.x + (in.largura / 2f);
+            float centroInimigoY = in.posicao.y + (in.altura / 2f);
             if (Vector2.dst(centroTorreX, centroTorreY, centroInimigoX, centroInimigoY) <= raio) {
-                alvoAtual = in;
-                viradaParaEsquerda = (in.posicao.x < posicao.x);
-                break;
+                inimigosNoRange.add(in);
             }
         }
+
+        // 2. Filtra pelo botão (Primeiro, Último, Mais Forte)
+        Inimigo alvoAtual = null;
+
+        if (inimigosNoRange.size > 0) {
+            alvoAtual = inimigosNoRange.get(0);
+
+            for (int i = 1; i < inimigosNoRange.size; i++) {
+                Inimigo in = inimigosNoRange.get(i);
+
+                if (modoAlvoAtual == ModoAlvo.PRIMEIRO) {
+                    if (in.distanciaPercorrida > alvoAtual.distanciaPercorrida) {
+                        alvoAtual = in;
+                    }
+                }
+                else if (modoAlvoAtual == ModoAlvo.ULTIMO) {
+                    if (in.distanciaPercorrida < alvoAtual.distanciaPercorrida) {
+                        alvoAtual = in;
+                    }
+                }
+                else if (modoAlvoAtual == ModoAlvo.MAIS_FORTE) {
+                    if (in.vida > alvoAtual.vida) {
+                        alvoAtual = in;
+                    }
+                }
+            }
+        }
+
+        if (alvoAtual != null) {
+            viradaParaEsquerda = (alvoAtual.posicao.x < posicao.x);
+        }
+
+        // --- FIM DO CÉREBRO DE MIRA ---
 
         if (alvoAtual != null && tempoTiro >= cooldown && !estaAtacando) {
             estaAtacando = true;
