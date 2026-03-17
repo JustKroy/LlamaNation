@@ -9,7 +9,15 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.List;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 public class HeroScreen extends ScreenAdapter {
@@ -20,15 +28,24 @@ public class HeroScreen extends ScreenAdapter {
     private Animation<TextureRegion> heroAnimacaoAtual; //Variável que permite mexer com animação
     private float tempoAnimacao; //Variável que permite mexer com animação (tempo)
     private HeroType heroSelecionado; //Variável que inicializa o tipo do herói
+    private HeroClasse classeSelecionada; //Variável que inicializa o tipo da classe
     private BackgroundType backgroundSelecionado; //Variável que inicializa o tipo do background
     private Color corBackground; //Variável que permite mudar a cor do background
+    private Stage stage; //Variável que permite desenhar na tela
+    private Skin skin; //Variável que permite carregar imagens
+    private SelectBox<HeroClasse> ListaClasse; //Variável que inicia um SelectBox
 
 
         //--------- ARRAY ---------
     //Variável que permite carregar imagens
-    private Texture[] imagensLlamas;
+    private Texture[] LlamasClassico;
+    private Texture[] LlamasAereo;
     private Texture[] HUDimg;
-    private Botao[] btnLlamas;
+    private Botao[] btnLlamasClassico;
+    private Botao[] btnLlamasSuporte;
+    private Botao[] btnLlamasAereo;
+    private Botao[] btnLlamasLenda;
+
     private Botao[] HUDbtn;
     private Texture heroSpriteSheetAtual, heroImagemEstatica;
 
@@ -41,13 +58,53 @@ public class HeroScreen extends ScreenAdapter {
         this.game = game; //Recebe a classe principal
         this.batch = new SpriteBatch(); //Recebe o batch para desenhar na tela
         this.viewport = new StretchViewport(1920, 1080); //Define o tamanho da tela
+        stage = new Stage(new ScreenViewport());
+        skin = new Skin(Gdx.files.internal("ui/uiskin.json")); //Carrega a skin
+
+        //--------- COMBOBOX ---------
+        ListaClasse = new SelectBox<>(skin);
+            ListaClasse.setItems(
+                HeroClasse.CLASSICOS,
+                HeroClasse.SUPORTES,
+                HeroClasse.AEREOS,
+                HeroClasse.LENDAS
+            );
+            ListaClasse.setPosition(100,850);
+            ListaClasse.setSize(300,50);
+            ListaClasse.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                   classeSelecionada = ListaClasse.getSelected();
+                }
+            });
+        //Centraliza o texto que aparece no botão do SelectBox
+        ListaClasse.setAlignment(Align.center);
+
+        //Define o limite de itens que aparecem no selectbox
+        ListaClasse.setMaxListCount(4);
+
+        //Centraliza o texto que aparece no botão do SelectBox
+        ListaClasse.getList().setAlignment(Align.center);
+
+        //Altera a cor
+        ListaClasse.getStyle().fontColor = Color.WHITE;
+
+        ListaClasse.getList().getStyle().fontColorSelected = Color.WHITE;
+        ListaClasse.getList().getStyle().fontColorUnselected = Color.LIGHT_GRAY;
+
+        stage.addActor(ListaClasse);
+        Gdx.input.setInputProcessor(stage); //Entende o clique do mouse
+
 
         //--------- Imagens -----------
-        imagensLlamas = new Texture[4];
-            imagensLlamas[0] = new Texture("Llama.png");
-            imagensLlamas[1] = new Texture("LlamaMage.png");
-            imagensLlamas[2] = new Texture("LlamaNinja.png");
-            imagensLlamas[3] = new Texture("LlamaRobo.png");
+
+        LlamasClassico = new Texture[4];
+            LlamasClassico[0] = new Texture("Llama.png");
+            LlamasClassico[1] = new Texture("LlamaMage.png");
+            LlamasClassico[2] = new Texture("LlamaNinja.png");
+            LlamasClassico[3] = new Texture("LlamaRobo.png");
+        LlamasAereo = new Texture[1];
+            LlamasAereo[0] = new Texture("LlamaAnjo.png");
 
         HUDimg = new Texture[11];
             HUDimg[0] = new Texture("backgroundHero.jpg");
@@ -94,57 +151,194 @@ public class HeroScreen extends ScreenAdapter {
                 700, 430, 100, 100
             );
 
-        btnLlamas = new Botao[5];
+        btnLlamasClassico = new Botao[5];
 
             //Llama
-            btnLlamas[0] = new Botao(
+            btnLlamasClassico[0] = new Botao(
                 new Texture("frame_classic.png"),
                 new Texture("frame_classic.png"),
-                20, 700, 200, 200
+                20, 580, 200, 200
             );
 
             //LlamaMage
-            btnLlamas[1] = new Botao(
+            btnLlamasClassico[1] = new Botao(
                 new Texture("frame_classic.png"),
                 new Texture("frame_classic.png"),
-                270, 700, 200, 200
+                270, 580, 200, 200
             );
 
             //LlamaNinja
-            btnLlamas[2] = new Botao(
+            btnLlamasClassico[2] = new Botao(
                 new Texture("frame_classic.png"),
                 new Texture("frame_classic.png"),
-                20, 450, 200, 200
+                20, 330, 200, 200
             );
 
             //LlamaRobo
-            btnLlamas[3] = new Botao(
+            btnLlamasClassico[3] = new Botao(
                 new Texture("frame_classic.png"),
                 new Texture("frame_classic.png"),
-                270, 450, 200, 200
+                270, 330, 200, 200
             );
 
             //LlamaAnjo
-            btnLlamas[4] = new Botao(
+            btnLlamasClassico[4] = new Botao(
                 new Texture("frame_classic.png"),
                 new Texture("frame_classic.png"),
-                20, 200, 200, 200
+                20, 80, 200, 200
+            );
+        btnLlamasSuporte = new Botao[5];
+
+            //Llama
+            btnLlamasSuporte[0] = new Botao(
+                new Texture("frame_support.png"),
+                new Texture("frame_support.png"),
+                20, 580, 200, 200
             );
 
+            //LlamaMage
+            btnLlamasSuporte[1] = new Botao(
+                new Texture("frame_support.png"),
+                new Texture("frame_support.png"),
+                270, 580, 200, 200
+            );
+
+            //LlamaNinja
+            btnLlamasSuporte[2] = new Botao(
+                new Texture("frame_support.png"),
+                new Texture("frame_support.png"),
+                20, 330, 200, 200
+            );
+
+            //LlamaRobo
+            btnLlamasSuporte[3] = new Botao(
+                new Texture("frame_support.png"),
+                new Texture("frame_support.png"),
+                270, 330, 200, 200
+            );
+
+            //LlamaAnjo
+            btnLlamasSuporte[4] = new Botao(
+                new Texture("frame_support.png"),
+                new Texture("frame_support.png"),
+                20, 80, 200, 200
+            );
+        btnLlamasAereo = new Botao[5];
+
+            //Llama
+            btnLlamasAereo[0] = new Botao(
+                new Texture("frame_aerial.png"),
+                new Texture("frame_aerial.png"),
+                20, 580, 200, 200
+            );
+
+            //LlamaMage
+            btnLlamasAereo[1] = new Botao(
+                new Texture("frame_aerial.png"),
+                new Texture("frame_aerial.png"),
+                270, 580, 200, 200
+            );
+
+            //LlamaNinja
+            btnLlamasAereo[2] = new Botao(
+                new Texture("frame_aerial.png"),
+                new Texture("frame_aerial.png"),
+                20, 330, 200, 200
+            );
+
+            //LlamaRobo
+            btnLlamasAereo[3] = new Botao(
+                new Texture("frame_aerial.png"),
+                new Texture("frame_aerial.png"),
+                270, 330, 200, 200
+            );
+
+            //LlamaAnjo
+            btnLlamasAereo[4] = new Botao(
+                new Texture("frame_aerial.png"),
+                new Texture("frame_aerial.png"),
+                20, 80, 200, 200
+            );
+        btnLlamasLenda = new Botao[5];
+
+            //Llama
+            btnLlamasLenda[0] = new Botao(
+                new Texture("frame_legend.png"),
+                new Texture("frame_legend.png"),
+                20, 580, 200, 200
+            );
+
+            //LlamaMage
+            btnLlamasLenda[1] = new Botao(
+                new Texture("frame_legend.png"),
+                new Texture("frame_legend.png"),
+                270, 580, 200, 200
+            );
+
+            //LlamaNinja
+            btnLlamasLenda[2] = new Botao(
+                new Texture("frame_legend.png"),
+                new Texture("frame_legend.png"),
+                20, 330, 200, 200
+            );
+
+            //LlamaRobo
+            btnLlamasLenda[3] = new Botao(
+                new Texture("frame_legend.png"),
+                new Texture("frame_legend.png"),
+                270, 330, 200, 200
+            );
+
+            //LlamaAnjo
+            btnLlamasLenda[4] = new Botao(
+                new Texture("frame_legend.png"),
+                new Texture("frame_legend.png"),
+                20, 80, 200, 200
+            );
+
+
         //----------- PRÉ IMG ----------
+            setClasseSelecionada(HeroClasse.CLASSICOS);
             trocarBackground(BackgroundType.CLASSICO); //Inicializa o background com CLASSICOS
             trocarHeroi(HeroType.LLAMA); //Inicializa o herói com LLAMA
 
+    }
+
+    public enum HeroClasse {
+        CLASSICOS,
+        SUPORTES,
+        AEREOS,
+        LENDAS;
+
+    }
+
+    public void setClasseSelecionada (HeroClasse classe) {
+        this.classeSelecionada = classe;
+    }
+
+    private Botao[] getBotoesClasseAtual() {
+        switch (classeSelecionada) {
+            case CLASSICOS:
+                return btnLlamasClassico;
+            case SUPORTES:
+                return btnLlamasSuporte;
+            case AEREOS:
+                return btnLlamasAereo;
+            case LENDAS:
+                return btnLlamasLenda;
+            default:
+                return btnLlamasClassico;
+        }
     }
 
     //Função que inicializa imagem de acordo com o tipo(animação ou estática)
     public enum HeroType {
 
         //FALSE - ESTÁTICO && TRUE - ANIMADO
-        LLAMA("Llama.png", false, 270, 300),
+        LLAMA("Llama.png", false, 260, 280),
         MAGELLAMA("LlamaMage.png", false, 300, 300),
-        NINJALLAMA("LlamaNinja.png", false, 350, 300),
-        ROBOTLLAMA("LlamaRobo.png", false, 300, 300),
+        NINJALLAMA("LlamaNinja.png", false, 330, 300),
+        ROBOTLLAMA("LlamaRobo.png", false, 260, 280),
         ANJOLLAMA("LlamaAnjo.png", false, 350, 300);
 
         public final String sprite; //Caminho da imagem
@@ -258,7 +452,7 @@ public class HeroScreen extends ScreenAdapter {
 
         // Se estiver sobre algum botão, vira mão
 
-        for(Botao btn : btnLlamas) {
+        for (Botao btn : getBotoesClasseAtual()) {
             btn.atualizarCursor(posMouse);
         }
 
@@ -279,11 +473,11 @@ public class HeroScreen extends ScreenAdapter {
             batch.draw(HUDimg[0], 0, 0, 1920, 1080);
 
             // glow externo
-            batch.setColor(corBackground.r, corBackground.g, corBackground.b, 0.28f);
+            batch.setColor(corBackground.r, corBackground.g, corBackground.b, 1f); //0.25f
             batch.draw(HUDimg[10], 720, 260, 1000, 1000);
 
             // glow interno
-            batch.setColor(corBackground.r, corBackground.g, corBackground.b, 0.32f);
+            batch.setColor(corBackground.r, corBackground.g, corBackground.b, 1f); //0.45f
             batch.draw(HUDimg[10], 880, 420, 650, 650);
 
             // volta a cor normal
@@ -308,15 +502,17 @@ public class HeroScreen extends ScreenAdapter {
 
         //------------ BOTOES ------------
 
-            for(Botao btn : btnLlamas) {
-                btn.Exibir(batch, posMouse);
-            }
+        for (Botao btn : getBotoesClasseAtual()) {
+            btn.Exibir(batch, posMouse);
+        }
 
             for(Botao btn : HUDbtn) {
                 btn.Exibir(batch, posMouse);
             }
 
         batch.end();
+        stage.act(delta); //Atualiza o stage
+        stage.draw(); //Desenha o stage
 
         //---------------- RECTANGLE --------------
         // Detecta se houve um clique na tela ou mouse
@@ -331,27 +527,27 @@ public class HeroScreen extends ScreenAdapter {
                 game.setScreen(new MenuScreen(game));
             }
 
-            if(btnLlamas[0].foiClicado(posMouse)){
+            if(btnLlamasClassico[0].foiClicado(posMouse)){
                 trocarHeroi(HeroType.LLAMA);
                 trocarBackground(BackgroundType.CLASSICO);
             }
 
-            if(btnLlamas[1].foiClicado(posMouse)){
+            if(btnLlamasClassico[1].foiClicado(posMouse)){
                 trocarHeroi(HeroType.MAGELLAMA);
                 trocarBackground(BackgroundType.SUPPORT);
             }
 
-            if(btnLlamas[2].foiClicado(posMouse)){
+            if(btnLlamasClassico[2].foiClicado(posMouse)){
                 trocarHeroi(HeroType.NINJALLAMA);
                 trocarBackground(BackgroundType.AERIAL);
             }
 
-            if(btnLlamas[3].foiClicado(posMouse)){
+            if(btnLlamasClassico[3].foiClicado(posMouse)){
                 trocarHeroi(HeroType.ROBOTLLAMA);
                 trocarBackground(BackgroundType.LENDA);
             }
 
-            if(btnLlamas[4].foiClicado(posMouse)){
+            if(btnLlamasClassico[4].foiClicado(posMouse)){
                 trocarHeroi(HeroType.ANJOLLAMA);
                 trocarBackground(BackgroundType.LENDA);
             }
@@ -363,13 +559,17 @@ public class HeroScreen extends ScreenAdapter {
     public void resize(int width, int height) {
 
         viewport.update(width, height, true); //Atualiza o viewport de acordo com o tamanho da tela
+        stage.getViewport().update(width, height, true); //Atualiza o stage de acordo com o tamanho da tela
     }
 
     @Override
     public void dispose() {
         batch.dispose();
         //------ IMG ------
-        for (Texture img : imagensLlamas) {
+        for (Texture img : LlamasClassico) {
+            img.dispose();
+        }
+        for (Texture img : LlamasAereo) {
             img.dispose();
         }
 
@@ -385,11 +585,26 @@ public class HeroScreen extends ScreenAdapter {
             heroImagemEstatica.dispose();
         }
 
+        //------ STAGE ------
+        stage.dispose();
+
+        //------ SKIN ------
+        skin.dispose();
+
+
         //----- BTN ------
-        for(Botao btn : btnLlamas) {
+        for(Botao btn : btnLlamasClassico) {
             btn.dispose();
         }
-
+        for(Botao btn : btnLlamasSuporte) {
+            btn.dispose();
+        }
+        for(Botao btn : btnLlamasAereo) {
+            btn.dispose();
+        }
+        for(Botao btn : btnLlamasLenda) {
+            btn.dispose();
+        }
         for (Botao btn : HUDbtn) {
             btn.dispose();
         }

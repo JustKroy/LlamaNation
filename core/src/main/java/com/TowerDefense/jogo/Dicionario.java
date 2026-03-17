@@ -1904,3 +1904,735 @@ Texto
 FIM
 =========================================================
 */
+
+
+/*
+=========================================================
+DICIONÁRIO LIBGDX
+COMBOBOX / SELECTBOX
+CRIAÇÃO, ADMINISTRAÇÃO E TROCA DE VALORES
+=========================================================
+
+OBSERVAÇÃO IMPORTANTE:
+No LibGDX, o componente equivalente ao "ComboBox" do Java Swing
+normalmente é o:
+
+SelectBox
+
+Ou seja:
+- Swing usa JComboBox
+- LibGDX usa SelectBox
+
+Então, quando falamos de "ComboBox no LibGDX",
+na prática estamos falando de SelectBox.
+
+=========================================================
+1. O QUE É UM SELECTBOX
+=========================================================
+
+É um componente de interface que mostra:
+
+- um valor selecionado atualmente
+- uma lista de opções ao clicar
+
+Exemplo:
+
+[ Clássico ▼ ]
+
+Ao clicar, ele abre:
+
+- Clássico
+- Aéreo
+- Suporte
+- Lendas
+
+=========================================================
+2. QUANDO USAR
+=========================================================
+
+Use SelectBox quando quiser:
+
+- filtrar heróis
+- escolher categoria
+- escolher dificuldade
+- escolher mapa
+- escolher idioma
+- escolher skin
+
+Exemplo no seu jogo:
+- Clássico -> mostra heróis clássicos
+- Aéreo -> mostra heróis aéreos
+- Suporte -> mostra heróis de suporte
+
+=========================================================
+3. BIBLIOTECAS NECESSÁRIAS
+=========================================================
+
+Para usar SelectBox, normalmente você usa Scene2D UI.
+
+Imports comuns:
+
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+
+=========================================================
+4. O QUE É STAGE
+=========================================================
+
+Stage é o "palco" da interface.
+
+Ele gerencia:
+- botões
+- labels
+- textfields
+- selectbox
+- cliques
+- foco
+
+Sem Stage, componentes de UI do Scene2D não funcionam direito.
+
+=========================================================
+5. O QUE É SKIN
+=========================================================
+
+Skin define o visual dos componentes.
+
+Exemplo:
+- fonte
+- cor
+- estilo
+- fundo
+- dropdown
+
+Você normalmente carrega um arquivo .json de skin.
+
+Exemplo muito comum:
+
+Skin skin = new Skin(Gdx.files.internal("uiskin.json"));
+
+Esse skin costuma vir em projetos LibGDX de exemplo.
+
+=========================================================
+6. CRIAÇÃO BÁSICA DO STAGE
+=========================================================
+
+Variáveis da classe:
+
+private Stage stage;
+private Skin skin;
+private SelectBox<String> comboClasse;
+
+No construtor ou show():
+
+stage = new Stage(new ScreenViewport());
+skin = new Skin(Gdx.files.internal("uiskin.json"));
+
+=========================================================
+7. ATIVAR INPUT DO STAGE
+=========================================================
+
+Sem isso, o SelectBox não recebe clique.
+
+Gdx.input.setInputProcessor(stage);
+
+=========================================================
+8. CRIAÇÃO DO SELECTBOX
+=========================================================
+
+comboClasse = new SelectBox<>(skin);
+
+Aqui ele foi criado usando o skin.
+
+=========================================================
+9. ADICIONAR ITENS AO SELECTBOX
+=========================================================
+
+comboClasse.setItems(
+    "Clássico",
+    "Aéreo",
+    "Suporte",
+    "Lendas"
+);
+
+Agora ele já tem as opções.
+
+=========================================================
+10. DEFINIR POSIÇÃO E TAMANHO
+=========================================================
+
+comboClasse.setSize(250, 60);
+comboClasse.setPosition(600, 900);
+
+=========================================================
+11. ADICIONAR AO STAGE
+=========================================================
+
+stage.addActor(comboClasse);
+
+Sem isso ele não aparece na tela.
+
+=========================================================
+12. DESENHAR O STAGE
+=========================================================
+
+No render():
+
+stage.act(delta);
+stage.draw();
+
+act(delta):
+- atualiza a UI
+
+draw():
+- desenha a UI
+
+=========================================================
+13. EXEMPLO COMPLETO BÁSICO
+=========================================================
+
+private Stage stage;
+private Skin skin;
+private SelectBox<String> comboClasse;
+
+public HeroScreen(Main game) {
+
+    stage = new Stage(new ScreenViewport());
+    skin = new Skin(Gdx.files.internal("uiskin.json"));
+
+    comboClasse = new SelectBox<>(skin);
+    comboClasse.setItems("Clássico", "Aéreo", "Suporte", "Lendas");
+    comboClasse.setSize(250, 60);
+    comboClasse.setPosition(600, 900);
+
+    stage.addActor(comboClasse);
+
+    Gdx.input.setInputProcessor(stage);
+}
+
+@Override
+public void render(float delta) {
+
+    ScreenUtils.clear(0, 0, 0, 1);
+
+    stage.act(delta);
+    stage.draw();
+}
+
+=========================================================
+14. COMO PEGAR O VALOR SELECIONADO
+=========================================================
+
+Use:
+
+comboClasse.getSelected()
+
+Exemplo:
+
+String valor = comboClasse.getSelected();
+
+Se o usuário escolheu "Aéreo",
+esse método retorna:
+
+"Aéreo"
+
+=========================================================
+15. REAGIR À MUDANÇA DE VALOR
+=========================================================
+
+O jeito mais correto é usar ChangeListener.
+
+comboClasse.addListener(new ChangeListener() {
+    @Override
+    public void changed(ChangeEvent event, Actor actor) {
+
+        String selecionado = comboClasse.getSelected();
+
+        System.out.println("Selecionado: " + selecionado);
+    }
+});
+
+=========================================================
+16. EXEMPLO PRÁTICO DE TROCA DE VALORES
+=========================================================
+
+Imagine que você tem 4 categorias de heróis:
+
+- Clássico
+- Aéreo
+- Suporte
+- Lendas
+
+E quer que o SelectBox troque os heróis exibidos.
+
+Você pode criar uma variável:
+
+private String categoriaAtual = "Clássico";
+
+Depois:
+
+comboClasse.addListener(new ChangeListener() {
+    @Override
+    public void changed(ChangeEvent event, Actor actor) {
+
+        categoriaAtual = comboClasse.getSelected();
+    }
+});
+
+Agora o valor muda automaticamente.
+
+=========================================================
+17. APLICAÇÃO PRÁTICA: MOSTRAR HERÓIS DIFERENTES
+=========================================================
+
+Você pode ter arrays separados:
+
+private Texture[] heroisClassicos;
+private Texture[] heroisAereos;
+private Texture[] heroisSuporte;
+private Texture[] heroisLendas;
+
+No render():
+
+if(categoriaAtual.equals("Clássico")) {
+    // desenha os clássicos
+}
+
+if(categoriaAtual.equals("Aéreo")) {
+    // desenha os aéreos
+}
+
+if(categoriaAtual.equals("Suporte")) {
+    // desenha os suportes
+}
+
+if(categoriaAtual.equals("Lendas")) {
+    // desenha os lendários
+}
+
+=========================================================
+//18. EXEMPLO PRÁTICO COM IF
+=========================================================
+
+comboClasse.addListener(new ChangeListener() {
+    @Override
+    public void changed(ChangeEvent event, Actor actor) {
+
+        String selecionado = comboClasse.getSelected();
+
+        if(selecionado.equals("Clássico")) {
+            categoriaAtual = "Clássico";
+        }
+
+        if(selecionado.equals("Aéreo")) {
+            categoriaAtual = "Aéreo";
+        }
+
+        if(selecionado.equals("Suporte")) {
+            categoriaAtual = "Suporte";
+        }
+
+        if(selecionado.equals("Lendas")) {
+            categoriaAtual = "Lendas";
+        }
+    }
+});
+
+=========================================================
+19. MELHOR FORMA: USAR ENUM
+=========================================================
+
+Em vez de String, é mais profissional usar enum.
+
+Exemplo:
+
+public enum CategoriaHeroi {
+    CLASSICO,
+    AEREO,
+    SUPORTE,
+    LENDAS
+}
+
+Depois:
+
+private CategoriaHeroi categoriaAtual = CategoriaHeroi.CLASSICO;
+
+=========================================================
+20. SELECTBOX COM ENUM
+=========================================================
+
+Você pode fazer assim:
+
+private SelectBox<CategoriaHeroi> comboClasse;
+
+comboClasse = new SelectBox<>(skin);
+comboClasse.setItems(
+    CategoriaHeroi.CLASSICO,
+    CategoriaHeroi.AEREO,
+    CategoriaHeroi.SUPORTE,
+    CategoriaHeroi.LENDAS
+);
+
+=========================================================
+21. PEGAR ENUM SELECIONADO
+=========================================================
+
+categoriaAtual = comboClasse.getSelected();
+
+Agora fica mais seguro que usar String.
+
+=========================================================
+22. APLICAÇÃO COM ENUM
+=========================================================
+
+switch(categoriaAtual) {
+
+    case CLASSICO:
+        // desenha clássicos
+        break;
+
+    case AEREO:
+        // desenha aéreos
+        break;
+
+    case SUPORTE:
+        // desenha suportes
+        break;
+
+    case LENDAS:
+        // desenha lendas
+        break;
+}
+
+=========================================================
+23. EXEMPLO COMPLETO COM ENUM
+=========================================================
+
+public enum CategoriaHeroi {
+    CLASSICO,
+    AEREO,
+    SUPORTE,
+    LENDAS
+}
+
+private Stage stage;
+private Skin skin;
+private SelectBox<CategoriaHeroi> comboClasse;
+private CategoriaHeroi categoriaAtual = CategoriaHeroi.CLASSICO;
+
+public HeroScreen(Main game) {
+
+    stage = new Stage(new ScreenViewport());
+    skin = new Skin(Gdx.files.internal("uiskin.json"));
+
+    comboClasse = new SelectBox<>(skin);
+    comboClasse.setItems(
+        CategoriaHeroi.CLASSICO,
+        CategoriaHeroi.AEREO,
+        CategoriaHeroi.SUPORTE,
+        CategoriaHeroi.LENDAS
+    );
+
+    comboClasse.setSize(250, 60);
+    comboClasse.setPosition(600, 900);
+
+    comboClasse.addListener(new ChangeListener() {
+        @Override
+        public void changed(ChangeEvent event, Actor actor) {
+            categoriaAtual = comboClasse.getSelected();
+        }
+    });
+
+    stage.addActor(comboClasse);
+    Gdx.input.setInputProcessor(stage);
+}
+
+@Override
+public void render(float delta) {
+
+    ScreenUtils.clear(0, 0, 0, 1);
+
+    batch.begin();
+
+    switch(categoriaAtual) {
+
+        case CLASSICO:
+            // desenha heróis clássicos
+            break;
+
+        case AEREO:
+            // desenha heróis aéreos
+            break;
+
+        case SUPORTE:
+            // desenha heróis de suporte
+            break;
+
+        case LENDAS:
+            // desenha heróis lendários
+            break;
+    }
+
+    batch.end();
+
+    stage.act(delta);
+    stage.draw();
+}
+
+=========================================================
+24. COMO ADMINISTRAR O SELECTBOX
+=========================================================
+
+Administrar significa:
+
+- criar
+- posicionar
+- definir valores
+- detectar mudança
+- usar o valor selecionado
+- liberar memória
+
+Resumo:
+
+1. cria Stage
+2. cria Skin
+3. cria SelectBox
+4. adiciona itens
+5. adiciona listener
+6. adiciona no Stage
+7. desenha o Stage
+8. usa o valor selecionado
+
+=========================================================
+25. COMO TROCAR OS BOTÕES/HERÓIS EXIBIDOS
+=========================================================
+
+Exemplo com arrays:
+
+private Botao[] botoesClassicos;
+private Botao[] botoesAereos;
+private Botao[] botoesSuporte;
+private Botao[] botoesLendas;
+
+No render:
+
+switch(categoriaAtual) {
+
+    case CLASSICO:
+        for(Botao b : botoesClassicos) {
+            b.Exibir(batch, posMouse);
+        }
+        break;
+
+    case AEREO:
+        for(Botao b : botoesAereos) {
+            b.Exibir(batch, posMouse);
+        }
+        break;
+
+    case SUPORTE:
+        for(Botao b : botoesSuporte) {
+            b.Exibir(batch, posMouse);
+        }
+        break;
+
+    case LENDAS:
+        for(Botao b : botoesLendas) {
+            b.Exibir(batch, posMouse);
+        }
+        break;
+}
+
+=========================================================
+26. COMO TROCAR OS HERÓIS DISPONÍVEIS
+=========================================================
+
+Exemplo real:
+
+Se categoriaAtual = CLASSICO
+→ aparecem Llama, Mage, Ninja
+
+Se categoriaAtual = AEREO
+→ aparecem heróis voadores
+
+Se categoriaAtual = SUPORTE
+→ aparecem buffers/healers
+
+Ou seja:
+o SelectBox não desenha os heróis sozinho.
+Ele apenas muda uma variável.
+Seu código usa essa variável para decidir o que desenhar.
+
+=========================================================
+27. RESUMO DA LÓGICA
+=========================================================
+
+SelectBox
+↓
+usuário escolhe categoria
+↓
+listener detecta mudança
+↓
+categoriaAtual muda
+↓
+render() desenha outro grupo de heróis
+
+=========================================================
+28. RESIZE
+=========================================================
+
+No resize:
+
+@Override
+public void resize(int width, int height) {
+    stage.getViewport().update(width, height, true);
+}
+
+=========================================================
+29. DISPOSE
+=========================================================
+
+No dispose:
+
+@Override
+public void dispose() {
+    stage.dispose();
+    skin.dispose();
+}
+
+IMPORTANTE:
+Stage e Skin também ocupam memória.
+
+=========================================================
+30. ERROS COMUNS
+=========================================================
+
+ERRO:
+O SelectBox não responde clique.
+
+CAUSA:
+faltou:
+Gdx.input.setInputProcessor(stage);
+
+-----------------------------------------
+
+ERRO:
+O SelectBox não aparece.
+
+CAUSA:
+faltou:
+stage.addActor(comboClasse);
+
+-----------------------------------------
+
+ERRO:
+O SelectBox aparece, mas não atualiza.
+
+CAUSA:
+faltou:
+stage.act(delta);
+stage.draw();
+
+-----------------------------------------
+
+ERRO:
+O jogo desenha por cima do SelectBox.
+
+CAUSA:
+ordem de render incorreta.
+
+Normalmente:
+1. desenha jogo/hud com batch
+2. desenha stage por último
+
+-----------------------------------------
+
+ERRO:
+O estilo está feio ou quebrado.
+
+CAUSA:
+skin ausente ou incompatível.
+
+=========================================================
+31. ORDEM CORRETA NO RENDER
+=========================================================
+
+@Override
+public void render(float delta) {
+
+    ScreenUtils.clear(0, 0, 0, 1);
+
+    // desenha fundo, heróis, botões, etc
+    batch.begin();
+    // ...
+    batch.end();
+
+    // desenha UI por cima
+    stage.act(delta);
+    stage.draw();
+}
+
+=========================================================
+32. QUANDO VALE A PENA USAR SELECTBOX
+=========================================================
+
+Vale a pena quando:
+
+- você quer uma lista compacta
+- há várias categorias
+- o usuário precisa filtrar opções
+- você quer algo mais organizado que vários botões
+
+=========================================================
+33. QUANDO NÃO VALE A PENA
+=========================================================
+
+Talvez não valha se:
+
+- há poucas opções e botões grandes funcionam melhor
+- a UI precisa ser muito estilizada
+- você quer um menu visual bem customizado
+
+Nesses casos, às vezes é melhor usar seus próprios botões.
+
+=========================================================
+34. EXEMPLO PRÁTICO DE FILTRO DE HERÓIS
+=========================================================
+
+Imagine:
+
+comboClasse = [ Clássico ▼ ]
+
+Se escolher "Aéreo":
+- some a lista de clássicos
+- aparece lista de aéreos
+
+Isso pode ser feito assim:
+
+if(categoriaAtual == CategoriaHeroi.AEREO) {
+    // exibe botoes dos aéreos
+}
+
+=========================================================
+35. IDEIA FINAL
+=========================================================
+
+SelectBox é um controlador de estado.
+
+Ele não "troca imagens" sozinho.
+Ele apenas muda o valor selecionado.
+Seu código usa esse valor para:
+
+- trocar heróis
+- trocar botões
+- trocar backgrounds
+- trocar stats
+- trocar filtros
+
+=========================================================
+FIM
+=========================================================
+*/
