@@ -29,11 +29,12 @@ public class HeroScreen extends ScreenAdapter {
     private float tempoAnimacao; //Variável que permite mexer com animação (tempo)
     private HeroType heroSelecionado; //Variável que inicializa o tipo do herói
     private HeroClasse classeSelecionada; //Variável que inicializa o tipo da classe
+    private Heroes padraoSelecionado;
     private BackgroundType backgroundSelecionado; //Variável que inicializa o tipo do background
     private Color corBackground; //Variável que permite mudar a cor do background
     private Stage stage; //Variável que permite desenhar na tela
     private Skin skin; //Variável que permite carregar imagens
-    private SelectBox<HeroClasse> ListaClasse; //Variável que inicia um SelectBox
+    private SelectBox<Heroes> ListaClasse; //Variável que inicia um SelectBox
 
 
         //--------- ARRAY ---------
@@ -64,17 +65,22 @@ public class HeroScreen extends ScreenAdapter {
         //--------- COMBOBOX ---------
         ListaClasse = new SelectBox<>(skin);
             ListaClasse.setItems(
-                HeroClasse.CLASSICOS,
-                HeroClasse.SUPORTES,
-                HeroClasse.AEREOS,
-                HeroClasse.LENDAS
+                Heroes.LlamasCLASSICAS,
+                Heroes.LlamasSUPORTES,
+                Heroes.LlamasAEREAS,
+                Heroes.LlamasLENDAS
             );
+            padraoSelecionado = Heroes.LlamasCLASSICAS;
+            ListaClasse.setSelected(padraoSelecionado);
+            setPadroes(padraoSelecionado);
+
             ListaClasse.setPosition(100,850);
             ListaClasse.setSize(300,50);
             ListaClasse.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                   classeSelecionada = ListaClasse.getSelected();
+                   padraoSelecionado = ListaClasse.getSelected();
+                   setPadroes(padraoSelecionado);
                 }
             });
         //Centraliza o texto que aparece no botão do SelectBox
@@ -304,6 +310,45 @@ public class HeroScreen extends ScreenAdapter {
 
     }
 
+    public enum Heroes {
+        LlamasCLASSICAS,
+        LlamasSUPORTES,
+        LlamasAEREAS,
+        LlamasLENDAS;
+    }
+
+    private Botao[] setPadroes (Heroes llamas) {
+
+        if (llamas == null) {
+            llamas = Heroes.LlamasCLASSICAS;
+        }
+
+        this.padraoSelecionado = llamas;
+
+        if(llamas == (Heroes.LlamasCLASSICAS)) {
+            setClasseSelecionada(HeroClasse.CLASSICOS);
+            trocarBackground(BackgroundType.CLASSICO);
+            trocarHeroi(HeroType.LLAMA);
+            return btnLlamasClassico;
+        } else if(llamas == (Heroes.LlamasSUPORTES)) {
+            setClasseSelecionada(HeroClasse.SUPORTES);
+            trocarBackground(BackgroundType.SUPPORT);
+//            trocarHeroi(HeroType.BURGUESA);
+            return btnLlamasSuporte;
+        } else if(llamas == (Heroes.LlamasAEREAS)) {
+            setClasseSelecionada(HeroClasse.AEREOS);
+            trocarBackground(BackgroundType.AERIAL);
+            trocarHeroi(HeroType.ANJOLLAMA);
+            return btnLlamasAereo;
+        } else if(llamas == (Heroes.LlamasLENDAS)) {
+            setClasseSelecionada(HeroClasse.LENDAS);
+            trocarBackground(BackgroundType.LENDA);
+//            trocarHeroi(HeroType.RPG);
+            return btnLlamasLenda;
+        }
+        return btnLlamasClassico;
+    }
+
     public enum HeroClasse {
         CLASSICOS,
         SUPORTES,
@@ -506,9 +551,9 @@ public class HeroScreen extends ScreenAdapter {
             btn.Exibir(batch, posMouse);
         }
 
-            for(Botao btn : HUDbtn) {
-                btn.Exibir(batch, posMouse);
-            }
+        for(Botao btn : HUDbtn) {
+            btn.Exibir(batch, posMouse);
+        }
 
         batch.end();
         stage.act(delta); //Atualiza o stage
@@ -534,22 +579,22 @@ public class HeroScreen extends ScreenAdapter {
 
             if(btnLlamasClassico[1].foiClicado(posMouse)){
                 trocarHeroi(HeroType.MAGELLAMA);
-                trocarBackground(BackgroundType.SUPPORT);
+                trocarBackground(BackgroundType.CLASSICO);
             }
 
             if(btnLlamasClassico[2].foiClicado(posMouse)){
                 trocarHeroi(HeroType.NINJALLAMA);
-                trocarBackground(BackgroundType.AERIAL);
+                trocarBackground(BackgroundType.CLASSICO);
             }
 
             if(btnLlamasClassico[3].foiClicado(posMouse)){
                 trocarHeroi(HeroType.ROBOTLLAMA);
-                trocarBackground(BackgroundType.LENDA);
+                trocarBackground(BackgroundType.CLASSICO);
             }
 
             if(btnLlamasClassico[4].foiClicado(posMouse)){
                 trocarHeroi(HeroType.ANJOLLAMA);
-                trocarBackground(BackgroundType.LENDA);
+                trocarBackground(BackgroundType.CLASSICO);
             }
 
         }
