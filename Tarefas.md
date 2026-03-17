@@ -29,7 +29,8 @@ hit box das arvores e casas
 # RAFAEL
 Documentação<br>
 Designação de Tarefas<br>
-Menu de Heróis
+Menu de Heróis completo
+Background das Llamas
 
 ## TAREFAS FUTURAS
 ### UI GLOBAIS
