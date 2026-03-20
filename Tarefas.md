@@ -7,7 +7,8 @@ Botões e HUD
 Llama Maga - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Llama Cyborg - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Llama Anjo - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
-Llama Mercenário - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
+Llama Burguesa - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
+Llama Chef - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Llama Ninja - Animação<br>
 Llama Padrâo - Animação
 
