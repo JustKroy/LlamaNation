@@ -39,7 +39,7 @@ Background das Llamas
 ### BOTÕES TELA DE HERÓIS
 - Um framezinho colocando cada llama dentro dele
 - Label nome da llama quando selecionada
-- Botão select hero
+- Botão de certinho (Hero Selecionado)
 ### BOTÕES TELA DE JOGO
 - Botão "Sell"
 - Botão "Leave Battle"
