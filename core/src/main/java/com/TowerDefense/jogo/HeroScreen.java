@@ -19,6 +19,9 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class HeroScreen extends ScreenAdapter {
 
     private final Main game; //Variável que referencia a classe principal
@@ -33,17 +36,19 @@ public class HeroScreen extends ScreenAdapter {
     private final Stage stage; //Variável que permite desenhar na tela
     private final Skin skin; //Variável que permite carregar imagens
     private SelectBox<HeroClasse> listaClasse; //Variável que inicia um SelectBox
+    private Map<labelLlama, Texture> labels = new HashMap<>();
 
 
         //--------- ARRAY ---------
     //Variável que permite carregar imagens
     private Texture[] HUDimg;
     private HeroType[][] heroisPorClasse;
+    private labelLlama[][] labelPorLlama;
     private Botao[] botoesHerois;
     private float[] posX = {20, 270, 20, 270, 20};
     private float[] posY = {580, 580, 330, 330, 80};
     private Botao[] HUDbtn;
-    private Texture heroSpriteSheetAtual, heroImagemEstatica, frameAtual;
+    private Texture heroSpriteSheetAtual, heroImagemEstatica, frameAtual, labelAtual;
 
     // Vetor para armazenar a posição do mouse convertida para o sistema do jogo
     private Vector2 posMouse = new Vector2();
@@ -102,8 +107,7 @@ public class HeroScreen extends ScreenAdapter {
                 HeroType.LLAMA,
                 HeroType.MAGELLAMA,
                 HeroType.NINJALLAMA,
-                HeroType.ROBOTLLAMA,
-                HeroType.ANJOLLAMA
+                HeroType.ROBOTLLAMA
             };
 
             //SUPORTES
@@ -121,6 +125,31 @@ public class HeroScreen extends ScreenAdapter {
                 HeroType.LLAMA
             };
 
+        labelPorLlama = new labelLlama[4][];
+
+            //CLÁSSICOS
+            labelPorLlama[0] = new labelLlama[]{
+                labelLlama.LABEL_LLAMA,
+                labelLlama.LABEL_MAGELLAMA,
+                labelLlama.LABEL_NINJALLAMA,
+                labelLlama.LABEL_ROBOTLLAMA
+            };
+
+            //SUPORTES
+            labelPorLlama[1] = new labelLlama[]{
+                labelLlama.LABEL_BURGUESA
+            };
+
+            //AEREOS
+            labelPorLlama[2] = new labelLlama[] {
+                labelLlama.LABEL_ANJOLLAMA
+            };
+
+            //LENDAS
+            labelPorLlama[3] = new labelLlama[] {
+                labelLlama.LABEL_LLAMA
+            };
+
 
         HUDimg = new Texture[11];
             HUDimg[0] = new Texture("backgroundHero.jpg");
@@ -136,11 +165,17 @@ public class HeroScreen extends ScreenAdapter {
             HUDimg[10] = new Texture("glow.png");
             HUDimg[10].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
+        //--------- LABEL LLAMAS -----------
+        for (labelLlama l : labelLlama.values()) {
+            labels.put(l, new Texture(Gdx.files.internal(l.label)));
+        }
+
         //-------- PADRÃO ---------
         classeSelecionada = HeroClasse.CLASSICOS;
         frameAtual = HUDimg[3];
         trocarBackground(BackgroundType.CLASSICO);
         trocarHeroi(HeroType.LLAMA);
+        trocarLabel(labelLlama.LABEL_LLAMA);
         setBotoesClasseAtual();
 
         //-------- Botões ----------
@@ -160,9 +195,9 @@ public class HeroScreen extends ScreenAdapter {
 
             //Select
             HUDbtn[1] = new Botao(
-                new Texture("verde.png"),
-                new Texture("verde.png"),
-                1050, 430, 350, 100
+                new Texture("BUTTON_select.png"),
+                new Texture("BUTTON_selecthover.png"),
+                970, 390, 470, 180
             );
 
             //Skins
@@ -204,11 +239,12 @@ public class HeroScreen extends ScreenAdapter {
         this.classeSelecionada = classe;
     }
 
+
     private void setBotoesClasseAtual() {
 
         if (botoesHerois == null) {
             botoesHerois = new Botao[5];
-        }   
+        }
 
         switch (classeSelecionada) {
             case CLASSICOS:
@@ -264,6 +300,7 @@ public class HeroScreen extends ScreenAdapter {
         }
     }
 
+
     //Função que troca o herói passano o parâmetro tipo
     private void trocarHeroi(HeroType tipo) {
 
@@ -302,22 +339,41 @@ public class HeroScreen extends ScreenAdapter {
         tempoAnimacao = 0; //Limpa o tempo da animação
     }
 
-    public enum BackgroundType {
-        CLASSICO("BackgroundClassicos.png", 300, 300),
-        SUPPORT("BackgroundSupport.png", 300, 300),
-        AERIAL("BackgroundAerial.png", 300, 300),
-        LENDA("BackgroundLendas.png", 300, 300);
+    public enum labelLlama {
+        LABEL_LLAMA("Llama.png"),
+        LABEL_MAGELLAMA("LlamaMage.png"),
+        LABEL_NINJALLAMA("LlamaNinja.png"),
+        LABEL_ROBOTLLAMA("LlamaRobo.png"),
+        LABEL_ANJOLLAMA("LlamaAnjo.png"),
+        LABEL_BURGUESA("LlamaBurguesa.png");
 
-        public final String background;
-        public final float largura;
-        public final float altura;
+        public final String label;
 
-        BackgroundType(String background, float largura, float altura) {
-            this.background = background;
-            this.largura = largura;
-            this.altura = altura;
-
+        labelLlama(String label) {
+            this.label = label;
         }
+
+    }
+
+        private void trocarLabel(labelLlama label) {
+            labelAtual = labels.get(label);
+        }
+
+    public enum BackgroundType {
+        CLASSICO,
+        SUPPORT,
+        AERIAL,
+        LENDA;
+    }
+
+    public Color getCorBordaClasse() {
+        return switch(classeSelecionada) {
+            case CLASSICOS -> new Color(0.55f, 0.75f, 0.55f, 1f);
+            case SUPORTES -> new Color(0.85f, 0.65f, 0.85f, 1f);
+            case AEREOS -> new Color(0.45f, 0.65f, 0.85f, 1f);
+            case LENDAS -> new Color(0.95f, 0.80f, 0.35f, 1f);
+            default -> Color.WHITE;
+        };
     }
 
     public void trocarBackground(BackgroundType tipo) {
@@ -359,6 +415,12 @@ public class HeroScreen extends ScreenAdapter {
         // Cursor padrão
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
 
+        //Inicializa os botões de acordo com a classe selecionada
+        HeroType[] heroisAtuais = heroisPorClasse[getIndiceClasse()];
+
+        //Inicializa as label de acordo com a llama selecionada
+        labelLlama[] labelsAtuais = labelPorLlama[getIndiceClasse()];
+
         // Se estiver sobre algum botão, vira mão
 
         for (Botao btn : botoesHerois) {
@@ -379,6 +441,7 @@ public class HeroScreen extends ScreenAdapter {
         //----------- IMAGENS -------------
         //Desenha na tela
         batch.begin();
+            //Fundo principal
             batch.draw(HUDimg[0], 0, 0, 1920, 1080);
 
             // glow externo
@@ -400,13 +463,16 @@ public class HeroScreen extends ScreenAdapter {
             //Se estiver animado, desenha a animação, caso contrário, desenha a imagem estática
             if (heroAnimacaoAtual != null) {
                 TextureRegion frameAtual = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true); //Pega o frame atual da animação
-                batch.draw(frameAtual, 1050, 600, largura, altura); //Desenha
+                batch.draw(frameAtual, 1050, 580, largura, altura); //Desenha
             } else {
-                batch.draw(heroImagemEstatica, 1050, 600, largura, altura);
+                batch.draw(heroImagemEstatica, 1050, 580, largura, altura);
             }
 
             batch.draw(HUDimg[1], 0, 0, 500, 950);
-            batch.draw(frameAtual, 700, 950, 700, 120);
+            //Label
+        if (labelAtual != null) {
+            batch.draw(labelAtual, 700, 950, 700, 120);
+        }
 
 
         //------------ BOTOES ------------
@@ -436,15 +502,24 @@ public class HeroScreen extends ScreenAdapter {
                 game.setScreen(new MenuScreen(game));
             }
 
-            //Inicializa os botões de acordo com a classe selecionada
-            HeroType[] heroisAtuais = heroisPorClasse[getIndiceClasse()];
-
             //Loop para exibir as llamas de acordo com o tipo de botão
             for (int i = 0; i < botoesHerois.length; i++) {
                 if (botoesHerois[i].foiClicado(posMouse)) {
 
+                    for (Botao btn : botoesHerois) {
+                        btn.setSelecionado(false);
+                    }
+
+                    botoesHerois[i].setSelecionado(true); //Define o botão clicado como selecionado
+                    botoesHerois[i].setCorBorda(getCorBordaClasse()); //Define a borda do botão clicado
+
                     if (i < heroisAtuais.length) {
                         trocarHeroi(heroisAtuais[i]);
+                    }
+
+                    //Troca a label de acordo com o botão clicado
+                    if (i < labelsAtuais.length) {
+                        trocarLabel(labelsAtuais[i]);
                     }
 
                     trocarBackground(backgroundSelecionado);
@@ -476,6 +551,10 @@ public class HeroScreen extends ScreenAdapter {
 
         if(heroImagemEstatica != null) {
             heroImagemEstatica.dispose();
+        }
+
+        for (Texture t : labels.values()) {
+            t.dispose();
         }
 
         //------ STAGE ------
