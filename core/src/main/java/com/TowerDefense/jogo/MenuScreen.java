@@ -2,46 +2,67 @@ package com.TowerDefense.jogo;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 public class MenuScreen extends ScreenAdapter {
     private final Main game;
-    private SpriteBatch batch;
-    private StretchViewport viewport;
-
-    private Texture imgPlay;
-    private Texture imgHeroes;
-    private Texture imgFundo; // Caso você tenha um fundo para o menu
-
-    private Rectangle btnPlay;
-    private Rectangle btnHeroes;
+    private final SpriteBatch batch;
+    private final StretchViewport viewport;
     private Vector2 posMouse = new Vector2();
+    private Botao[] HUDbtn;
+    private Texture[] HUDimg;
+    private boolean popupAberto;
+
 
     public MenuScreen(Main game) {
         this.game = game;
         this.batch = new SpriteBatch();
         this.viewport = new StretchViewport(1920, 1080);
+        Skin skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
+        popupAberto = false;
 
-        // Carregando as imagens
-        imgPlay = new Texture("play.png");
-        imgHeroes = new Texture("heroes.png");
-        // imgFundo = new Texture("fundo_menu.png"); // Ative se tiver um fundo
+        HUDbtn = new Botao[6];
+            HUDbtn[0] = new Botao(
+                new Texture("Botao_play.png"),
+                new Texture("BotaoPlayHover.png"),
+                760, 720, 400, 100
+            );
+            HUDbtn[1] = new Botao(
+                new Texture("Botao_heroes.png"),
+                new Texture("BotaoHeroHover.png"),
+                760, 520, 400, 100
+            );
+            HUDbtn[2] = new Botao(
+                new Texture("settings.png"),
+                new Texture("settings.png"),
+                1800, 950, 100, 100
+            );
+            HUDbtn[3] = new Botao(
+                new Texture("Botao_play.png"),
+                new Texture("Botao_play.png"),
+                760, 320, 400, 100
+            );
+            HUDbtn[4] = new Botao(
+                new Texture("Botao_fecharPopup.png"),
+                new Texture("Botao_fecharPopup.png"),
+                860, 220, 200, 80
+            );
+            HUDbtn[5] = new Botao(
+                new Texture("Botao_som.png"),
+                new Texture("Botao_som.png"),
+                760, 400, 400, 100
+            );
 
-        // Definindo o tamanho dos botões
-        float larguraBtn = 400;
-        float alturaBtn = 150;
-
-        // Posicionando os botões (Centralizados)
-        // Play no centro: (1920/2 - largura/2)
-        btnPlay = new Rectangle(1920 / 2f - larguraBtn / 2f, 600, larguraBtn, alturaBtn);
-
-        // Heroes um pouco abaixo do Play
-        btnHeroes = new Rectangle(1920 / 2f - larguraBtn / 2f, 400, larguraBtn, alturaBtn);
+        HUDimg = new Texture[3];
+            HUDimg[0] = new Texture("backgroundHero.jpg");
+            HUDimg[1] = new Texture("fundoPopup.png");
+            HUDimg[2] = new Texture("painelPopup");
     }
 
     @Override
@@ -52,32 +73,43 @@ public class MenuScreen extends ScreenAdapter {
         viewport.apply();
         batch.setProjectionMatrix(viewport.getCamera().combined);
 
-        // Lógica de clique
-        if (Gdx.input.justTouched()) {
-            posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+        // ATUALIZA O MOUSE EM TODO FRAME
+        posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
-            if (btnPlay.contains(posMouse.x, posMouse.y)) {
-                game.setScreen(new GameScreen(game)); // Inicia o jogo
-            }
+        // Cursor padrão
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
 
-            if (btnHeroes.contains(posMouse.x, posMouse.y)) {
-                // Aqui você pode colocar para ir para uma tela de heróis no futuro
-                game.setScreen(new HeroScreen(game)); // Inicia o jogo
-            }
+
+        for(Botao btn : HUDbtn) {
+            btn.atualizarCursor(posMouse);
         }
 
         batch.begin();
 
-        // Se tiver fundo, desenha aqui
-        // batch.draw(imgFundo, 0, 0, 1920, 1080);
+            batch.draw(HUDimg[0], 0, 0, 1920, 1080);
 
-        // Desenha o botão de Play
-        batch.draw(imgPlay, btnPlay.x, btnPlay.y, btnPlay.width, btnPlay.height);
-
-        // Desenha o botão de Heroes
-        batch.draw(imgHeroes, btnHeroes.x, btnHeroes.y, btnHeroes.width, btnHeroes.height);
+            for (Botao btn : HUDbtn) {
+                btn.Exibir(batch, posMouse);
+            }
 
         batch.end();
+
+        // Lógica de clique
+        if (Gdx.input.justTouched()) {
+            posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+
+            if (HUDbtn[0].foiClicado(posMouse)) {
+                game.setScreen(new GameScreen(game)); // Inicia o jogo
+            }
+
+            if (HUDbtn[1].foiClicado(posMouse)) {
+                // Aqui você pode colocar para ir para uma tela de heróis no futuro
+                game.setScreen(new HeroScreen(game)); // Inicia o jogo
+            }
+            if (HUDbtn[2].foiClicado(posMouse)) {
+//                game.setScreen(new SettingsScreen(game));
+            }
+        }
     }
 
     @Override
@@ -88,8 +120,12 @@ public class MenuScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         batch.dispose();
-        imgPlay.dispose();
-        imgHeroes.dispose();
-        if (imgFundo != null) imgFundo.dispose();
+        for(Botao btn : HUDbtn) {
+            btn.dispose();
+        }
+
+        for (Texture t : HUDimg) {
+            t.dispose();
+        }
     }
 }

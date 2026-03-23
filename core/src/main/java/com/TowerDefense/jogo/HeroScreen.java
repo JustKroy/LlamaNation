@@ -122,7 +122,7 @@ public class HeroScreen extends ScreenAdapter {
 
             //LENDAS
             heroisPorClasse[3] = new HeroType[]{
-                HeroType.LLAMA
+                HeroType.CHEF
             };
 
         labelPorLlama = new labelLlama[4][];
@@ -147,7 +147,7 @@ public class HeroScreen extends ScreenAdapter {
 
             //LENDAS
             labelPorLlama[3] = new labelLlama[] {
-                labelLlama.LABEL_LLAMA
+                labelLlama.LABEL_CHEF
             };
 
 
@@ -251,21 +251,25 @@ public class HeroScreen extends ScreenAdapter {
                 frameAtual = HUDimg[3];
                 trocarBackground(BackgroundType.CLASSICO);
                 trocarHeroi(HeroType.LLAMA);
+                trocarLabel(labelLlama.LABEL_LLAMA);
                 break;
             case SUPORTES:
                 frameAtual = HUDimg[5];
                 trocarBackground(BackgroundType.SUPPORT);
                 trocarHeroi(HeroType.BURGUESA);
+                trocarLabel(labelLlama.LABEL_BURGUESA);
                 break;
             case AEREOS:
                 frameAtual = HUDimg[2];
                 trocarBackground(BackgroundType.AERIAL);
                 trocarHeroi(HeroType.ANJOLLAMA);
+                trocarLabel(labelLlama.LABEL_ANJOLLAMA);
                 break;
             case LENDAS:
                 frameAtual = HUDimg[4];
                 trocarBackground(BackgroundType.LENDA);
-//              trocarHeroi(HeroType.RPG);
+                trocarHeroi(HeroType.CHEF);
+                trocarLabel(labelLlama.LABEL_CHEF);
                 break;
         }
 
@@ -284,7 +288,8 @@ public class HeroScreen extends ScreenAdapter {
         NINJALLAMA("LlamaNinja.png", false, 330, 300),
         ROBOTLLAMA("LlamaRobo.png", false, 260, 280),
         ANJOLLAMA("LlamaAnjo.png", false, 350, 300),
-        BURGUESA("LlamaBurguesa.png", false, 330, 300);
+        BURGUESA("LlamaBurguesa.png", false, 330, 300),
+        CHEF("LlamaChef.png", false, 330, 300);
 
         public final String sprite; //Caminho da imagem
         public final boolean animado; //Se é animado ou estático
@@ -340,12 +345,13 @@ public class HeroScreen extends ScreenAdapter {
     }
 
     public enum labelLlama {
-        LABEL_LLAMA("Llama.png"),
-        LABEL_MAGELLAMA("LlamaMage.png"),
-        LABEL_NINJALLAMA("LlamaNinja.png"),
-        LABEL_ROBOTLLAMA("LlamaRobo.png"),
-        LABEL_ANJOLLAMA("LlamaAnjo.png"),
-        LABEL_BURGUESA("LlamaBurguesa.png");
+        LABEL_LLAMA("LabelsLlamas.png"),
+        LABEL_MAGELLAMA("LabelsLlamas.png"),
+        LABEL_NINJALLAMA("LabelsLlamas.png"),
+        LABEL_ROBOTLLAMA("LabelsLlamas.png"),
+        LABEL_ANJOLLAMA("LabelsLlamas.png"),
+        LABEL_BURGUESA("LabelsLlamas.png"),
+        LABEL_CHEF("LabelsLlamas.png");
 
         public final String label;
 
