@@ -31,7 +31,9 @@ hit box das arvores e casas
 Documentação<br>
 Designação de Tarefas<br>
 Menu de Heróis completo<br>
-Background das Llamas
+Background das Llamas<br>
+Banco de dados<br>
+Menu Principal<br>
 
 ## TAREFAS FUTURAS
 ### UI GLOBAIS
@@ -39,8 +41,8 @@ Background das Llamas
 - Hover de Todos Botões
 ### BOTÕES TELA DE HERÓIS
 - Um framezinho colocando cada llama dentro dele
-- Label nome da llama quando selecionada
 - Botão de certinho (Hero Selecionado)
+### BOTÕES TELA PRINCIPAL
 ### BOTÕES TELA DE JOGO
 - Botão "Sell"
 - Botão "Leave Battle"
