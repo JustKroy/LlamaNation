@@ -61,12 +61,12 @@ public class PopupConfig {
         //------------- POPUP PRINCIPAL -----------------
 
         shapeRenderer.setColor(Color.LIGHT_GRAY); //Cinza claro
-        rectArredondado(shapeRenderer, areaPopup.x, areaPopup.y, areaPopup.width, areaPopup.height, 25);
+        rectArredondado(shapeRenderer, areaPopup.x, areaPopup.y, areaPopup.width, areaPopup.height, 20);
 
         //------------- POPUP BOTÕES --------------
 
         shapeRenderer.setColor(0.59f,0.39f,0.24f,1f); //Marrom
-        rectArredondado(shapeRenderer, areaBotoes.x, areaBotoes.y, areaBotoes.width, areaBotoes.height, 25);
+        rectArredondado(shapeRenderer, areaBotoes.x, areaBotoes.y, areaBotoes.width, areaBotoes.height, 20);
 
         //------------- OPÇÕES -----------------
 

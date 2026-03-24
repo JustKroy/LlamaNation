@@ -1,13 +1,11 @@
 package com.TowerDefense.jogo;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -98,11 +96,16 @@ public class MenuScreen extends ScreenAdapter {
                 btn.Exibir(batch, posMouse);
             }
 
-        if (popup.isAberto()) {
-            popup.handleInput(mouseX, mouseY);
-            popup.render(batch);
-            return; // impede interação com o resto
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            popup.toggle(); // fecha popup
         }
+
+
+            if (popup.isAberto()) {
+                popup.handleInput(mouseX, mouseY);
+                popup.render(batch);
+                return; // impede interação com o resto
+            }
 
         batch.end();
 
