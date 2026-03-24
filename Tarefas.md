@@ -43,6 +43,7 @@ Menu Principal<br>
 - Um framezinho colocando cada llama dentro dele
 - Botão de certinho (Hero Selecionado)
 ### BOTÕES TELA PRINCIPAL
+- "x" de sair de uma tela
 ### BOTÕES TELA DE JOGO
 - Botão "Sell"
 - Botão "Leave Battle"
