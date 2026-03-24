@@ -473,7 +473,7 @@ public class HeroScreen extends ScreenAdapter {
             } else {
                 batch.draw(heroImagemEstatica, 1050, 580, largura, altura);
             }
-            
+
             //Label
         if (labelAtual != null) {
             batch.draw(labelAtual, 700, 950, 700, 120);

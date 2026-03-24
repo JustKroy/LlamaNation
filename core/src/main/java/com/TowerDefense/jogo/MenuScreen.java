@@ -4,30 +4,39 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 public class MenuScreen extends ScreenAdapter {
-    private final Main game;
-    private final SpriteBatch batch;
-    private final StretchViewport viewport;
-    private Vector2 posMouse = new Vector2();
+
+    //--------- VARIÁVEIS GLOBAIS -----------
+    private final Main game; //Referência para o jogo
+    private final SpriteBatch batch; //Desenho
+    private final StretchViewport viewport; //Viewport - Adaptar o tamanho da tela
+    private Vector2 posMouse = new Vector2(); //Posição do mouse
+
+    //----------- ARRAYS -----------
     private Botao[] HUDbtn;
     private Texture[] HUDimg;
-    private boolean popupAberto;
 
+    //----------- OUTRAS VARIÁVEIS -----------
+    private PopupConfig popup;
 
+    //------------- CONSTRUTOR ------------ --
     public MenuScreen(Main game) {
         this.game = game;
         this.batch = new SpriteBatch();
         this.viewport = new StretchViewport(1920, 1080);
         Skin skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
-        popupAberto = false;
+        popup = new PopupConfig();
 
-        HUDbtn = new Botao[6];
+        HUDbtn = new Botao[4];
             HUDbtn[0] = new Botao(
                 new Texture("Botao_play.png"),
                 new Texture("BotaoPlayHover.png"),
@@ -48,21 +57,13 @@ public class MenuScreen extends ScreenAdapter {
                 new Texture("Botao_play.png"),
                 760, 320, 400, 100
             );
-            HUDbtn[4] = new Botao(
-                new Texture("Botao_fecharPopup.png"),
-                new Texture("Botao_fecharPopup.png"),
-                860, 220, 200, 80
-            );
-            HUDbtn[5] = new Botao(
-                new Texture("Botao_som.png"),
-                new Texture("Botao_som.png"),
-                760, 400, 400, 100
-            );
+
 
         HUDimg = new Texture[3];
             HUDimg[0] = new Texture("backgroundHero.jpg");
             HUDimg[1] = new Texture("fundoPopup.png");
-            HUDimg[2] = new Texture("painelPopup");
+            HUDimg[2] = new Texture("painel.jpg"); //Painel popup
+
     }
 
     @Override
@@ -76,6 +77,9 @@ public class MenuScreen extends ScreenAdapter {
         // ATUALIZA O MOUSE EM TODO FRAME
         posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
+        float mouseX = Gdx.input.getX();
+        float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
+
         // Cursor padrão
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
 
@@ -84,6 +88,8 @@ public class MenuScreen extends ScreenAdapter {
             btn.atualizarCursor(posMouse);
         }
 
+        // DESENHA NA TELA
+
         batch.begin();
 
             batch.draw(HUDimg[0], 0, 0, 1920, 1080);
@@ -91,6 +97,12 @@ public class MenuScreen extends ScreenAdapter {
             for (Botao btn : HUDbtn) {
                 btn.Exibir(batch, posMouse);
             }
+
+        if (popup.isAberto()) {
+            popup.handleInput(mouseX, mouseY);
+            popup.render(batch);
+            return; // impede interação com o resto
+        }
 
         batch.end();
 
@@ -106,8 +118,9 @@ public class MenuScreen extends ScreenAdapter {
                 // Aqui você pode colocar para ir para uma tela de heróis no futuro
                 game.setScreen(new HeroScreen(game)); // Inicia o jogo
             }
+
             if (HUDbtn[2].foiClicado(posMouse)) {
-//                game.setScreen(new SettingsScreen(game));
+                popup.toggle();
             }
         }
     }
