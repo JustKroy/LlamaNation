@@ -81,7 +81,7 @@ public class MenuScreen extends ScreenAdapter {
             // Se o ponto do clique (X, Y) caiu dentro do retângulo do Botão Play...
             if (btnPlay.contains(posMouse.x, posMouse.y)) {
                 // ...Pede para o Main fechar o Menu e abrir o Jogo!
-                game.setScreen(new GameScreen(game));
+                game.setScreen(new TelaSelecaoDeck(game));
             }
 
             // Se o ponto do clique caiu dentro do retângulo do Botão Heroes...

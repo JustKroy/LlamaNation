@@ -18,14 +18,23 @@ public class Hud {
     private GlyphLayout layout;
 
     private Texture imgSettings;
-    private Texture imgVoltar;
-    private Texture imgPlay;
     private Texture texFundoPausa;
+
+    private Texture texBtnContinue;
+    private Texture texBtnContinueHover;
+    private Texture texBtnLeave;
+    private Texture texBtnLeaveHover;
 
     public Rectangle btnHitbox;
     public Rectangle btnSettings;
-    public Rectangle btnVoltar;
-    public Rectangle btnPlayPause;
+
+    // Retângulos para DESENHAR a imagem completa
+    public Rectangle rectDesenhoContinue;
+    public Rectangle rectDesenhoLeave;
+
+    // Hitboxes REAIS para o clique e o hover
+    public Rectangle btnContinue;
+    public Rectangle btnLeave;
 
     public boolean mostrarHitbox = false;
     public boolean pausado = false;
@@ -40,19 +49,45 @@ public class Hud {
         imgMoeda = new Texture("moeda.png");
 
         imgSettings = new Texture("settings.png");
-        imgVoltar = new Texture("voltar.png");
-        imgPlay = new Texture("play.png");
+
+        texBtnContinue = new Texture("BUTTON_continue.png");
+        texBtnContinueHover = new Texture("BUTTON_continuehover.png");
+        texBtnLeave = new Texture("BUTTON_leavebattle.png");
+        texBtnLeaveHover = new Texture("BUTTON_leavebattlehover.png");
 
         btnHitbox = new Rectangle(1600, 50, 240, 60);
         btnSettings = new Rectangle(1820, 970, 70, 70);
 
         float centroX = 1920 / 2f;
-        float btnLargura = 240;
-        float btnAltura = 80;
-        float espaco = 40;
+        float btnLargura = 420f;
 
-        btnVoltar = new Rectangle(centroX - btnLargura - (espaco / 2f), 450, btnLargura, btnAltura);
-        btnPlayPause = new Rectangle(centroX + (espaco / 2f), 450, btnLargura, btnAltura);
+        float altContinue = btnLargura * ((float) texBtnContinue.getHeight() / texBtnContinue.getWidth());
+        float altLeave = btnLargura * ((float) texBtnLeave.getHeight() / texBtnLeave.getWidth());
+
+        float espacoY = 20f;
+
+        // Áreas de DESENHO
+        rectDesenhoContinue = new Rectangle(centroX - (btnLargura / 2f), 480, btnLargura, altContinue);
+        rectDesenhoLeave = new Rectangle(centroX - (btnLargura / 2f), 480 - altLeave - espacoY, btnLargura, altLeave);
+
+        // 🔥 HITBOXES REDUZIDAS MAIS UM POUCO: Cortando 12% da largura e 25% da altura
+        float margemW = btnLargura * 0.12f;
+
+        float margemContH = altContinue * 0.25f;
+        btnContinue = new Rectangle(
+            rectDesenhoContinue.x + margemW,
+            rectDesenhoContinue.y + margemContH,
+            rectDesenhoContinue.width - (margemW * 2),
+            rectDesenhoContinue.height - (margemContH * 2)
+        );
+
+        float margemLeaveH = altLeave * 0.25f;
+        btnLeave = new Rectangle(
+            rectDesenhoLeave.x + margemW,
+            rectDesenhoLeave.y + margemLeaveH,
+            rectDesenhoLeave.width - (margemW * 2),
+            rectDesenhoLeave.height - (margemLeaveH * 2)
+        );
 
         layout = new GlyphLayout();
 
@@ -71,10 +106,10 @@ public class Hud {
 
     public void verificarClique(float x, float y) {
         if (pausado) {
-            if (btnVoltar.contains(x, y)) {
-                voltarAoMenu = true;
-            } else if (btnPlayPause.contains(x, y)) {
+            if (btnContinue.contains(x, y)) {
                 pausado = false;
+            } else if (btnLeave.contains(x, y)) {
+                voltarAoMenu = true;
             }
         } else {
             if (btnSettings.contains(x, y)) {
@@ -85,39 +120,32 @@ public class Hud {
         }
     }
 
-    public void desenhar(SpriteBatch batch, int vidas, int dinheiro, int waveAtual) {
+    public void desenhar(SpriteBatch batch, int vidas, int dinheiro, int waveAtual, float mouseX, float mouseY) {
         font.setColor(Color.WHITE);
 
         // --- CORAÇÃO E VIDAS ---
         float coracaoX = 30;
         float coracaoY = 930;
-        float coracaoW = 110; // Aumentei um tiquinho para ajudar na visão
+        float coracaoW = 110;
         float coracaoH = 100;
 
         batch.draw(imgCoracao, coracaoX, coracaoY, coracaoW, coracaoH);
 
-        // Ajuste fino dos números:
-        font.getData().setScale(0.75f); // Diminuí um pouco a escala para não sufocar o ícone
-
-        // MÁGICA PARA OS NÚMEROS NÃO FICAREM MUITO SEPARADOS:
-        // Reduz o espaçamento entre os caracteres (ajuste esse valor se precisar de mais perto ou longe)
+        font.getData().setScale(0.75f);
         font.getData().markupEnabled = true;
 
         String textoVidas = String.valueOf(vidas);
         layout.setText(font, textoVidas);
 
-        // Centralização exata usando o centro da imagem e metade da largura do texto
         float centroImagemX = coracaoX + (coracaoW / 2f);
         float centroImagemY = coracaoY + (coracaoH / 2f);
 
-        // O ponto X de desenho é o centro da imagem menos metade da largura da palavra escrita
         float textoX = centroImagemX - (layout.width / 2f);
-        // O ponto Y de desenho é o centro da imagem mais metade da altura da fonte (ajuste de +8 para centralizar no "olho")
         float textoY = centroImagemY + (layout.height / 2f) + 4;
 
         font.draw(batch, textoVidas, textoX, textoY);
 
-        // --- RESTANTE DO HUD (Mantive igual ao seu) ---
+        // --- RESTANTE DO HUD ---
         font.getData().setScale(1.0f);
         batch.draw(imgMoeda, 1410, 992, 50, 50);
         font.draw(batch, "" + dinheiro, 1465, 1030);
@@ -138,14 +166,25 @@ public class Hud {
 
         batch.draw(imgSettings, btnSettings.x, btnSettings.y, btnSettings.width, btnSettings.height);
 
+        // --- TELA DE PAUSA ---
         if (pausado) {
             batch.draw(texFundoPausa, 0, 0, 1920, 1080);
-            batch.draw(imgPlay, btnPlayPause.x, btnPlayPause.y, btnPlayPause.width, btnPlayPause.height);
-            batch.draw(imgVoltar, btnVoltar.x, btnVoltar.y, btnVoltar.width, btnVoltar.height);
+
+            if (btnContinue.contains(mouseX, mouseY)) {
+                batch.draw(texBtnContinueHover, rectDesenhoContinue.x, rectDesenhoContinue.y, rectDesenhoContinue.width, rectDesenhoContinue.height);
+            } else {
+                batch.draw(texBtnContinue, rectDesenhoContinue.x, rectDesenhoContinue.y, rectDesenhoContinue.width, rectDesenhoContinue.height);
+            }
+
+            if (btnLeave.contains(mouseX, mouseY)) {
+                batch.draw(texBtnLeaveHover, rectDesenhoLeave.x, rectDesenhoLeave.y, rectDesenhoLeave.width, rectDesenhoLeave.height);
+            } else {
+                batch.draw(texBtnLeave, rectDesenhoLeave.x, rectDesenhoLeave.y, rectDesenhoLeave.width, rectDesenhoLeave.height);
+            }
 
             font.getData().setScale(1.5f);
             layout.setText(font, "PAUSED");
-            font.draw(batch, "PAUSED", (1920 / 2f) - (layout.width / 2f), 650);
+            font.draw(batch, "PAUSED", (1920 / 2f) - (layout.width / 2f), 680);
             font.getData().setScale(1.0f);
         }
     }
@@ -156,8 +195,11 @@ public class Hud {
         imgCoracao.dispose();
         imgMoeda.dispose();
         imgSettings.dispose();
-        imgVoltar.dispose();
-        imgPlay.dispose();
         texFundoPausa.dispose();
+
+        texBtnContinue.dispose();
+        texBtnContinueHover.dispose();
+        texBtnLeave.dispose();
+        texBtnLeaveHover.dispose();
     }
 }

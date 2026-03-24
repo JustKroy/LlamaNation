@@ -42,7 +42,7 @@ public class LhamaMage extends Torre {
     }
 
     @Override
-    public void atualizar(float delta, Array<Inimigo> listaInimigos, Array<Projetil> listaProjeteis) {
+    public int atualizar(float delta, Array<Inimigo> listaInimigos, Array<Projetil> listaProjeteis) {
         if (!estaAtacando) tempoTiro += delta;
 
         // Centro real da torre para o Range não mentir
@@ -133,6 +133,7 @@ public class LhamaMage extends Torre {
 
             if (animacaoAtirando.isAnimationFinished(tempoEstado)) estaAtacando = false;
         }
+        return 0;
     }
 
     @Override

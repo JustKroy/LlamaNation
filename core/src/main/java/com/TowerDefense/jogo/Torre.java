@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public abstract class Torre {
-
+    public TipoLlama tipoLlama;
     public enum ModoAlvo {
         PRIMEIRO, ULTIMO, MAIS_FORTE
     }
@@ -32,6 +32,15 @@ public abstract class Torre {
     public float larguraDesenho;
     public boolean viradaParaEsquerda = false;
 
+    // 🔥 NOVO: Construtor simplificado para torres que não atiram (como a LlamaBurguesa)
+    public Torre(float x, float y) {
+        this.posicao = new Vector2(x, y);
+        this.hitbox = new Rectangle(x, y, 80, 80); // Tamanho padrão
+        this.larguraDesenho = 80f;
+        this.alturaDesenho = 80f;
+    }
+
+    // Construtor original para as torres de ataque
     public Torre(float x, float y, Texture textura, Texture imgProjetil) {
         this.posicao = new Vector2(x, y);
         this.textura = textura;
@@ -43,7 +52,8 @@ public abstract class Torre {
         this.hitbox = new Rectangle(x, y, larguraDesenho, alturaDesenho);
     }
 
-    public void atualizar(float delta, Array<Inimigo> listaInimigos, Array<Projetil> listaProjeteis) {
+    // 🔥 ATUALIZADO: Agora retorna "int", que é o dinheiro gerado
+    public int atualizar(float delta, Array<Inimigo> listaInimigos, Array<Projetil> listaProjeteis) {
         tempoTiro += delta;
 
         float centroTorreX = posicao.x + (larguraDesenho / 2f);
@@ -113,6 +123,9 @@ public abstract class Torre {
                 tempoTiro = 0;
             }
         }
+
+        // Retorna 0 de dinheiro, pois torre de ataque não faz dinheiro
+        return 0;
     }
 
     public void trocarModoAlvo() {

@@ -50,7 +50,7 @@ public class LlamaCyborg extends Torre {
     }
 
     @Override
-    public void atualizar(float delta, Array<Inimigo> listaInimigos, Array<Projetil> listaProjeteis) {
+    public int atualizar(float delta, Array<Inimigo> listaInimigos, Array<Projetil> listaProjeteis) {
         if (!estaAtacando) tempoTiro += delta;
 
         float centroTorreX = posicao.x + (larguraDesenho / 2f);
@@ -148,6 +148,7 @@ public class LlamaCyborg extends Torre {
                 estaAtacando = false;
             }
         }
+        return 0;
     }
 
     @Override

@@ -50,7 +50,7 @@ public class LhamaNormal extends Torre {
     }
 
     @Override
-    public void atualizar(float delta, Array<Inimigo> listaInimigos, Array<Projetil> listaProjeteis) {
+    public int atualizar(float delta, Array<Inimigo> listaInimigos, Array<Projetil> listaProjeteis) {
         if (!estaAtacando) tempoTiro += delta;
 
         float centroTorreX = posicao.x + (larguraDesenho / 2f);
@@ -142,6 +142,9 @@ public class LhamaNormal extends Torre {
                 estaAtacando = false;
             }
         }
+
+        // Retorna 0 de dinheiro, pois a Lhama Normal só distribui porrada, não dinheiro!
+        return 0;
     }
 
     @Override
