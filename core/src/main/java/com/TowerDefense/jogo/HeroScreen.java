@@ -195,9 +195,9 @@ public class HeroScreen extends ScreenAdapter {
 
             //Select
             HUDbtn[1] = new Botao(
-                new Texture("BUTTON_select.png"),
-                new Texture("BUTTON_selecthover.png"),
-                970, 390, 470, 180
+                new Texture("Botao_select.png"),
+                new Texture("Botao_selecthover.png"),
+                1000, 430, 400, 100
             );
 
             //Skins

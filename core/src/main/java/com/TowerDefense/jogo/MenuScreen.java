@@ -51,8 +51,8 @@ public class MenuScreen extends ScreenAdapter {
                 1800, 950, 100, 100
             );
             HUDbtn[3] = new Botao(
-                new Texture("Botao_play.png"),
-                new Texture("Botao_play.png"),
+                new Texture("shop_0.png"),
+                new Texture("shop_hover.png"),
                 760, 320, 400, 100
             );
 
@@ -61,8 +61,7 @@ public class MenuScreen extends ScreenAdapter {
             HUDimg[0] = new Texture("backgroundHero.jpg");
             HUDimg[1] = new Texture("fundoPopup.png");
             HUDimg[2] = new Texture("painel.jpg"); //Painel popup
-
-    }
+        }
 
     @Override
     public void render(float delta) {
@@ -131,6 +130,7 @@ public class MenuScreen extends ScreenAdapter {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+        popup.atualizarLayout();
     }
 
     @Override
