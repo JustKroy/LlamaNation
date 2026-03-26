@@ -80,37 +80,37 @@ public class MenuScreen extends ScreenAdapter {
         // Cursor padrão
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
 
+        if (popup.isAberto()) {
+
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+                popup.toggle();
+            }
+
+            popup.handleInput(mouseX, mouseY);
+
+            //DESENHA FUNDO (batch)
+            batch.begin();
+            batch.draw(HUDimg[0], 0, 0, 1920, 1080);
+            batch.end();
+
+            //DESENHA FORMAS (popup - ShapeRenderer)
+            popup.renderShapes(); // 👈 vamos criar isso
+
+            //DESENHA TEXTO (batch)
+            batch.begin();
+            popup.render(batch);
+            batch.end();
+
+            return;
+        }
+
 
         for(Botao btn : HUDbtn) {
             btn.atualizarCursor(posMouse);
         }
 
-        // DESENHA NA TELA
-
-        batch.begin();
-
-            batch.draw(HUDimg[0], 0, 0, 1920, 1080);
-
-            for (Botao btn : HUDbtn) {
-                btn.Exibir(batch, posMouse);
-            }
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            popup.toggle(); // fecha popup
-        }
-
-
-            if (popup.isAberto()) {
-                popup.handleInput(mouseX, mouseY);
-                popup.render(batch);
-                return; // impede interação com o resto
-            }
-
-        batch.end();
-
         // Lógica de clique
         if (Gdx.input.justTouched()) {
-            posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
             if (HUDbtn[0].foiClicado(posMouse)) {
                 game.setScreen(new GameScreen(game)); // Inicia o jogo
@@ -125,6 +125,17 @@ public class MenuScreen extends ScreenAdapter {
                 popup.toggle();
             }
         }
+
+        // DESENHA NA TELA
+        batch.begin();
+
+            batch.draw(HUDimg[0], 0, 0, 1920, 1080);
+
+            for (Botao btn : HUDbtn) {
+                btn.Exibir(batch, posMouse);
+            }
+
+        batch.end();
     }
 
     @Override

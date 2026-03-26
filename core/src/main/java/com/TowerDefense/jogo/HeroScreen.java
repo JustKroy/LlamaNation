@@ -41,7 +41,7 @@ public class HeroScreen extends ScreenAdapter {
 
         //--------- ARRAY ---------
     //Variável que permite carregar imagens
-    private Texture[] HUDimg;
+    private Texture[] HUDimg; //Variável que permite carregar imagens
     private HeroType[][] heroisPorClasse;
     private labelLlama[][] labelPorLlama;
     private Botao[] botoesHerois;
