@@ -9,6 +9,7 @@ Llama Cyborg - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Mod
 Llama Anjo - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Llama Burguesa - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Llama Chef - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
+Abominavel Llama Das Neves - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Llama Ninja - Animação<br>
 Llama Padrâo - Animação
 
