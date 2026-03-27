@@ -34,7 +34,7 @@ Designação de Tarefas<br>
 Menu de Heróis completo<br>
 Background das Llamas<br>
 Banco de dados<br>
-Menu Principal<br>
+Menu Principal, incluindo integração com banco<br>
 
 ## TAREFAS FUTURAS
 ### UI GLOBAIS
@@ -42,9 +42,11 @@ Menu Principal<br>
 - Hover de Todos Botões
 ### BOTÕES TELA DE HERÓIS
 - Um framezinho colocando cada llama dentro dele
-- Botão de certinho (Hero Selecionado)
+- Labels Llamas
+- Background menu heróis
 ### BOTÕES TELA PRINCIPAL
-- "x" de sair de uma tela
+- Background menu principal
+- Background configs
 ### BOTÕES TELA DE JOGO
 - Botão "Sell"
 - Botão "Leave Battle"
