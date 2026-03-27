@@ -112,7 +112,8 @@ public class HeroScreen extends ScreenAdapter {
 
             //SUPORTES
             heroisPorClasse[1] = new HeroType[]{
-                HeroType.BURGUESA
+                HeroType.BURGUESA,
+                HeroType.YETI
             };
 
             //AEREOS
@@ -289,7 +290,8 @@ public class HeroScreen extends ScreenAdapter {
         ROBOTLLAMA("LlamaRobo.png", false, 260, 280),
         ANJOLLAMA("LlamaAnjo.png", false, 350, 300),
         BURGUESA("LlamaBurguesa.png", false, 330, 300),
-        CHEF("LlamaChef.png", false, 330, 300);
+        CHEF("LlamaChef.png", false, 330, 300),
+        YETI("AbominavelLlamaDasNeves.png", false, 260, 280);
 
         public final String sprite; //Caminho da imagem
         public final boolean animado; //Se é animado ou estático

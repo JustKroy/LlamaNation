@@ -11,88 +11,65 @@ import java.util.*;
 
 public class PopupConfig {
 
-//----------------------- VARIÁVEIS GLOBAIS ------------------------
-    private final ShapeRenderer shapeRenderer; // Variável que permite desenhar na tela
-    private final BitmapFont fonte; // Variável que permite carregar imagens
+    //----------------------- VARIÁVEIS GLOBAIS ------------------------
+    private final ShapeRenderer shapeRenderer;
+    private final BitmapFont fonte;
 
-//----------------------- ARRAYS ------------------------
-    private Rectangle[] opcoesMenu; //Array que armazena as opções do menu
-    private Map<TipoConfig, List<OpcaoConfig>> opcoes = new HashMap<>(); //Map que armazena as opções dos menus
-    private String[] textosMenu = {"Geral", "Áudio", "Vídeo", "Atalhos", "Acessibilidade"}; //Array que armazena os textos dos menus
+    //----------------------- ARRAYS ------------------------
+    private Rectangle[] opcoesMenu;
+    private Map<TipoConfig, List<OpcaoConfig>> opcoes = new HashMap<>();
+    private String[] textosMenu = {"Geral", "Áudio", "Vídeo", "Atalhos", "Acessibilidade"};
 
-//---------------------- OUTRAS VARIÁVEIS -----------------
-    private boolean aberto; //Define o estado do menu
-    private Rectangle areaPopup, areaBotoes; //Define a área do menu e dos botões
-    private TipoConfig tipoSelecionado; //Define o tipo padrão como opções GERAIS
-    private OpcaoConfig opcaoSelecionada; //Define a opção selecionada
-
-
-//----------------- VARIÁVEIS DE ÁUDIO ------------------
-    private float volume = 0.5f;
-    private Rectangle sliderBar;
-    private Rectangle sliderKnob;
-    private boolean arrastando = false;
-
-// ---------------- VARIÁVEIS DE VÍDEO ------------------
-    private String[] resolucoes = {"800x600", "1280x720", "1920x1080"};
-    private int resolucaoSelecionada = 0;
-    private boolean dropdownAberto = false;
-    private Rectangle botaoResolucao;
-    private Rectangle[] opcoesResolucao;
-
-// ---------------- VARIÁVEIS DE ATALHOS ----------------
-    private int teclaPular = Input.Keys.SPACE;
-    private boolean esperandoTecla = false;
-    private Rectangle botaoKeybind;
+    //---------------------- OUTRAS VARIÁVEIS -----------------
+    private boolean aberto;
+    private Rectangle areaPopup, areaBotoes;
+    private TipoConfig tipoSelecionado;
 
     //------------------ CONSTRUTOR --------------------
     public PopupConfig() {
-        shapeRenderer = new ShapeRenderer(); //Recebe o batch para desenhar na tela
-        fonte = new BitmapFont(); //Recebe o batch para fonte
+        shapeRenderer = new ShapeRenderer();
+        fonte = new BitmapFont();
         aberto = false;
-        arrastando = false;
-        tipoSelecionado = TipoConfig.GERAL; //Define o tipo padrão como opções GERAIS
+        tipoSelecionado = TipoConfig.GERAL;
 
-        atualizarLayout(); //Chama a função que atualiza o layout do menu
-        inicializarOpcoes(); //Chama a função que inicializa as opções do menu
+        atualizarLayout();
+        inicializarOpcoes();
     }
 
     //--------------- RENDER DAS OPÇÕES ---------------------
     public void render(SpriteBatch batch) {
 
-        if (!aberto) return; //Se o menu estiver fechado, não renderiza nada
+        if (!aberto) return;
 
-        //Loop que exibe as opções de cada menu
         for(int i=0;i<textosMenu.length;i++){
             desenharTextoCentralizado(fonte,batch,textosMenu[i],opcoesMenu[i]);
         }
 
-        //Desenha o conteúdo do menu
         desenharConteudo(batch);
     }
 
     public void renderShapes() {
 
-        if (!aberto) return; //Se o menu estiver fechado, não renderiza nada
+        if (!aberto) return;
 
-        Gdx.gl.glEnable(GL20.GL_BLEND); //Permite mexer com transarência
+        Gdx.gl.glEnable(GL20.GL_BLEND);
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled); //Inicia o shapeRenderer preenchendo
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Fundo escuro
+        // Fundo
         shapeRenderer.setColor(0,0,0,0.6f);
         shapeRenderer.rect(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 
         // Popup
-        shapeRenderer.setColor(0.25f,0.25f,0.25f,0f);
+        shapeRenderer.setColor(0.25f,0.25f,0.25f,1f);
         shapeRenderer.rect(areaPopup.x,areaPopup.y,areaPopup.width,areaPopup.height);
 
-        // Barra que contém os botões
+        // Barra
         shapeRenderer.setColor(0,0,0.2f,0.8f);
         shapeRenderer.rect(areaBotoes.x,areaBotoes.y,areaBotoes.width,areaBotoes.height);
 
         // Aba selecionada
-        Rectangle sel = opcoesMenu[getIndice()]; //Pega a opção selecionada
+        Rectangle sel = opcoesMenu[getIndice()];
         shapeRenderer.setColor(Color.GRAY);
         shapeRenderer.rect(sel.x,sel.y,sel.width,sel.height);
 
@@ -102,43 +79,42 @@ public class PopupConfig {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.WHITE);
 
-        //Loop que desenha as bordas dos menus
         for(Rectangle r : opcoesMenu){
             shapeRenderer.rect(r.x,r.y,r.width,r.height);
         }
 
         shapeRenderer.end();
 
-        // sliders
+        // SLIDERS
         List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
+        if (lista == null) return;
 
-        if(lista != null) {
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        atualizarAreasOpcoes(lista);
 
-            for (OpcaoConfig op : lista) {
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-                if (op.tipo == TipoOpcao.SLIDER && op.area != null) {
+        for (OpcaoConfig op : lista) {
 
-                    float barX = op.area.x + op.area.width - 200;
-                    float barY = op.area.y + 20;
+            if (op.tipo == TipoOpcao.SLIDER && op.area != null) {
 
-                    shapeRenderer.setColor(Color.DARK_GRAY);
-                    shapeRenderer.rect(barX, barY, 150, 10);
+                float barX = op.area.x + op.area.width - 200;
+                float barY = op.area.y + 20;
 
-                    float knobX = barX + op.valor * 150;
+                shapeRenderer.setColor(Color.DARK_GRAY);
+                shapeRenderer.rect(barX, barY, 150, 10);
 
-                    shapeRenderer.setColor(Color.WHITE);
-                    shapeRenderer.rect(knobX - 5, barY - 5, 10, 20);
-                }
+                float knobX = barX + op.valor * 150;
+
+                shapeRenderer.setColor(Color.WHITE);
+                shapeRenderer.rect(knobX - 5, barY - 5, 10, 20);
             }
-
-            shapeRenderer.end();
         }
 
-        Gdx.gl.glDisable(GL20.GL_BLEND); //Desabilita a transparência
+        shapeRenderer.end();
+
+        Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
-    //---------------- FUNÇÃO QUE LÊ O MOUSE -------------------
     //------------------ INPUT ------------------
     public void handleInput(float mouseX, float mouseY) {
 
@@ -156,10 +132,14 @@ public class PopupConfig {
         List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
         if (lista == null) return;
 
+        atualizarAreasOpcoes(lista);
+
         for (OpcaoConfig op : lista) {
 
+            if (op.area == null) continue;
+
             // clique
-            if (Gdx.input.justTouched() && op.area != null && op.area.contains(mouseX, mouseY)) {
+            if (Gdx.input.justTouched() && op.area.contains(mouseX, mouseY)) {
 
                 switch (op.tipo) {
 
@@ -195,7 +175,7 @@ public class PopupConfig {
                 op.valor = Math.max(0f, Math.min(1f, op.valor));
             }
 
-            // dropdown seleção
+            // dropdown
             if (op.tipo == TipoOpcao.DROPDOWN && op.aberto) {
 
                 for (int j = 0; j < op.opcoes.length; j++) {
@@ -227,29 +207,18 @@ public class PopupConfig {
         }
     }
 
-    //----------------- FUNÇÃO QUE DESENHA O CONTEÚDO -----------------
+    //----------------- DESENHAR CONTEÚDO -----------------
     private void desenharConteudo(SpriteBatch batch) {
 
-        List<OpcaoConfig> lista = opcoes.get(tipoSelecionado); //Pega a lista de opções
+        List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
         if (lista == null) return;
 
-        //Loop que percorre o tamanho da lista para desenhar as opções de config
-        for (int i = 0; i < lista.size(); i++) {
+        atualizarAreasOpcoes(lista);
 
-            OpcaoConfig op = lista.get(i);
+        for (OpcaoConfig op : lista) {
 
-            if (op.area == null) {
-                op.area = new Rectangle(
-                    areaPopup.x + 80,
-                    areaPopup.y + areaPopup.height - 150 - i * 80,
-                    1000,
-                    50
-                );
-            }
+            desenharTextoCentralizado(fonte, batch, op.texto, op.area);
 
-            desenharTextoCentralizado(fonte, batch, op.texto, op.area); //Texto centralizado
-
-            // desenhar estado
             switch (op.tipo) {
 
                 case TOGGLE:
@@ -291,25 +260,38 @@ public class PopupConfig {
         }
     }
 
-    //---------------------- FUNÇÃO QUE CENTRALIZA O TEXTO ------------------------
+    //----------------- ATUALIZA ÁREAS -----------------
+    private void atualizarAreasOpcoes(List<OpcaoConfig> lista) {
+        for (int i = 0; i < lista.size(); i++) {
+            OpcaoConfig op = lista.get(i);
+
+            op.area = new Rectangle(
+                areaPopup.x + 80,
+                areaPopup.y + areaPopup.height - 150 - i * 80,
+                1000,
+                50
+            );
+        }
+    }
+
+    //---------------- TEXTO CENTRAL ----------------
     private void desenharTextoCentralizado(BitmapFont font, SpriteBatch batch, String texto, Rectangle botao) {
-        GlyphLayout layout = new GlyphLayout(font, texto); //Layout do texto
+        GlyphLayout layout = new GlyphLayout(font, texto);
         float x = botao.x + (botao.width - layout.width) / 2;
         float y = botao.y + (botao.height + layout.height) / 2;
         font.draw(batch, layout, x, y);
     }
 
-    //----------------------- FUNÇÃO QUE INICIALIZA AS OPÇÕES -----------------------
-
-    //------------------ OPÇÕES ------------------
+    //---------------- OPÇÕES ----------------
     private void inicializarOpcoes() {
 
         List<OpcaoConfig> audio = new ArrayList<>();
 
         OpcaoConfig vol = new OpcaoConfig("Volume");
+        vol.tipo = TipoOpcao.SLIDER;
         vol.valor = 0.5f;
-
         audio.add(vol);
+
         audio.add(criarToggle("Mute"));
 
         opcoes.put(TipoConfig.AUDIO, audio);
@@ -317,6 +299,7 @@ public class PopupConfig {
         List<OpcaoConfig> video = new ArrayList<>();
 
         OpcaoConfig res = new OpcaoConfig("Resolution");
+        res.tipo = TipoOpcao.DROPDOWN;
         res.opcoes = new String[]{"800x600","1280x720","1920x1080"};
         res.selecionado = 2;
 
@@ -327,6 +310,7 @@ public class PopupConfig {
         List<OpcaoConfig> atalhos = new ArrayList<>();
 
         OpcaoConfig key = new OpcaoConfig("Pular");
+        key.tipo = TipoOpcao.KEYBIND;
         key.tecla = Input.Keys.SPACE;
 
         atalhos.add(key);
@@ -336,68 +320,54 @@ public class PopupConfig {
         opcoes.put(TipoConfig.GERAL, new ArrayList<>());
         opcoes.put(TipoConfig.ACESSIBILIDADE, new ArrayList<>());
     }
-    //------------------------ FUNÇÃO QUE CRIA UM TOGGLE -------------------------
+
     private OpcaoConfig criarToggle(String texto) {
         OpcaoConfig op = new OpcaoConfig(texto);
+        op.tipo = TipoOpcao.TOGGLE;
         op.estado = false;
         return op;
     }
 
-    //------------------------ FUNÇÃO QUE CRIA A LISTA DE OPÇÕES -------------------------
-    private List<OpcaoConfig> criarLista(String... textos) { //Variável que recebe os textos
-        List<OpcaoConfig> lista = new ArrayList<>(); //Lista que armazena as opções
-        //Loop que percorre o tamanho da lista para criar as opções
-        for (String t : textos) {
-            lista.add(new OpcaoConfig(t));
-        }
-        return lista;
-    }
-
-    //------------------------------ FUNÇÃO QUE FAZ O LAYOUT DO POPUP --------------------------------
+    //---------------- LAYOUT ----------------
     public void atualizarLayout() {
 
-        float largura = Gdx.graphics.getWidth(); //Pega a largura da tela
-        float altura = Gdx.graphics.getHeight(); //Pega a altura da tela
+        float largura = Gdx.graphics.getWidth();
+        float altura = Gdx.graphics.getHeight();
 
         areaPopup = new Rectangle(largura*0.2f, altura*0.1f, largura*0.6f, altura*0.8f);
         areaBotoes = new Rectangle(0, altura-100, largura, 100);
 
-        opcoesMenu = new Rectangle[textosMenu.length]; //Array que armazena as opções do menu
+        opcoesMenu = new Rectangle[textosMenu.length];
 
         float larguraBotao = 200;
         float espacamento = 20;
-        float total = textosMenu.length * larguraBotao + (textosMenu.length - 1)*espacamento; //Calcula o espaço total dos botões
+        float total = textosMenu.length * larguraBotao + (textosMenu.length - 1)*espacamento;
 
         float x = (largura-total)/2;
         float y = areaBotoes.y + 20;
 
-        //Loop que percorre a array opcoesMenu para gerar os botões
         for(int i=0;i<opcoesMenu.length;i++){
             opcoesMenu[i] = new Rectangle(x + i*(larguraBotao+espacamento), y, larguraBotao,60);
         }
     }
 
-    //------------- FUNÇÃO ENUM QUE INCIALIZA O TIPO DE CONFIG ---------------
+    // ENUMS
     public enum TipoConfig {
         GERAL, AUDIO, VIDEO, ATALHOS, ACESSIBILIDADE
     }
 
-    //------------- FUNÇÃO ENUM QUE INCIALIZA O TIPO DE OPÇÃO ---------------
     public enum TipoOpcao {
         TOGGLE, SLIDER, DROPDOWN, KEYBIND
     }
 
-    //----------- Pega o índice do tipo selecionado -----------
     private int getIndice() {
         return tipoSelecionado.ordinal();
     }
 
-    // ------ Troca o estado do menu (Aberto/Fechado) ------
     public void toggle() {
         aberto = !aberto;
     }
 
-    // ------- Função que retorna o estado do menu -------
     public boolean isAberto() {
         return aberto;
     }
