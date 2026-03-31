@@ -21,8 +21,9 @@ public class ConstrutorDeTorres {
     private Texture imgLlamaAngel, imgNuvemNasc, imgNuvemAtiva, imgNuvemSum, imgAngelAttack;
     private Texture imgLlamaBurguesa;
     private Texture imgLlamaChef, imgArmaChef;
+    private Texture imgLlamaNeves, imgNevesAttack;
 
-    private TextureRegion iconeLhama, iconeLhamaNinja, iconeLhamaMage, iconeLlamaCyborg, iconeLlamaAngel, iconeLlamaBurguesa, iconeLlamaChef;
+    private TextureRegion iconeLhama, iconeLhamaNinja, iconeLhamaMage, iconeLlamaCyborg, iconeLlamaAngel, iconeLlamaBurguesa, iconeLlamaChef, iconeLlamaNeves;
 
     private HashMap<TipoLlama, TextureRegion> iconesLoja;
     public Array<TipoLlama> deckAtual;
@@ -51,7 +52,6 @@ public class ConstrutorDeTorres {
     public Rectangle btnAcelerar;
     public boolean jogoAcelerado = false;
 
-    // 🔥 NOVO: Guarda uma referência das torres no mapa para podermos contar!
     private Array<Torre> torresReferencia;
 
     public ConstrutorDeTorres(Array<TipoLlama> deckEscolhido) {
@@ -61,23 +61,20 @@ public class ConstrutorDeTorres {
         imgLhamaNinja = new Texture("lhamaninja.png");
         imgCuspe = new Texture("guspe.png");
         imgKunai = new Texture("kunai.png");
-
         imgLhamaMage = new Texture("llamamage.png");
         imgMagia = new Texture("mageattack.png");
-
         imgLlamaCyborg = new Texture("LlamaCyborg.png");
         imgCyborgAttack = new Texture("CyborgAttack.png");
-
         imgLlamaAngel = new Texture("llamaAngel.png");
         imgNuvemNasc = new Texture("nuvemAngelnasc.png");
         imgNuvemAtiva = new Texture("nuvemAngel.png");
         imgNuvemSum = new Texture("nuvemAngelsum.png");
         imgAngelAttack = new Texture("Angel_Attack.png");
-
         imgLlamaBurguesa = new Texture("llamaBurguesa.png");
-
         imgLlamaChef = new Texture("llamaChef.png");
         imgArmaChef = new Texture("armaChef.png");
+        imgLlamaNeves = new Texture("llamadasneves.png");
+        imgNevesAttack = new Texture("attackdasneves.png");
 
         imgBtnAcelerar = new Texture("Iniciar.png");
         btnAcelerar = new Rectangle(1450, 50, 100, 100);
@@ -102,6 +99,9 @@ public class ConstrutorDeTorres {
         int largChef = imgLlamaChef.getWidth() / 5;
         iconeLlamaChef = new TextureRegion(imgLlamaChef, 0, 0, largChef, imgLlamaChef.getHeight());
 
+        int largNeves = imgLlamaNeves.getWidth() / 12;
+        iconeLlamaNeves = new TextureRegion(imgLlamaNeves, 0, 0, largNeves, imgLlamaNeves.getHeight());
+
         iconesLoja = new HashMap<>();
         iconesLoja.put(TipoLlama.NORMAL, iconeLhama);
         iconesLoja.put(TipoLlama.NINJA, iconeLhamaNinja);
@@ -110,6 +110,7 @@ public class ConstrutorDeTorres {
         iconesLoja.put(TipoLlama.ANGEL, iconeLlamaAngel);
         iconesLoja.put(TipoLlama.BURGUESA, iconeLlamaBurguesa);
         iconesLoja.put(TipoLlama.CHEF, iconeLlamaChef);
+        iconesLoja.put(TipoLlama.NEVES, iconeLlamaNeves);
 
         font = new BitmapFont(Gdx.files.internal("fontes.fnt"));
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -118,7 +119,6 @@ public class ConstrutorDeTorres {
         imgMoedaPequena = new Texture("moeda.png");
         texFundoLoja = new Texture("Loja.png");
         texFundoMenu = new Texture("fundosell.png");
-
         texBtnSell = new Texture("BUTTON_sell.png");
         texBtnSellHover = new Texture("BUTTON_sellhover.png");
 
@@ -154,7 +154,6 @@ public class ConstrutorDeTorres {
         }
     }
 
-    // 🔥 NOVO MÉTODO: Conta quantas lhamas de um tipo já existem no mapa
     private int contarLlamasNoMapa(TipoLlama tipo) {
         if (torresReferencia == null) return 0;
         int count = 0;
@@ -165,7 +164,6 @@ public class ConstrutorDeTorres {
     }
 
     public int atualizar(Vector2 posMouse, boolean justTouched, boolean isTouched, int dinheiro, Array<Torre> listaTorres, Mapa mapa, Hud hud) {
-        // 🔥 Atualiza a referência das torres para o método de contar funcionar
         this.torresReferencia = listaTorres;
 
         if (justTouched) hud.verificarClique(posMouse.x, posMouse.y);
@@ -189,10 +187,8 @@ public class ConstrutorDeTorres {
             if (posicionando && lhamaSendoArrastada != null) {
                 if (posicaoValida) {
                     float sx = posMouse.x - (arrastoLarg / 2), sy = posMouse.y - (arrastoAlt / 2);
+                    Torre novaTorre = null;
 
-                    Torre novaTorre = null; // Preparamos a variável
-
-                    // Criamos a torre dependendo do tipo
                     switch(lhamaSendoArrastada) {
                         case BURGUESA: novaTorre = new LlamaBurguesa(sx, sy); break;
                         case ANGEL: novaTorre = new LlamaAngel(sx, sy, imgLlamaAngel, imgNuvemNasc, imgNuvemAtiva, imgNuvemSum, imgAngelAttack); break;
@@ -200,15 +196,14 @@ public class ConstrutorDeTorres {
                         case CHEF: novaTorre = new LlamaChef(sx, sy, imgLlamaChef, imgArmaChef); break;
                         case MAGE: novaTorre = new LhamaMage(sx, sy, imgLhamaMage, imgMagia); break;
                         case NINJA: novaTorre = new LhamaNinja(sx, sy, imgLhamaNinja, imgKunai); break;
+                        case NEVES: novaTorre = new LlamaNeves(sx, sy, imgLlamaNeves, imgNevesAttack); break;
                         case NORMAL: novaTorre = new LhamaNormal(sx, sy, imgLhama, imgCuspe); break;
                     }
 
-                    // 🔥 O SEGREDO PARA O CONTADOR FUNCIONAR ESTÁ AQUI! 🔥
                     if (novaTorre != null) {
-                        novaTorre.tipoLlama = lhamaSendoArrastada; // Carimba a identidade dela!
-                        listaTorres.add(novaTorre);                // Coloca no mapa
+                        novaTorre.tipoLlama = lhamaSendoArrastada;
+                        listaTorres.add(novaTorre);
                     }
-
                     dinheiro -= lhamaSendoArrastada.preco;
                 }
                 posicionando = false;
@@ -217,12 +212,17 @@ public class ConstrutorDeTorres {
             } else if (torreSelecionada != null && btnModoAlvo.contains(posMouse.x, posMouse.y)) {
                 torreSelecionada.trocarModoAlvo();
             } else if (torreSelecionada != null && btnVender.contains(posMouse.x, posMouse.y)) {
-                int preco = (torreSelecionada instanceof LlamaBurguesa) ? 500 : (torreSelecionada instanceof LlamaAngel) ? 400 : (torreSelecionada instanceof LlamaChef) ? 350 : (torreSelecionada instanceof LlamaCyborg) ? 300 : (torreSelecionada instanceof LhamaMage ? 250 : (torreSelecionada instanceof LhamaNinja ? 150 : 50));
+                int preco = (torreSelecionada instanceof LlamaBurguesa) ? 500 :
+                    (torreSelecionada instanceof LlamaAngel) ? 400 :
+                        (torreSelecionada instanceof LlamaNeves) ? 400 :
+                            (torreSelecionada instanceof LlamaChef) ? 350 :
+                                (torreSelecionada instanceof LlamaCyborg) ? 300 :
+                                    (torreSelecionada instanceof LhamaMage ? 250 :
+                                        (torreSelecionada instanceof LhamaNinja ? 150 : 50));
+
                 dinheiro += (int) (preco * 0.6f);
 
-                if (torreSelecionada instanceof LlamaAngel) {
-                    ((LlamaAngel) torreSelecionada).destruirNuvem();
-                }
+                if (torreSelecionada instanceof LlamaAngel) ((LlamaAngel) torreSelecionada).destruirNuvem();
 
                 listaTorres.removeValue(torreSelecionada, true);
                 torreSelecionada = null;
@@ -241,7 +241,6 @@ public class ConstrutorDeTorres {
                     TipoLlama lhamaEscolhida = deckAtual.get(i);
                     int qtdAtual = contarLlamasNoMapa(lhamaEscolhida);
 
-                    // 🔥 BARRICADA: Só deixa comprar se tiver dinheiro E se não atingiu o limite!
                     if (dinheiro >= lhamaEscolhida.preco && qtdAtual < lhamaEscolhida.limite) {
                         posicionando = true;
                         lhamaSendoArrastada = lhamaEscolhida;
@@ -260,7 +259,7 @@ public class ConstrutorDeTorres {
         for (int i = 0; i < 6; i++) {
             if (i < deckAtual.size) {
                 TipoLlama lhamaMenu = deckAtual.get(i);
-                int qtdAtual = contarLlamasNoMapa(lhamaMenu); // 🔥 Conta para mostrar na loja
+                int qtdAtual = contarLlamasNoMapa(lhamaMenu);
                 desenharItemLoja(batch, iconesLoja.get(lhamaMenu), String.valueOf(lhamaMenu.preco), slotsLoja[i], qtdAtual, lhamaMenu.limite);
             }
         }
@@ -284,6 +283,8 @@ public class ConstrutorDeTorres {
                 renderMenu = iconeLhamaMage; nome = "Mage Llama"; precoCheio = TipoLlama.MAGE.preco;
             } else if (torreSelecionada instanceof LhamaNinja) {
                 renderMenu = iconeLhamaNinja; nome = "Ninja Llama"; precoCheio = TipoLlama.NINJA.preco;
+            } else if (torreSelecionada instanceof LlamaNeves) {
+                renderMenu = iconeLlamaNeves; nome = "Yeti Llama"; precoCheio = TipoLlama.NEVES.preco;
             }
 
             float propTorre = (float) renderMenu.getRegionWidth() / renderMenu.getRegionHeight();
@@ -298,7 +299,6 @@ public class ConstrutorDeTorres {
             font.draw(batch, nome, nameX, 550);
 
             font.getData().setScale(0.45f);
-
             float labelX = 85f, valueX = 195f, currentY = 500, spacingY = 25;
 
             font.draw(batch, "Dano:", labelX, currentY);
@@ -349,45 +349,38 @@ public class ConstrutorDeTorres {
         batch.draw(imgBtnAcelerar, btnAcelerar.x, btnAcelerar.y, btnAcelerar.width, btnAcelerar.height);
         batch.setColor(Color.WHITE);
 
-        // 🔥 DESENHA A TORRE SENDO ARRASTADA E O TEXTO DO LIMITE "1/3" EMBAIXO DELA
         if (posicionando && texturaPosicionando != null && lhamaSendoArrastada != null) {
             batch.setColor(1, posicaoValida ? 1 : 0.3f, posicaoValida ? 1 : 0.3f, 0.7f);
             float arrL = 80f * ((float) texturaPosicionando.getRegionWidth() / texturaPosicionando.getRegionHeight());
             batch.draw(texturaPosicionando, posMouse.x - (arrL / 2), posMouse.y - 40, arrL, 80);
             batch.setColor(1, 1, 1, 1);
 
-            // Calcula o limite para mostrar: "(quantidade no mapa + 1) / limite"
             int qtdNoMapa = contarLlamasNoMapa(lhamaSendoArrastada);
             String txtLimite = (qtdNoMapa + 1) + "/" + lhamaSendoArrastada.limite;
 
             font.getData().setScale(0.40f);
             layout.setText(font, txtLimite);
 
-            // Fica vermelho se for a última
             if (qtdNoMapa + 1 >= lhamaSendoArrastada.limite) font.setColor(Color.RED);
 
             font.draw(batch, txtLimite, posMouse.x - (layout.width / 2), posMouse.y - 50);
-            font.setColor(Color.WHITE); // Reseta a cor pra não estragar as outras letras
+            font.setColor(Color.WHITE);
         }
     }
 
-    // 🔥 ATUALIZADO: Agora recebe qtd e limite para desenhar na loja também
     private void desenharItemLoja(SpriteBatch batch, TextureRegion tex, String preco, Rectangle slot, int qtdAtual, int limite) {
         float larg = slot.height * ((float) tex.getRegionWidth() / tex.getRegionHeight());
         float xCentralizado = slot.x + (slot.width - larg) / 2f;
 
-        // Desenha Lhama com sombra se estiver no limite máximo
         if (qtdAtual >= limite) batch.setColor(0.4f, 0.4f, 0.4f, 1f);
         batch.draw(tex, xCentralizado, slot.y, larg, slot.height);
         batch.setColor(Color.WHITE);
 
-        // Preço e Moeda
         font.getData().setScale(0.55f);
         layout.setText(font, preco);
         batch.draw(imgMoedaPequena, slot.x + 15, slot.y - 35, 25, 25);
         font.draw(batch, preco, slot.x + 45, slot.y - 12);
 
-        // 🔥 NOVO: Mostra "1/3" direto na carta da loja!
         font.getData().setScale(0.35f);
         String txtEstoque = qtdAtual + "/" + limite;
         layout.setText(font, txtEstoque);
@@ -398,9 +391,8 @@ public class ConstrutorDeTorres {
             font.setColor(Color.RED);
         }
 
-        // Desenha no topo da carta
         font.draw(batch, txtEstoque, slot.x + slot.width - layout.width - 5, slot.y + slot.height - 5);
-        font.setColor(Color.WHITE); // Reseta a cor
+        font.setColor(Color.WHITE);
     }
 
     public void desenharHitboxes(ShapeRenderer shape, Vector2 posMouse, Hud hud) {
@@ -412,13 +404,14 @@ public class ConstrutorDeTorres {
         }
         if (posicionando && !hud.pausado && lhamaSendoArrastada != null) {
             shape.setColor(1f, posicaoValida ? 1f : 0f, posicaoValida ? 1f : 0f, posicaoValida ? 0.2f : 0.3f);
-            float r = 200f; // raio padrão
+            float r = 200f;
             switch(lhamaSendoArrastada) {
                 case BURGUESA: r = 0f; break;
                 case ANGEL: r = 350f; break;
                 case CYBORG: r = 250f; break;
                 case CHEF: r = 150f; break;
                 case MAGE: r = 300f; break;
+                case NEVES: r = 150f; break; // Alinhado com a LlamaNeves
             }
             shape.circle(posMouse.x, posMouse.y, r);
         }
@@ -441,6 +434,8 @@ public class ConstrutorDeTorres {
         imgNuvemSum.dispose();
         imgAngelAttack.dispose();
         imgLlamaBurguesa.dispose();
+        imgLlamaNeves.dispose();
+        imgNevesAttack.dispose();
         imgBtnAcelerar.dispose();
         imgMoedaPequena.dispose();
         texFundoLoja.dispose();

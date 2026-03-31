@@ -20,9 +20,10 @@ public abstract class Inimigo {
     protected float velocidade;
     public int recompensaMoedas;
 
-    // 🔥 STATUS DA METRALHADORA (NOVO) 🔥
+    // 🔥 STATUS DE EFEITOS 🔥
     public float timerBurn = 0;
     public float timerSlow = 0;
+    public float timerStun = 0; // Tempo de congelamento
     private float relogioDano = 0;
 
     // --- TAMANHO VISUAL ---
@@ -41,17 +42,29 @@ public abstract class Inimigo {
         this.animacaoVirada = animacaoVirada;
     }
 
+    // Método para aplicar o congelamento (Stun)
+    public void aplicarStun(float tempo) {
+        if (this.timerStun < tempo) {
+            this.timerStun = tempo;
+        }
+    }
+
     public boolean atualizar(float delta, Array<Vector2> caminho) {
         tempoAnim += delta;
-
-        // 🔥 1. APLICA O SLOW 🔥
         float vFinal = velocidade;
-        if (timerSlow > 0) {
+
+        // 🔥 1. APLICA O STUN (CONGELAMENTO) 🔥
+        if (timerStun > 0) {
+            vFinal = 0; // Fica totalmente parado!
+            timerStun -= delta;
+        }
+        // 🔥 2. APLICA O SLOW (Só se não estiver com Stun) 🔥
+        else if (timerSlow > 0) {
             vFinal = velocidade * 0.5f; // Metade da velocidade
             timerSlow -= delta;
         }
 
-        // 🔥 2. APLICA O BURN (50 dano a cada 0.5s) 🔥
+        // 🔥 3. APLICA O BURN (Dano contínuo, mesmo congelado) 🔥
         if (timerBurn > 0) {
             timerBurn -= delta;
             relogioDano += delta;
@@ -71,37 +84,39 @@ public abstract class Inimigo {
             if (tempDirecao.x < -0.1f) indoParaEsquerda = true;
             else if (tempDirecao.x > 0.1f) indoParaEsquerda = false;
 
-            // Usamos a vFinal que pode estar com Slow
             float distanciaFrame = vFinal * delta;
             float distanciaAteAlvo = tempDirecao.len();
 
-            if (distanciaAteAlvo <= distanciaFrame) {
+            if (distanciaAteAlvo <= distanciaFrame && vFinal > 0) {
                 posicao.set(alvo);
                 pontoAtual++;
                 distanciaPercorrida += distanciaAteAlvo;
             } else {
-                tempDirecao.nor().scl(distanciaFrame);
-                posicao.add(tempDirecao);
-                distanciaPercorrida += distanciaFrame;
+                if (vFinal > 0) {
+                    tempDirecao.nor().scl(distanciaFrame);
+                    posicao.add(tempDirecao);
+                    distanciaPercorrida += distanciaFrame;
+                }
             }
             return false;
         }
         return true;
     }
+        public void desenhar(SpriteBatch batch) {
+            TextureRegion frame = indoParaEsquerda ?
+                animacaoVirada.getKeyFrame(tempoAnim, true) :
+                animacaoNormal.getKeyFrame(tempoAnim, true);
 
-    public void desenhar(SpriteBatch batch) {
-        TextureRegion frame = indoParaEsquerda ?
-            animacaoVirada.getKeyFrame(tempoAnim, true) :
-            animacaoNormal.getKeyFrame(tempoAnim, true);
+            // 🔥 PISCA AZUL SE ESTIVER CONGELADO (STUN) OU LENTO (SLOW) 🔥
+            if ((timerStun > 0 || timerSlow > 0) && (int)((timerStun + timerSlow) * 15) % 2 == 0) {
+                batch.setColor(Color.CYAN);
+            }
+            // 🔥 PISCA VERMELHO SE ESTIVER QUEIMANDO 🔥
+            else if (timerBurn > 0 && (int)(timerBurn * 15) % 2 == 0) {
+                batch.setColor(Color.RED);
+            }
 
-        // 🔥 PISCA VERMELHO SE ESTIVER QUEIMANDO 🔥
-        if (timerBurn > 0 && (int)(timerBurn * 15) % 2 == 0) {
-            batch.setColor(Color.RED);
+            batch.draw(frame, posicao.x, posicao.y, largura, altura);
+            batch.setColor(Color.WHITE); // Reset para não bugar o resto do jogo
         }
-
-        batch.draw(frame, posicao.x, posicao.y, largura, altura);
-
-        // Retorna a cor ao normal
-        batch.setColor(Color.WHITE);
-    }
 }

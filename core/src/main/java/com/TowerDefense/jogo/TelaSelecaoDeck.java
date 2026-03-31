@@ -21,8 +21,12 @@ public class TelaSelecaoDeck implements Screen {
     private ShapeRenderer shape;
     private BitmapFont font;
 
-    // Texturas genéricas que você já tem
+    // Texturas genéricas
     private Texture imgLhama, imgLhamaNinja, imgLhamaMage, imgLlamaCyborg, imgLlamaAngel, imgLlamaBurguesa, imgLlamaChef;
+
+    // 🔥 NOVO: Textura da Lhama das Neves
+    private Texture imgLlamaNeves;
+
     private HashMap<TipoLlama, TextureRegion> icones;
 
     // O Deck final
@@ -51,6 +55,7 @@ public class TelaSelecaoDeck implements Screen {
     }
 
     private void carregarTexturas() {
+
         imgLhama = new Texture("llama.png");
         imgLhamaNinja = new Texture("lhamaninja.png");
         imgLhamaMage = new Texture("llamamage.png");
@@ -58,6 +63,9 @@ public class TelaSelecaoDeck implements Screen {
         imgLlamaAngel = new Texture("llamaAngel.png");
         imgLlamaBurguesa = new Texture("llamaBurguesa.png");
         imgLlamaChef = new Texture("llamaChef.png");
+
+        // 🔥 NOVO: Carregando a textura da Neves
+        imgLlamaNeves = new Texture("llamadasneves.png");
 
         // Corta só o primeiro frame de cada lhama para ser o ícone
         icones.put(TipoLlama.NORMAL, new TextureRegion(imgLhama, 0, 0, imgLhama.getWidth() / 9, imgLhama.getHeight()));
@@ -67,6 +75,9 @@ public class TelaSelecaoDeck implements Screen {
         icones.put(TipoLlama.ANGEL, new TextureRegion(imgLlamaAngel, 0, 0, imgLlamaAngel.getWidth() / 5, imgLlamaAngel.getHeight()));
         icones.put(TipoLlama.BURGUESA, new TextureRegion(imgLlamaBurguesa, 0, 0, imgLlamaBurguesa.getWidth() / 17, imgLlamaBurguesa.getHeight()));
         icones.put(TipoLlama.CHEF, new TextureRegion(imgLlamaChef, 0, 0, imgLlamaChef.getWidth() / 5, imgLlamaChef.getHeight()));
+
+        // 🔥 NOVO: Cortando o primeiro frame (dos 12) da Neves e guardando no dicionário de ícones
+        icones.put(TipoLlama.NEVES, new TextureRegion(imgLlamaNeves, 0, 0, imgLlamaNeves.getWidth() / 12, imgLlamaNeves.getHeight()));
     }
 
     private void configurarBotoes() {
@@ -143,6 +154,9 @@ public class TelaSelecaoDeck implements Screen {
     }
 
     private void desenharIcone(TextureRegion icon, Rectangle rect) {
+        // Previne o NullPointerException que estava fechando o jogo!
+        if (icon == null) return;
+
         float proporcao = (float) icon.getRegionWidth() / icon.getRegionHeight();
         float larguraIdeal = rect.height * proporcao;
         float xCentralizado = rect.x + (rect.width - larguraIdeal) / 2f;
@@ -174,7 +188,6 @@ public class TelaSelecaoDeck implements Screen {
 
             // Clicou no botão JOGAR
             if (btnJogar.contains(mouseX, mouseY) && deckEscolhido.size == 6) {
-                // 🔥 AGORA VAI! Descomentado e com (Main) para passar na verificação do GameScreen
                 game.setScreen(new GameScreen((Main) game, deckEscolhido));
             }
         }
@@ -197,5 +210,7 @@ public class TelaSelecaoDeck implements Screen {
         imgLlamaCyborg.dispose();
         imgLlamaAngel.dispose();
         imgLlamaBurguesa.dispose();
+        imgLlamaChef.dispose(); // 🔥 NOVO: Consertei esse pequeno vazamento de memória!
+        imgLlamaNeves.dispose(); // 🔥 NOVO: Limpando a textura da Neves no final
     }
 }

@@ -7,11 +7,12 @@ public enum TipoLlama {
     CYBORG("Llama Cyborg", 300, 3),
     CHEF("Llama Chef", 2500, 1),
     ANGEL("Llama Angel", 500, 3),
-    BURGUESA("Llama Burguesa", 1000, 2);
+    BURGUESA("Llama Burguesa", 1000, 2),
+    NEVES("Llama das Neves", 650, 2);
 
     public final String nome;
     public final int preco;
-    public final int limite; // <--- NOVA VARIÁVEL AQUI!
+    public final int limite;
 
     TipoLlama(String nome, int preco, int limite) {
         this.nome = nome;
