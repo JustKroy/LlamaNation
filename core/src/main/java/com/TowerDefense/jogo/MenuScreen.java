@@ -1,11 +1,13 @@
 package com.TowerDefense.jogo;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
@@ -112,6 +114,7 @@ public class MenuScreen extends ScreenAdapter {
     public void resize(int width, int height) {
         // Pede para o Viewport recalcular o esticamento
         viewport.update(width, height, true);
+        popup.atualizarLayout();
     }
 
     // --- FAXINA ---
@@ -119,8 +122,12 @@ public class MenuScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         batch.dispose();
-        imgPlay.dispose();
-        imgHeroes.dispose();
-        if (imgFundo != null) imgFundo.dispose();
+        for(Botao btn : HUDbtn) {
+            btn.dispose();
+        }
+
+        for (Texture t : HUDimg) {
+            t.dispose();
+        }
     }
 }
