@@ -77,6 +77,9 @@ NomeDaLlamaFrame_classe.png (ChefFrame_legend.png)
 <h3>BOTOES</h3>
 FuncaoDoBotao_Button.png (Ex: Heroes_Button.png)
 
+<h3>HOVER</h3>
+FuncaoDoBotao_ButtonHover (Ex: Heroes_ButtonHover.png)
+
 <h3>MAPAS</h3>
 CaracterisitcaDoMapa_Map.png (Ex: Snow_Map.png) 
 
