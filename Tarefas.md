@@ -52,8 +52,36 @@ Menu Principal, incluindo integração com banco<br>
 - Botão "Leave Battle"
 - Botão "Continue" 
 
-
 ## IDEIAS
 ### LHAMAS
 - Lhama RPG, que dependendo do valor do D20 tem padroes  de ataque diferentes
 - Lhama Cozinheiro, que joga Sal nos Caracois e eles derretem
+
+
+
+PADRONIZAÇÃO DE NOME DE ARQUIVO
+SEMPRE EM INGLES
+
+LLAMA ESTATICA
+NomeDaLlamaLLama.png (NinjaLlama.png)
+
+LLAMA GIF(SPRITESHEET)
+NomeDaLLamaLlamaSS.png (Ex: NinjaLlamaSS.png)
+
+LABELS
+NomeDaLlamaLabel.png (Ex: NinjaLabel.png)
+
+FRAME
+NomeDaLlamaFrame_classe.png (ChefFrame_legend.png)
+
+BOTOES
+FuncaoDoBotao_Button.png (Ex: Heroes_Button.png)
+
+MAPAS
+CaracterisitcaDoMapa_Map.png (Ex: Snow_Map.png) 
+
+BACKGROUNDS
+FuncaoBackground_Background.png (Ex: HeroScreen_Background.png, Settings_Background.png)
+
+OUTRAS IMAGENS (EX: CORACAO, ACCEPT)
+Nome.png (Ex: Coracao.png, Accept.png)
