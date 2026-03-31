@@ -60,6 +60,7 @@ Menu Principal, incluindo integração com banco<br>
 PADRONIZAÇÃO DE NOME DE ARQUIVO<br>
 SEMPRE EM INGLES<br>
 TUDO QUE FOR A LLAMA PADRÃO SÓ COLOCAR "LLAMA"<br>
+SEPARAR IMAGENS EM PASTAS (EX: PASTA DAS LLAMAS, PASTA DOS BOTOES)
 
 <h3>LLAMA ESTATICA</h3>
 NomeDaLlamaLLama.png (NinjaLlama.png)
