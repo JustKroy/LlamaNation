@@ -36,30 +36,30 @@ public class MenuScreen extends ScreenAdapter {
 
         HUDbtn = new Botao[4];
             HUDbtn[0] = new Botao(
-                new Texture("Botao_play.png"),
-                new Texture("BotaoPlayHover.png"),
+                new Texture("Play_Button.png"),
+                new Texture("Play_ButtonHover.png"),
                 760, 720, 400, 100
             );
             HUDbtn[1] = new Botao(
-                new Texture("Botao_heroes.png"),
-                new Texture("BotaoHeroHover.png"),
+                new Texture("Heroes_Button.png"),
+                new Texture("Heroes_ButtonHover.png"),
                 760, 520, 400, 100
             );
             HUDbtn[2] = new Botao(
-                new Texture("settings.png"),
-                new Texture("settings.png"),
+                new Texture("Settings_Button.png"),
+                new Texture("Settings_Button.png"),
                 1800, 950, 100, 100
             );
             HUDbtn[3] = new Botao(
-                new Texture("shop_0.png"),
-                new Texture("shop_hover.png"),
+                new Texture("Shop_Button.png"),
+                new Texture("Shop_ButtonHover.png"),
                 760, 320, 400, 100
             );
 
 
         HUDimg = new Texture[3];
-            HUDimg[0] = new Texture("backgroundHero.jpg");
-            HUDimg[1] = new Texture("fundoPopup.png");
+            HUDimg[0] = new Texture("HeroScreen_Background.jpg");
+            HUDimg[1] = new Texture("Popup_Background.png");
             HUDimg[2] = new Texture("painel.jpg"); //Painel popup
         }
 

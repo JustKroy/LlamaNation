@@ -152,19 +152,15 @@ public class HeroScreen extends ScreenAdapter {
             };
 
 
-        HUDimg = new Texture[11];
-            HUDimg[0] = new Texture("backgroundHero.jpg");
+        HUDimg = new Texture[7];
+            HUDimg[0] = new Texture("HeroScreen_Background.jpg");
             HUDimg[1] = new Texture("painel.jpg");
-            HUDimg[2] = new Texture("frame_aerial.png");
-            HUDimg[3] = new Texture("frame_classic.png");
-            HUDimg[4] = new Texture("frame_legend.png");
-            HUDimg[5] = new Texture("frame_support.png");
-            HUDimg[6] = new Texture("botaovoltar.png");
-            HUDimg[7] = new Texture("verde.png");
-            HUDimg[8] = new Texture("icon_attributes.png");
-            HUDimg[9] = new Texture("icon_skin.png");
-            HUDimg[10] = new Texture("glow.png");
-            HUDimg[10].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            HUDimg[2] = new Texture("Frame_aerial.png");
+            HUDimg[3] = new Texture("Frame_classic.png");
+            HUDimg[4] = new Texture("Frame_legend.png");
+            HUDimg[5] = new Texture("Frame_support.png");
+            HUDimg[6] = new Texture("Glow.png");
+            HUDimg[6].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
         //--------- LABEL LLAMAS -----------
         for (labelLlama l : labelLlama.values()) {
@@ -188,30 +184,30 @@ public class HeroScreen extends ScreenAdapter {
         HUDbtn = new Botao[4];
             //Voltar
             HUDbtn[0] = new Botao(
-                new Texture("botaovoltar.png"),
+                new Texture("Back_Button.png"),
                 //hover
-                new Texture("botaovoltar.png"),
+                new Texture("Back_Button.png"),
                 20,975,180,80
             );
 
             //Select
             HUDbtn[1] = new Botao(
-                new Texture("Botao_select.png"),
-                new Texture("Botao_selecthover.png"),
+                new Texture("Select_Button.png"),
+                new Texture("Select_ButtonHover.png"),
                 1000, 430, 400, 100
             );
 
             //Skins
             HUDbtn[2] = new Botao(
-                new Texture("icon_skin.png"),
-                new Texture("icon_skin.png"),
+                new Texture("Skins_Button.png"),
+                new Texture("Skins_Button.png"),
                 850, 430, 100, 100
             );
 
             //Infos
             HUDbtn[3] = new Botao(
-                new Texture("icon_attributes.png"),
-                new Texture("icon_attributes.png"),
+                new Texture("Infos_Button.png"),
+                new Texture("Infos_Button.png"),
                 700, 430, 100, 100
             );
 
@@ -285,13 +281,13 @@ public class HeroScreen extends ScreenAdapter {
 
         //FALSE - ESTÁTICO && TRUE - ANIMADO
         LLAMA("Llama.png", false, 260, 280),
-        MAGELLAMA("LlamaMage.png", false, 300, 300),
-        NINJALLAMA("LlamaNinja.png", false, 330, 300),
-        ROBOTLLAMA("LlamaRobo.png", false, 260, 280),
-        ANJOLLAMA("LlamaAnjo.png", false, 350, 300),
-        BURGUESA("LlamaBurguesa.png", false, 330, 300),
-        CHEF("LlamaChef.png", false, 330, 300),
-        YETI("AbominavelLlamaDasNeves.png", false, 260, 280);
+        MAGELLAMA("MageLlama.png", false, 300, 300),
+        NINJALLAMA("NinjaLlama.png", false, 330, 300),
+        ROBOTLLAMA("CyborgLlama.png", false, 260, 280),
+        ANJOLLAMA("AngelLlama.png", false, 350, 300),
+        BURGUESA("BourgeoisLlama.png", false, 330, 300),
+        CHEF("ChefLlama.png", false, 330, 300),
+        YETI("YetiLlama.png", false, 260, 280);
 
         public final String sprite; //Caminho da imagem
         public final boolean animado; //Se é animado ou estático
@@ -347,13 +343,13 @@ public class HeroScreen extends ScreenAdapter {
     }
 
     public enum labelLlama {
-        LABEL_LLAMA("LabelsLlamas.png"),
-        LABEL_MAGELLAMA("LabelsLlamas.png"),
-        LABEL_NINJALLAMA("LabelsLlamas.png"),
-        LABEL_ROBOTLLAMA("LabelsLlamas.png"),
-        LABEL_ANJOLLAMA("LabelsLlamas.png"),
-        LABEL_BURGUESA("LabelsLlamas.png"),
-        LABEL_CHEF("LabelsLlamas.png");
+        LABEL_LLAMA("LlamaLabel.png"),
+        LABEL_MAGELLAMA("LlamaLabel.png"),
+        LABEL_NINJALLAMA("LlamaLabel.png"),
+        LABEL_ROBOTLLAMA("LlamaLabel.png"),
+        LABEL_ANJOLLAMA("LlamaLabel.png"),
+        LABEL_BURGUESA("LlamaLabel.png"),
+        LABEL_CHEF("LlamaLabel.png");
 
         public final String label;
 
@@ -454,11 +450,11 @@ public class HeroScreen extends ScreenAdapter {
 
             // glow externo
             batch.setColor(corBackground.r, corBackground.g, corBackground.b, 1f); //0.25f
-            batch.draw(HUDimg[10], 720, 260, 1000, 1000);
+            batch.draw(HUDimg[6], 720, 260, 1000, 1000);
 
             // glow interno
             batch.setColor(corBackground.r, corBackground.g, corBackground.b, 1f); //0.45f
-            batch.draw(HUDimg[10], 880, 420, 650, 650);
+            batch.draw(HUDimg[6], 880, 420, 650, 650);
 
             // volta a cor normal
             batch.setColor(1f, 1f, 1f, 1f);
