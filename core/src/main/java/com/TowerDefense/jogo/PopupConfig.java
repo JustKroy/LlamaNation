@@ -12,26 +12,31 @@ import java.util.*;
 public class PopupConfig {
 
     //----------------------- VARIÁVEIS GLOBAIS ------------------------
-    private final ShapeRenderer shapeRenderer;
-    private final BitmapFont fonte;
+    private final ShapeRenderer shapeRenderer; //Variável que permite desenhar na tela (formas)
+    private final BitmapFont fonte; //Variável que permite desenhar texto
 
     //----------------------- ARRAYS ------------------------
-    private Rectangle[] opcoesMenu;
-    private Map<TipoConfig, List<OpcaoConfig>> opcoes = new HashMap<>();
-    private String[] textosMenu = {"Geral", "Áudio", "Vídeo", "Atalhos", "Acessibilidade"};
+    private Rectangle[] opcoesMenu; //Array com os botões clicáveis
+    private Map<TipoConfig, List<OpcaoConfig>> opcoes = new HashMap<>(); //Map que armazena as opções de configurações (tipo e texto)
+    private String[] textosMenu = {"Geral", "Áudio", "Vídeo", "Atalhos", "Acessibilidade"}; //Array que armazena os textos dos botões
 
     //---------------------- OUTRAS VARIÁVEIS -----------------
-    private boolean aberto;
-    private Rectangle areaPopup, areaBotoes;
-    private TipoConfig tipoSelecionado;
+    private boolean aberto; //Inicializa a variável que indica se o popup está aberto ou fechado
+    private Rectangle areaPopup, areaBotoes; //Variáveis que armazenam as posições do popup e dos botões
+    private TipoConfig tipoSelecionado; //Variável que armazena o tipo de configuração selecionado ativo
 
     //------------------ CONSTRUTOR --------------------
     public PopupConfig() {
-        shapeRenderer = new ShapeRenderer();
-        fonte = new BitmapFont();
-        aberto = false;
+
+        //---- Inicializa as variáveis ------
+        shapeRenderer = new ShapeRenderer(); //Objetoo que permite desenhar na tela
+        fonte = new BitmapFont(); //Objeto que permite desenhar texto
+        aberto = false; //Começa fechado
+
+        //Define padrão
         tipoSelecionado = TipoConfig.GERAL;
 
+        //Atualiza o layout e chama as opções de configurações
         atualizarLayout();
         inicializarOpcoes();
     }
@@ -39,29 +44,33 @@ public class PopupConfig {
     //--------------- RENDER DAS OPÇÕES ---------------------
     public void render(SpriteBatch batch) {
 
-        if (!aberto) return;
+        if (!aberto) return; //Se o popup não está aberto, não executa nada
 
+        //Loop que exibe os botões e o texto centralizado
         for(int i=0;i<textosMenu.length;i++){
             desenharTextoCentralizado(fonte,batch,textosMenu[i],opcoesMenu[i]);
         }
 
+        //Desenha o conteúdo do popup
         desenharConteudo(batch);
     }
 
     public void renderShapes() {
 
-        if (!aberto) return;
+        if (!aberto) return; //Se o popup não está aberto, não executa nada
 
+        //Ativa a opção de blending (Mexer com opacidade)
         Gdx.gl.glEnable(GL20.GL_BLEND);
 
+        //Incia o shaperenderer preenchendo o fundo com a cor desejada
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Fundo
+        // Fundo - escurecido
         shapeRenderer.setColor(0,0,0,0.6f);
         shapeRenderer.rect(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 
         // Popup
-        shapeRenderer.setColor(0.25f,0.25f,0.25f,1f);
+        shapeRenderer.setColor(0.25f,0.25f,0.25f,0f);
         shapeRenderer.rect(areaPopup.x,areaPopup.y,areaPopup.width,areaPopup.height);
 
         // Barra
@@ -69,9 +78,9 @@ public class PopupConfig {
         shapeRenderer.rect(areaBotoes.x,areaBotoes.y,areaBotoes.width,areaBotoes.height);
 
         // Aba selecionada
-        Rectangle sel = opcoesMenu[getIndice()];
+        Rectangle sel = opcoesMenu[getIndice()]; //Pega a posição do botão selecionado (ativo)
         shapeRenderer.setColor(Color.GRAY);
-        shapeRenderer.rect(sel.x,sel.y,sel.width,sel.height);
+        shapeRenderer.rect(sel.x,sel.y,sel.width,sel.height); //Destaca ele com uma bordas
 
         shapeRenderer.end();
 
@@ -79,35 +88,44 @@ public class PopupConfig {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.WHITE);
 
+        //Loop que desenha as bordas dos botões
         for(Rectangle r : opcoesMenu){
             shapeRenderer.rect(r.x,r.y,r.width,r.height);
         }
 
+
+
         shapeRenderer.end();
 
-        // SLIDERS
-        List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
-        if (lista == null) return;
 
-        atualizarAreasOpcoes(lista);
+
+
+        // SLIDERS
+        List<OpcaoConfig> lista = opcoes.get(tipoSelecionado); //Pega a lista de opções do tipo selecionado
+        if (lista == null) return; //Se a lista estiver vazia, não executa nada
+
+        atualizarAreasOpcoes(lista); //Atualiza as áreas dos botões
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
+        //Loop que desenha o tipo de config de acordo com a opção
         for (OpcaoConfig op : lista) {
 
+            //Se o tipo for slider e a area não estiver vazia
             if (op.tipo == TipoOpcao.SLIDER && op.area != null) {
 
-                float barX = op.area.x + op.area.width - 200;
+                float barX = op.area.x + op.area.width - 200; //Pega a posição da barra
                 float barY = op.area.y + 20;
 
                 shapeRenderer.setColor(Color.DARK_GRAY);
                 shapeRenderer.rect(barX, barY, 150, 10);
 
-                float knobX = barX + op.valor * 150;
+                float knobX = barX + op.valor * 150; //Pega a posição do knob (valor vai de 0 a 1) multiplica pelo valor da barra
 
                 shapeRenderer.setColor(Color.WHITE);
                 shapeRenderer.rect(knobX - 5, barY - 5, 10, 20);
             }
+
         }
 
         shapeRenderer.end();
@@ -115,22 +133,69 @@ public class PopupConfig {
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
+    public void renderDropdownTop(SpriteBatch batch) {
+
+
+        List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
+        if (lista == null) return;
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        for (OpcaoConfig op : lista) {
+
+            if (op.tipo == TipoOpcao.DROPDOWN && op.aberto && op.area != null) {
+
+                for (int j = 0; j < op.opcoes.length; j++) {
+
+                    float y = op.area.y - (j + 1) * 50;
+
+                    shapeRenderer.setColor(0.15f, 0.15f, 0.15f, 1f);
+
+                    float dropdownWidth = op.area.width * 0.1f;
+                    float dropdownX = op.area.x + op.area.width - dropdownWidth; // alinhado à direita
+                    shapeRenderer.rect(dropdownX -65, y, dropdownWidth, 50);
+                }
+            }
+        }
+
+        shapeRenderer.end();
+
+        batch.begin();
+
+        for (OpcaoConfig op : lista) {
+            float dropdownWidth = op.area.width * 0.3f;
+            float dropdownX = op.area.x + op.area.width - dropdownWidth; // alinhado à direita
+            if (op.tipo == TipoOpcao.DROPDOWN && op.aberto && op.area != null) {
+
+                for (int j = 0; j < op.opcoes.length; j++) {
+
+                    float y = op.area.y - (j + 1) * 50;
+
+                    desenharTextoCentralizado(fonte, batch, op.opcoes[j], new Rectangle(dropdownX + 35, y, dropdownWidth, 50));
+                }
+            }
+        }
+
+        batch.end();
+    }
+
     //------------------ INPUT ------------------
     public void handleInput(float mouseX, float mouseY) {
 
         if (!aberto) return;
 
-        // trocar aba
+        //-------------- TROCAR ABA ----------------
         if (Gdx.input.justTouched()) {
+            //Loop que verifica se o mouse clicou em algum botão
             for (int i = 0; i < opcoesMenu.length; i++) {
-                if (opcoesMenu[i].contains(mouseX, mouseY)) {
-                    tipoSelecionado = TipoConfig.values()[i];
+                if (opcoesMenu[i].contains(mouseX, mouseY)) { //Detecta clique em aba
+                    tipoSelecionado = TipoConfig.values()[i]; //Se o mouse clicou, muda o tipo de configuração selecionado
                 }
             }
         }
 
-        List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
-        if (lista == null) return;
+        List<OpcaoConfig> lista = opcoes.get(tipoSelecionado); //Pega a lista de opções do tipo selecionado
+        if (lista == null) return; //Se a lista estiver vazia, não executa nada
 
         atualizarAreasOpcoes(lista);
 
@@ -144,7 +209,7 @@ public class PopupConfig {
                 switch (op.tipo) {
 
                     case TOGGLE:
-                        op.estado = !op.estado;
+                        op.estado = !op.estado; //Liga/Desliga
                         break;
 
                     case SLIDER:
@@ -171,7 +236,7 @@ public class PopupConfig {
 
                 float barX = op.area.x + op.area.width - 200;
 
-                op.valor = (mouseX - barX) / 150f;
+                op.valor = (mouseX - barX) / 150f; //Converte posição do mouse em valor (0-1)
                 op.valor = Math.max(0f, Math.min(1f, op.valor));
             }
 
@@ -188,7 +253,7 @@ public class PopupConfig {
                     );
 
                     if (Gdx.input.justTouched() && r.contains(mouseX, mouseY)) {
-                        op.selecionado = j;
+                        op.selecionado = j; //Seleciona opçãpo
                         op.aberto = false;
                     }
                 }
@@ -198,7 +263,7 @@ public class PopupConfig {
             if (op.tipo == TipoOpcao.KEYBIND && op.esperandoTecla) {
 
                 for (int key = 0; key < 256; key++) {
-                    if (Gdx.input.isKeyJustPressed(key)) {
+                    if (Gdx.input.isKeyJustPressed(key)) { //Detecta tecla pressionada
                         op.tecla = key;
                         op.esperandoTecla = false;
                     }
@@ -208,6 +273,7 @@ public class PopupConfig {
     }
 
     //----------------- DESENHAR CONTEÚDO -----------------
+    //Desenha cada tipo - TOGGLE, SLIDER, DROPDOWN, KEYBIND
     private void desenharConteudo(SpriteBatch batch) {
 
         List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
@@ -237,17 +303,6 @@ public class PopupConfig {
                     fonte.draw(batch, op.opcoes[op.selecionado],
                         op.area.x + op.area.width - 150,
                         op.area.y + 35);
-
-                    if (op.aberto) {
-                        for (int j = 0; j < op.opcoes.length; j++) {
-
-                            float y = op.area.y - (j + 1) * 50;
-
-                            fonte.draw(batch, op.opcoes[j],
-                                op.area.x + op.area.width - 150,
-                                y + 35);
-                        }
-                    }
                     break;
 
                 case KEYBIND:
@@ -285,39 +340,76 @@ public class PopupConfig {
     //---------------- OPÇÕES ----------------
     private void inicializarOpcoes() {
 
+    //-------------------- ÁUDIO ---------------------------
+
+        //Cria uma lista que guarda todas as opções de AUDIO
         List<OpcaoConfig> audio = new ArrayList<>();
 
+    //-------- VOLUME ---------------------------------
+
+        //Cria uma opção chamada VOLUME
         OpcaoConfig vol = new OpcaoConfig("Volume");
-        vol.tipo = TipoOpcao.SLIDER;
-        vol.valor = 0.5f;
-        audio.add(vol);
+        vol.tipo = TipoOpcao.SLIDER; //Define volume como um slider
+        vol.valor = 0.5f; //Valor inciial do slider
+        audio.add(vol); //Adiciona o volume na lista
 
-        audio.add(criarToggle("Mute"));
+        audio.add(criarToggle("Mute")); //Utiliza método auxiliar que cria um botão que começa desligado
 
-        opcoes.put(TipoConfig.AUDIO, audio);
+        opcoes.put(TipoConfig.AUDIO, audio); //Salva no map todas as opções de AUDIO
 
+        //-------------------- VIDEO ---------------------------
+
+        //Cria uma lista que guarda todas as opções de VIDEO
         List<OpcaoConfig> video = new ArrayList<>();
 
+    //-------- RESOLUÇÃO ---------------------------------
+
+        //Cria uma opção de Resolução
         OpcaoConfig res = new OpcaoConfig("Resolution");
-        res.tipo = TipoOpcao.DROPDOWN;
-        res.opcoes = new String[]{"800x600","1280x720","1920x1080"};
-        res.selecionado = 2;
+        res.tipo = TipoOpcao.DROPDOWN; //Define o tipo da opção como DROPDOWN
+        res.opcoes = new String[]{"800x600","1280x720","1920x1080"}; //Define as opções dentro do dropdown de resolução
+        res.selecionado = 2; //Define a opção selecionada como a terceira opção
+        video.add(res); //Adiciona a resolução como uma das opções de vídeo
 
-        video.add(res);
+        OpcaoConfig mode = new OpcaoConfig("Exibition Mode");
+        mode.tipo = TipoOpcao.DROPDOWN;
+        mode.opcoes = new String[]{"Windowed","Fullscreen"};
+        mode.selecionado = 1;
+        video.add(mode);
 
-        opcoes.put(TipoConfig.VIDEO, video);
+        video.add(criarToggle("Show FPS"));
 
-        List<OpcaoConfig> atalhos = new ArrayList<>();
 
+        opcoes.put(TipoConfig.VIDEO, video); //Salva no map todas as opções de VIDEO
+
+        //-------------------- ATALHOS ---------------------------
+
+        List<OpcaoConfig> atalhos = new ArrayList<>(); //Cria uma lista que guarda todas as opções de ATALHOS
+
+    //-------- PULAR ---------------------------------
+
+        //Cria uma opção chamada PULAR
         OpcaoConfig key = new OpcaoConfig("Pular");
-        key.tipo = TipoOpcao.KEYBIND;
-        key.tecla = Input.Keys.SPACE;
+        key.tipo = TipoOpcao.KEYBIND; //Define o tipo da opção como KEYBIND
+        key.tecla = Input.Keys.SPACE; //Define a tecla como ESPAÇO
+        atalhos.add(key); //Adiciona a opção de PULAR na lista
 
-        atalhos.add(key);
+        opcoes.put(TipoConfig.ATALHOS, atalhos); //Salva no map todas as opções de ATALHOS
 
-        opcoes.put(TipoConfig.ATALHOS, atalhos);
+        //-------------------- GERAL ---------------------------
+
+        List<OpcaoConfig> geral = new ArrayList<>();
+
+        geral.add(criarToggle("Invert Camera-X-Asis"));
+        geral.add(criarToggle("Invert Camera-Y-Asis"));
+        geral.add(criarToggle("Invert Mouse-X-Asis"));
+        geral.add(criarToggle("Invert Mouse-Y-Asis"));
 
         opcoes.put(TipoConfig.GERAL, new ArrayList<>());
+
+
+        //-------------------- ACESSIBILIDADE ---------------------------
+
         opcoes.put(TipoConfig.ACESSIBILIDADE, new ArrayList<>());
     }
 

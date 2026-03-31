@@ -94,12 +94,13 @@ public class MenuScreen extends ScreenAdapter {
             batch.end();
 
             //DESENHA FORMAS (popup - ShapeRenderer)
-            popup.renderShapes(); // 👈 vamos criar isso
+            popup.renderShapes();
 
             //DESENHA TEXTO (batch)
             batch.begin();
             popup.render(batch);
             batch.end();
+            popup.renderDropdownTop(batch);
 
             return;
         }
