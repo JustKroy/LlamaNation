@@ -4,10 +4,16 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -37,6 +43,10 @@ public class HeroScreen extends ScreenAdapter {
     private final Skin skin; //Variável que permite carregar imagens
     private SelectBox<HeroClasse> listaClasse; //Variável que inicia um SelectBox
     private Map<labelLlama, Texture> labels = new HashMap<>();
+    private FrameBuffer fbo;
+    private Texture fboTexture;
+    private ShaderProgram blurShader;
+    private ShapeRenderer shapeRenderer;
 
 
         //--------- ARRAY ---------
@@ -61,6 +71,21 @@ public class HeroScreen extends ScreenAdapter {
         this.viewport = new StretchViewport(1920, 1080); //Define o tamanho da tela
         stage = new Stage(new ScreenViewport());
         skin = new Skin(Gdx.files.internal("ui/uiskin.json")); //Carrega a skin
+        shapeRenderer = new ShapeRenderer();
+
+        fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
+
+        //--------- SHADER ---------)
+        ShaderProgram.pedantic = false;
+
+        blurShader = new ShaderProgram(
+            Gdx.files.internal("blur.vert"),
+            Gdx.files.internal("blur.frag")
+        );
+
+        if (!blurShader.isCompiled()) {
+            System.out.println(blurShader.getLog());
+        }
 
         //--------- COMBOBOX ---------
         listaClasse = new SelectBox<>(skin);
@@ -153,7 +178,7 @@ public class HeroScreen extends ScreenAdapter {
 
 
         HUDimg = new Texture[7];
-            HUDimg[0] = new Texture("HeroScreen_Background.jpg");
+            HUDimg[0] = new Texture("MenuScreen_Background.png");
             HUDimg[1] = new Texture("painel.jpg");
             HUDimg[2] = new Texture("Frame_aerial.png");
             HUDimg[3] = new Texture("Frame_classic.png");
@@ -367,7 +392,7 @@ public class HeroScreen extends ScreenAdapter {
         CLASSICO,
         SUPPORT,
         AERIAL,
-        LENDA;
+        LENDA
     }
 
     public Color getCorBordaClasse() {
@@ -376,7 +401,6 @@ public class HeroScreen extends ScreenAdapter {
             case SUPORTES -> new Color(0.85f, 0.65f, 0.85f, 1f);
             case AEREOS -> new Color(0.45f, 0.65f, 0.85f, 1f);
             case LENDAS -> new Color(0.95f, 0.80f, 0.35f, 1f);
-            default -> Color.WHITE;
         };
     }
 
@@ -412,6 +436,7 @@ public class HeroScreen extends ScreenAdapter {
 
         viewport.apply();
         batch.setProjectionMatrix(viewport.getCamera().combined);
+        boolean clicou = Gdx.input.justTouched();
 
         // ATUALIZA O MOUSE EM TODO FRAME
         posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
@@ -444,9 +469,35 @@ public class HeroScreen extends ScreenAdapter {
 
         //----------- IMAGENS -------------
         //Desenha na tela
+
+        //------------ FUNDO -----------
+        fbo.begin();
+        ScreenUtils.clear(0, 0, 0, 1);
+
         batch.begin();
+
+            float offsetX = (posMouse.x - 960) * 0.01f;
+            float offsetY = (posMouse.y - 540) * 0.01f;
+
             //Fundo principal
-            batch.draw(HUDimg[0], 0, 0, 1920, 1080);
+            batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
+
+        batch.end();
+        fbo.end();
+
+        fboTexture = fbo.getColorBufferTexture();
+        fboTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+        batch.begin();
+
+        // CORREÇÃO DO FBO INVERTIDO
+        batch.draw(fboTexture, 0, 1080, 1920, -1080);
+
+        batch.end();
+
+        // SEMPRE resetar shader
+        batch.setShader(null);
+        batch.begin();
 
             // glow externo
             batch.setColor(corBackground.r, corBackground.g, corBackground.b, 1f); //0.25f
@@ -473,11 +524,39 @@ public class HeroScreen extends ScreenAdapter {
             }
 
             //Label
-        if (labelAtual != null) {
-            batch.draw(labelAtual, 700, 950, 700, 120);
+            if (labelAtual != null) {
+                batch.draw(labelAtual, 700, 950, 700, 120);
+            }
+
+        batch.end();
+
+        batch.setShader(null);
+
+        //2. SOMBRAS
+        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        for (Botao btn : HUDbtn) {
+            Rectangle r = btn.getArea();
+
+            // sombra leve
+            shapeRenderer.setColor(0, 0, 0, 0.08f);
+            shapeRenderer.rect(r.x + 6, r.y - 6, r.width, r.height);
+
+            // sombra principal
+            shapeRenderer.setColor(0, 0, 0, 0.2f);
+            shapeRenderer.rect(r.x + 3, r.y - 3, r.width, r.height);
         }
 
+        shapeRenderer.end();
 
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+
+        batch.begin();
         //------------ BOTOES ------------
 
         for (Botao btn : botoesHerois) {
@@ -494,20 +573,20 @@ public class HeroScreen extends ScreenAdapter {
 
         //---------------- RECTANGLE --------------
         // Detecta se houve um clique na tela ou mouse
-        if (Gdx.input.justTouched()) {
+        if (clicou) {
 
             // Converte a posição do mouse da tela para o sistema de coordenadas do jogo
             posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
             // Verifica se o clique aconteceu dentro da área do botão PLAY
-            if (HUDbtn[0].foiClicado(posMouse)) {
+            if (HUDbtn[0].foiClicado(posMouse, clicou)) {
                 // Troca a tela atual para a tela do jogo
                 game.setScreen(new MenuScreen(game));
             }
 
             //Loop para exibir as llamas de acordo com o tipo de botão
             for (int i = 0; i < botoesHerois.length; i++) {
-                if (botoesHerois[i].foiClicado(posMouse)) {
+                if (botoesHerois[i].foiClicado(posMouse, clicou)) {
 
                     for (Botao btn : botoesHerois) {
                         btn.setSelecionado(false);

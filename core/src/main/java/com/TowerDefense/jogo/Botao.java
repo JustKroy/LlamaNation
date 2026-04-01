@@ -13,6 +13,8 @@ public class Botao {
     private Texture imagem, hover, borda;
     private Rectangle area;
     private Color corBorda;
+    private float scaleAtual = 1.0f;
+    private float alpha = 0f;
     private boolean selecionado = false; //Variável que permite mudar o estado do botão
 
 
@@ -21,6 +23,10 @@ public class Botao {
         this.hover = hover;
         this.area = new Rectangle(x, y, largura, altura);
         corBorda = new Color(1,1,1,1);
+    }
+
+    public Rectangle getArea() {
+        return new Rectangle(area);
     }
     public void setSelecionado(boolean selecionado) {
         this.selecionado = selecionado;
@@ -38,8 +44,8 @@ public class Botao {
         return area.contains(mouse.x, mouse.y);
     }
 
-    public Boolean foiClicado(Vector2 mouse) {
-        return area.contains(mouse.x,mouse.y);
+    public boolean foiClicado(Vector2 mouse, boolean clicou) {
+        return estaSobre(mouse) && clicou;
     }
 
     public void atualizarCursor(Vector2 mouse){
@@ -51,17 +57,39 @@ public class Botao {
     }
 
     public void Exibir(SpriteBatch batch, Vector2 mouse) {
-        if (estaSobre(mouse)) {
-            batch.draw(hover, area.x, area.y, area.width, area.height);
-        } else {
-            batch.draw(imagem, area.x, area.y, area.width, area.height);
-        }
 
+        boolean hoverAtivo = estaSobre(mouse);
+        Texture texturaAtual = hoverAtivo ? hover : imagem;
+
+        // animações
+        boolean clicando = estaSobre(mouse) && Gdx.input.isTouched();
+        float targetScale = clicando ? 0.97f : (hoverAtivo ? 1.05f : 1.0f);
+        scaleAtual += (targetScale - scaleAtual) * 0.15f;
+
+        alpha += (1f - alpha) * 0.05f;
+
+        // cálculo centralizado
+        float drawWidth = area.width * scaleAtual;
+        float drawHeight = area.height * scaleAtual;
+
+        float drawX = area.x - (drawWidth - area.width) / 2;
+        float drawY = area.y - (drawHeight - area.height) / 2;
+
+        // glow + alpha combinados
+        float brilho = hoverAtivo ? 1.2f : 1f;
+
+        batch.setColor(brilho, brilho, brilho, alpha);
+
+        batch.draw(texturaAtual, drawX, drawY, drawWidth, drawHeight);
+
+        // borda
         if (selecionado) {
             batch.setColor(corBorda);
-            batch.draw(imagem, area.x - 10, area.y - 10, area.width + 20, area.height + 20);
-            batch.setColor(1, 1, 1, 1);
+            batch.draw(texturaAtual, drawX, drawY, drawWidth, drawHeight);
         }
+
+        // reset obrigatório
+        batch.setColor(Color.WHITE);
     }
 
     public void dispose() {

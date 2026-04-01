@@ -199,6 +199,46 @@ public class PopupConfig {
 
         atualizarAreasOpcoes(lista);
 
+        OpcaoConfig dropdownAberto = null;
+
+        for (OpcaoConfig op : lista) {
+            if (op.tipo == TipoOpcao.DROPDOWN && op.aberto) {
+                dropdownAberto = op;
+                break;
+            }
+        }
+
+        if (dropdownAberto != null) {
+
+            boolean clicouEmOpcao = false;
+
+            for (int j = 0; j < dropdownAberto.opcoes.length; j++) {
+
+                float dropdownWidth = 200;
+                float dropdownX = dropdownAberto.area.x + dropdownAberto.area.width - dropdownWidth;
+
+                Rectangle r = new Rectangle(
+                    dropdownX,
+                    dropdownAberto.area.y - (j + 1) * 50,
+                    dropdownWidth,
+                    50
+                );
+
+                if (Gdx.input.justTouched() && r.contains(mouseX, mouseY)) {
+                    dropdownAberto.selecionado = j;
+                    dropdownAberto.aberto = false;
+                    clicouEmOpcao = true;
+                }
+            }
+
+            //clique fora do dropdown fecha
+            if (Gdx.input.justTouched() && !clicouEmOpcao) {
+                dropdownAberto.aberto = false;
+            }
+
+            return; //ISSO AQUI É A CHAVE
+        }
+
         for (OpcaoConfig op : lista) {
 
             if (op.area == null) continue;
@@ -217,7 +257,10 @@ public class PopupConfig {
                         break;
 
                     case DROPDOWN:
-                        op.aberto = !op.aberto;
+                        for (OpcaoConfig other : lista) {
+                            other.aberto = false;
+                        }
+                        op.aberto = true;
                         break;
 
                     case KEYBIND:
@@ -295,8 +338,8 @@ public class PopupConfig {
 
                 case SLIDER:
                     fonte.draw(batch, (int)(op.valor*100) + "%",
-                        op.area.x + op.area.width - 80,
-                        op.area.y + 35);
+                        op.area.x + op.area.width - 40,
+                        op.area.y + 30);
                     break;
 
                 case DROPDOWN:
@@ -309,7 +352,7 @@ public class PopupConfig {
                     String txt = op.esperandoTecla ? "..." : Input.Keys.toString(op.tecla);
                     fonte.draw(batch, txt,
                         op.area.x + op.area.width - 150,
-                        op.area.y + 35);
+                        op.area.y + 30);
                     break;
             }
         }
@@ -317,15 +360,45 @@ public class PopupConfig {
 
     //----------------- ATUALIZA ÁREAS -----------------
     private void atualizarAreasOpcoes(List<OpcaoConfig> lista) {
-        for (int i = 0; i < lista.size(); i++) {
-            OpcaoConfig op = lista.get(i);
 
-            op.area = new Rectangle(
-                areaPopup.x + 80,
-                areaPopup.y + areaPopup.height - 150 - i * 80,
-                1000,
-                50
-            );
+
+        if (tipoSelecionado == TipoConfig.ATALHOS) {
+
+            int colunas = 2;
+
+            float larguraColuna = 500; // metade (ajusta se quiser)
+            float espacamentoX = 40;
+
+            float xBase = areaPopup.x + 80;
+            float yBase = areaPopup.y + areaPopup.height - 150;
+
+            for (int i = 0; i < lista.size(); i++) {
+
+                OpcaoConfig op = lista.get(i);
+
+                int coluna = i % colunas;   // 0 ou 1
+                int linha = i / colunas;    // 0,1,2...
+
+                float x = xBase + coluna * (larguraColuna + espacamentoX);
+                float y = yBase - linha * 80;
+
+                op.area = new Rectangle(x, y, larguraColuna, 50);
+            }
+
+        } else {
+            // layout normal (1 coluna)
+
+            for (int i = 0; i < lista.size(); i++) {
+
+                OpcaoConfig op = lista.get(i);
+
+                op.area = new Rectangle(
+                    areaPopup.x + 80,
+                    areaPopup.y + areaPopup.height - 150 - i * 80,
+                    1000,
+                    50
+                );
+            }
         }
     }
 
@@ -379,6 +452,13 @@ public class PopupConfig {
 
         video.add(criarToggle("Show FPS"));
 
+        OpcaoConfig scale = new OpcaoConfig("Effects Scale");
+        scale.tipo = TipoOpcao.SLIDER;
+        scale.valor = 1f;
+        video.add(scale);
+
+        video.add(criarToggle("Map Effects"));
+
 
         opcoes.put(TipoConfig.VIDEO, video); //Salva no map todas as opções de VIDEO
 
@@ -388,11 +468,31 @@ public class PopupConfig {
 
     //-------- PULAR ---------------------------------
 
+    //-------------- JOGABILIDADE --------------
         //Cria uma opção chamada PULAR
-        OpcaoConfig key = new OpcaoConfig("Pular");
-        key.tipo = TipoOpcao.KEYBIND; //Define o tipo da opção como KEYBIND
-        key.tecla = Input.Keys.SPACE; //Define a tecla como ESPAÇO
-        atalhos.add(key); //Adiciona a opção de PULAR na lista
+        atalhos.add(criarAtalho("Reproduzir/Acelerar", Input.Keys.SPACE));
+
+        atalhos.add(criarAtalho("Pausar/Voltar", Input.Keys.BACKSPACE));
+
+        atalhos.add(criarAtalho("Enviar next wave", Input.Keys.SHIFT_LEFT + Input.Keys.SPACE));
+
+        atalhos.add(criarAtalho("Vender", Input.Keys.BACKSPACE));
+
+        atalhos.add(criarAtalho("Melhorar Herói", Input.Keys.Q));
+
+        //----------- LLAMAS -----------
+        atalhos.add(criarAtalho("Llama 1", Input.Keys.NUM_1));
+
+        atalhos.add(criarAtalho("Llama 2", Input.Keys.NUM_2));
+
+        atalhos.add(criarAtalho("Llama 3", Input.Keys.NUM_3));
+
+        atalhos.add(criarAtalho("Llama 4", Input.Keys.NUM_4));
+
+        atalhos.add(criarAtalho("Llama 5", Input.Keys.NUM_5));
+
+        atalhos.add(criarAtalho("Llama 6", Input.Keys.NUM_6));
+
 
         opcoes.put(TipoConfig.ATALHOS, atalhos); //Salva no map todas as opções de ATALHOS
 
@@ -405,18 +505,34 @@ public class PopupConfig {
         geral.add(criarToggle("Invert Mouse-X-Asis"));
         geral.add(criarToggle("Invert Mouse-Y-Asis"));
 
-        opcoes.put(TipoConfig.GERAL, new ArrayList<>());
+        //Vincular Steam
+        //Vincular E-mail
+        //Vincular Discord
+        //Vincular Twitch
+        //Nome de Exibição
+        //UserID
+        //Idioma
+
+        opcoes.put(TipoConfig.GERAL, geral);
 
 
         //-------------------- ACESSIBILIDADE ---------------------------
 
         opcoes.put(TipoConfig.ACESSIBILIDADE, new ArrayList<>());
+        //Daltonismo/Alto Contraste
     }
 
     private OpcaoConfig criarToggle(String texto) {
         OpcaoConfig op = new OpcaoConfig(texto);
         op.tipo = TipoOpcao.TOGGLE;
         op.estado = false;
+        return op;
+    }
+
+    private OpcaoConfig criarAtalho(String texto, int tecla) {
+        OpcaoConfig op = new OpcaoConfig(texto);
+        op.tipo = TipoOpcao.KEYBIND;
+        op.tecla = tecla;
         return op;
     }
 
