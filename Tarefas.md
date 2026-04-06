@@ -35,6 +35,7 @@ Menu de Heróis completo<br>
 Background das Llamas<br>
 Banco de dados<br>
 Menu Principal, incluindo integração com banco<br>
+Configurações<br>
 
 ## TAREFAS FUTURAS
 ### UI GLOBAIS
@@ -47,6 +48,8 @@ Menu Principal, incluindo integração com banco<br>
 ### BOTÕES TELA PRINCIPAL
 - Background menu principal
 - Background configs
+- Botão de configurações (Geral, Áudio, Vídeo, Atalhos, Acessibilidades) - Retangular
+- Barra de volume, Botão ON/OFF
 ### BOTÕES TELA DE JOGO
 - Botão "Sell"
 - Botão "Leave Battle"
