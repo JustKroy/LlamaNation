@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 import java.util.*;
 
@@ -24,14 +25,57 @@ public class PopupConfig {
     private boolean aberto; //Inicializa a variável que indica se o popup está aberto ou fechado
     private Rectangle areaPopup, areaBotoes; //Variáveis que armazenam as posições do popup e dos botões
     private TipoConfig tipoSelecionado; //Variável que armazena o tipo de configuração selecionado ativo
+    private final Color COR_FUNDO = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+    private final Color COR_PRIMARIA = new Color(0.2f, 0.6f, 1f, 1f);
+    private final Color COR_HOVER = new Color(1,1,1,0.05f);
+    BitmapFont fonteTitulo;
+    BitmapFont fonteNormal;
 
     //------------------ CONSTRUTOR --------------------
     public PopupConfig() {
 
         //---- Inicializa as variáveis ------
         shapeRenderer = new ShapeRenderer(); //Objetoo que permite desenhar na tela
-        fonte = new BitmapFont(); //Objeto que permite desenhar texto
         aberto = false; //Começa fechado
+
+
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(
+            Gdx.files.internal("fonts/Raleway-Regular.ttf")
+        );
+
+        FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+        // CONFIGURAÇÕES IMPORTANTES
+        param.size = 28; // tamanho da fonte (ajusta aqui)
+        param.color = Color.WHITE;
+
+        // deixa suave (ANTI-SERRILHADO)
+        param.minFilter = Texture.TextureFilter.Linear;
+        param.magFilter = Texture.TextureFilter.Linear;
+
+        param.borderWidth = 2; // espessura da borda
+        param.borderColor = Color.BLACK;
+
+        param.shadowOffsetX = 2;
+        param.shadowOffsetY = 2;
+        param.shadowColor = new Color(0, 0, 0, 0.5f);
+
+        // gera a fonte
+        fonte = generator.generateFont(param);
+
+
+
+        // TÍTULO
+        param.size = 32;
+        fonteTitulo = generator.generateFont(param);
+
+// TEXTO NORMAL
+        param.size = 22;
+        fonteNormal = generator.generateFont(param);
+
+        // limpa memória
+        generator.dispose();
+
 
         //Define padrão
         tipoSelecionado = TipoConfig.GERAL;
@@ -44,12 +88,23 @@ public class PopupConfig {
     //--------------- RENDER DAS OPÇÕES ---------------------
     public void render(SpriteBatch batch) {
 
+
         if (!aberto) return; //Se o popup não está aberto, não executa nada
 
         //Loop que exibe os botões e o texto centralizado
         for(int i=0;i<textosMenu.length;i++){
-            desenharTextoCentralizado(fonte,batch,textosMenu[i],opcoesMenu[i]);
+
+            Rectangle r = opcoesMenu[i];
+
+            if (i == getIndice()) {
+                fonte.setColor(Color.WHITE);
+            } else {
+                fonte.setColor(Color.LIGHT_GRAY);
+            }
+
+            desenharTextoCentralizado(fonteTitulo,batch,textosMenu[i], r);
         }
+
 
         //Desenha o conteúdo do popup
         desenharConteudo(batch);
@@ -59,23 +114,35 @@ public class PopupConfig {
 
         if (!aberto) return; //Se o popup não está aberto, não executa nada
 
+        float colunaDireita = areaPopup.x + areaPopup.width - 220;
+
         //Ativa a opção de blending (Mexer com opacidade)
         Gdx.gl.glEnable(GL20.GL_BLEND);
 
+        float mouseX = Gdx.input.getX();
+        float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
+
         //Incia o shaperenderer preenchendo o fundo com a cor desejada
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
 
         // Fundo - escurecido
         shapeRenderer.setColor(0,0,0,0.6f);
         shapeRenderer.rect(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 
+        // sombra
+        shapeRenderer.setColor(0,0,0,0.3f);
+        shapeRenderer.rect(areaPopup.x + 8, areaPopup.y - 8, areaPopup.width, areaPopup.height);
+
         // Popup
-        shapeRenderer.setColor(0.25f,0.25f,0.25f,0f);
+        shapeRenderer.setColor(COR_FUNDO);
         shapeRenderer.rect(areaPopup.x,areaPopup.y,areaPopup.width,areaPopup.height);
 
-        // Barra
-        shapeRenderer.setColor(0,0,0.2f,0.8f);
-        shapeRenderer.rect(areaBotoes.x,areaBotoes.y,areaBotoes.width,areaBotoes.height);
+        shapeRenderer.end();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(1,1,1,0.1f);
+        shapeRenderer.rect(areaPopup.x, areaPopup.y, areaPopup.width, areaPopup.height);
 
         // Aba selecionada
         Rectangle sel = opcoesMenu[getIndice()]; //Pega a posição do botão selecionado (ativo)
@@ -88,9 +155,22 @@ public class PopupConfig {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.WHITE);
 
-        //Loop que desenha as bordas dos botões
-        for(Rectangle r : opcoesMenu){
-            shapeRenderer.rect(r.x,r.y,r.width,r.height);
+        for (int i = 0; i < opcoesMenu.length; i++) {
+
+            Rectangle r = opcoesMenu[i];
+
+            boolean hover = r.contains(mouseX, mouseY);
+            boolean ativo = (i == getIndice());
+
+            if (ativo) {
+                shapeRenderer.setColor(0.4f, 0.4f, 0.4f, 1f);
+            } else if (hover) {
+                shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1f);
+            } else {
+                shapeRenderer.setColor(0.2f, 0.2f, 0.2f, 1f);
+            }
+
+            shapeRenderer.rect(r.x, r.y, r.width, r.height);
         }
 
 
@@ -111,19 +191,56 @@ public class PopupConfig {
         //Loop que desenha o tipo de config de acordo com a opção
         for (OpcaoConfig op : lista) {
 
+            boolean hover = op.area.contains(mouseX, mouseY);
+
+            if (hover) {
+                shapeRenderer.setColor(COR_HOVER);
+                shapeRenderer.rect(op.area.x, op.area.y, op.area.width, op.area.height);
+            }
+
             //Se o tipo for slider e a area não estiver vazia
             if (op.tipo == TipoOpcao.SLIDER && op.area != null) {
 
-                float barX = op.area.x + op.area.width - 200; //Pega a posição da barra
+                float barX = colunaDireita;
                 float barY = op.area.y + 20;
 
-                shapeRenderer.setColor(Color.DARK_GRAY);
-                shapeRenderer.rect(barX, barY, 150, 10);
+                // fundo
+                shapeRenderer.setColor(0.2f, 0.2f, 0.2f, 1);
+                shapeRenderer.rect(barX, barY, 150, 8);
 
-                float knobX = barX + op.valor * 150; //Pega a posição do knob (valor vai de 0 a 1) multiplica pelo valor da barra
+                // preenchido
+                shapeRenderer.setColor(COR_PRIMARIA);
+                shapeRenderer.rect(barX, barY, 150 * op.valor, 8);
+
+                // bolinha
+                float knobX = barX + op.valor * 150;
 
                 shapeRenderer.setColor(Color.WHITE);
-                shapeRenderer.rect(knobX - 5, barY - 5, 10, 20);
+                shapeRenderer.circle(knobX, barY + 4, 8);
+            }
+
+            if (op.tipo == TipoOpcao.TOGGLE && op.area != null) {
+
+                float x = colunaDireita;
+                float y = op.area.y + 10;
+
+                float w = 60;
+                float h = 30;
+
+                // fundo
+                if (op.estado) {
+                    shapeRenderer.setColor(COR_PRIMARIA);
+                } else {
+                    shapeRenderer.setColor(0.4f, 0.4f, 0.4f, 1);
+                }
+
+                shapeRenderer.rect(x, y, w, h);
+
+                // bolinha
+                float bolinhaX = op.estado ? x + w - 15 : x + 15;
+
+                shapeRenderer.setColor(Color.WHITE);
+                shapeRenderer.circle(bolinhaX, y + h/2, 10);
             }
 
         }
@@ -134,46 +251,53 @@ public class PopupConfig {
     }
 
     public void renderDropdownTop(SpriteBatch batch) {
-
-
         List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
         if (lista == null) return;
 
+        OpcaoConfig dropdownAberto = null;
+        for (OpcaoConfig op : lista) {
+            if (op.tipo == TipoOpcao.DROPDOWN && op.aberto && op.area != null) {
+                dropdownAberto = op;
+                break;
+            }
+        }
+
+        if (dropdownAberto == null) return;
+
+        // Desenha o fundo do dropdown
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        for (OpcaoConfig op : lista) {
+        for (int j = 0; j < dropdownAberto.opcoes.length; j++) {
+            String textoOpcao = dropdownAberto.opcoes[j];
+            GlyphLayout layout = new GlyphLayout(fonteNormal, textoOpcao);
+            float padding = 20;
+            float larguraTexto = layout.width + padding;
 
-            if (op.tipo == TipoOpcao.DROPDOWN && op.aberto && op.area != null) {
+            float dropdownX = dropdownAberto.area.x + dropdownAberto.area.width - larguraTexto;
+            float y = dropdownAberto.area.y - (j + 1) * 50;
 
-                for (int j = 0; j < op.opcoes.length; j++) {
-
-                    float y = op.area.y - (j + 1) * 50;
-
-                    shapeRenderer.setColor(0.15f, 0.15f, 0.15f, 1f);
-
-                    float dropdownWidth = op.area.width * 0.1f;
-                    float dropdownX = op.area.x + op.area.width - dropdownWidth; // alinhado à direita
-                    shapeRenderer.rect(dropdownX -65, y, dropdownWidth, 50);
-                }
-            }
+            shapeRenderer.setColor(0.15f, 0.15f, 0.15f, 1f);
+            shapeRenderer.rect(dropdownX, y, larguraTexto, 50);
         }
 
         shapeRenderer.end();
 
+        // Desenha o texto dentro do dropdown
         batch.begin();
 
-        for (OpcaoConfig op : lista) {
-            float dropdownWidth = op.area.width * 0.3f;
-            float dropdownX = op.area.x + op.area.width - dropdownWidth; // alinhado à direita
-            if (op.tipo == TipoOpcao.DROPDOWN && op.aberto && op.area != null) {
+        for (int j = 0; j < dropdownAberto.opcoes.length; j++) {
+            String textoOpcao = dropdownAberto.opcoes[j];
+            GlyphLayout layout = new GlyphLayout(fonteNormal, textoOpcao);
+            float padding = 20;
+            float larguraTexto = layout.width + padding;
 
-                for (int j = 0; j < op.opcoes.length; j++) {
+            float dropdownX = dropdownAberto.area.x + dropdownAberto.area.width - larguraTexto;
+            float y = dropdownAberto.area.y - (j + 1) * 50;
 
-                    float y = op.area.y - (j + 1) * 50;
+            Rectangle optionRect = new Rectangle(dropdownX, y, larguraTexto, 50);
 
-                    desenharTextoCentralizado(fonte, batch, op.opcoes[j], new Rectangle(dropdownX + 35, y, dropdownWidth, 50));
-                }
-            }
+            // Alinha o texto à direita dentro do retângulo, centralizado verticalmente
+            desenharTextoDireitaCentro(fonteNormal, batch, textoOpcao, optionRect, 10);
         }
 
         batch.end();
@@ -276,8 +400,8 @@ public class PopupConfig {
 
             // arrastar slider
             if (op.tipo == TipoOpcao.SLIDER && op.arrastando) {
-
-                float barX = op.area.x + op.area.width - 200;
+                float colunaDireita = areaPopup.x + areaPopup.width - 220;
+                float barX = colunaDireita;
 
                 op.valor = (mouseX - barX) / 150f; //Converte posição do mouse em valor (0-1)
                 op.valor = Math.max(0f, Math.min(1f, op.valor));
@@ -326,36 +450,49 @@ public class PopupConfig {
 
         for (OpcaoConfig op : lista) {
 
-            desenharTextoCentralizado(fonte, batch, op.texto, op.area);
+            fonte.setColor(Color.WHITE);
+            desenharTextoCentralizado(fonteNormal, batch, op.texto, op.area);
+
+            fonte.setColor(Color.LIGHT_GRAY);
 
             switch (op.tipo) {
 
                 case TOGGLE:
-                    fonte.draw(batch, op.estado ? "ON" : "OFF",
+                    fonteNormal.draw(batch, op.estado ? "ON" : "OFF",
                         op.area.x + op.area.width - 60,
                         op.area.y + 35);
                     break;
 
                 case SLIDER:
-                    fonte.draw(batch, (int)(op.valor*100) + "%",
-                        op.area.x + op.area.width - 40,
-                        op.area.y + 30);
+                    float colunaDireita = areaPopup.x + areaPopup.width - 220;
+
+                    // valor % alinhado com slider
+                    fonteNormal.draw(batch, (int)(op.valor * 100) + "%",
+                        colunaDireita + 160,
+                        op.area.y + 35);
                     break;
 
                 case DROPDOWN:
-                    fonte.draw(batch, op.opcoes[op.selecionado],
-                        op.area.x + op.area.width - 150,
-                        op.area.y + 35);
+                    desenharTextoDireitaCentro(fonteNormal  , batch, op.opcoes[op.selecionado], op.area, 20);
                     break;
 
                 case KEYBIND:
                     String txt = op.esperandoTecla ? "..." : Input.Keys.toString(op.tecla);
-                    fonte.draw(batch, txt,
-                        op.area.x + op.area.width - 150,
+                    fonteNormal.draw(batch, txt,
+                        op.area.x + op.area.width - 100,
                         op.area.y + 30);
                     break;
             }
         }
+    }
+
+    private void desenharTextoDireitaCentro(BitmapFont font, SpriteBatch batch, String texto, Rectangle area, float paddingRight) {
+        GlyphLayout layout = new GlyphLayout(font, texto);
+
+        float x = area.x + area.width - layout.width - paddingRight; // alinhado à direita com padding
+        float y = area.y + (area.height + layout.height) / 2;          // centraliza verticalmente
+
+        font.draw(batch, layout, x, y);
     }
 
     //----------------- ATUALIZA ÁREAS -----------------
