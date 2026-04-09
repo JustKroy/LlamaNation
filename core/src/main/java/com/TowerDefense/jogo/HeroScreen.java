@@ -1,6 +1,9 @@
 package com.TowerDefense.jogo;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
@@ -13,6 +16,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -43,11 +47,12 @@ public class HeroScreen extends ScreenAdapter {
     private final Skin skin; //Variável que permite carregar imagens
     private SelectBox<HeroClasse> listaClasse; //Variável que inicia um SelectBox
     private Map<labelLlama, Texture> labels = new HashMap<>();
-    private FrameBuffer fbo;
+    private final FrameBuffer fbo;
     private Texture fboTexture;
-    private ShaderProgram blurShader;
-    private ShapeRenderer shapeRenderer;
-
+    private final ShaderProgram blurShader;
+    private final ShapeRenderer shapeRenderer;
+    private float scaleAtual, alpha, HoverAlpha;
+    private float mouseX, mouseY;
 
         //--------- ARRAY ---------
     //Variável que permite carregar imagens
@@ -59,6 +64,7 @@ public class HeroScreen extends ScreenAdapter {
     private float[] posY = {580, 580, 330, 330, 80};
     private Botao[] HUDbtn;
     private Texture heroSpriteSheetAtual, heroImagemEstatica, frameAtual, labelAtual;
+    private PainelSkins skinsPanel;
 
     // Vetor para armazenar a posição do mouse convertida para o sistema do jogo
     private Vector2 posMouse = new Vector2();
@@ -72,6 +78,12 @@ public class HeroScreen extends ScreenAdapter {
         stage = new Stage(new ScreenViewport());
         skin = new Skin(Gdx.files.internal("ui/uiskin.json")); //Carrega a skin
         shapeRenderer = new ShapeRenderer();
+        skinsPanel = new PainelSkins();
+        scaleAtual = 1.0f;
+        alpha = 0f;
+        HoverAlpha = 0f;
+
+
 
         fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
 
@@ -120,7 +132,10 @@ public class HeroScreen extends ScreenAdapter {
         listaClasse.getList().getStyle().fontColorUnselected = Color.LIGHT_GRAY;
 
         stage.addActor(listaClasse);
-        Gdx.input.setInputProcessor(stage); //Entende o clique do mouse
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(stage);
+        multiplexer.addProcessor(new InputAdapter() {});
+        Gdx.input.setInputProcessor(multiplexer);
 
 
         //--------- Imagens -----------
@@ -253,7 +268,7 @@ public class HeroScreen extends ScreenAdapter {
         CLASSICOS,
         SUPORTES,
         AEREOS,
-        LENDAS;
+        LENDAS
 
     }
 
@@ -331,6 +346,9 @@ public class HeroScreen extends ScreenAdapter {
 
     //Função que troca o herói passano o parâmetro tipo
     private void trocarHeroi(HeroType tipo) {
+
+        alpha = 0f;
+        scaleAtual = 0.7f; // começa menor e cresce
 
         heroSelecionado = tipo; //Salva o tipo
 
@@ -430,184 +448,255 @@ public class HeroScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-
-        //Limpa a tela
+        // Limpa a tela
         ScreenUtils.clear(0.1f, 0.1f, 0.1f, 1);
 
         viewport.apply();
         batch.setProjectionMatrix(viewport.getCamera().combined);
-        boolean clicou = Gdx.input.justTouched();
+        boolean clicou = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
 
         // ATUALIZA O MOUSE EM TODO FRAME
         posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
+        mouseX = Gdx.input.getX();
+        mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
+
         // Cursor padrão
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
 
-        //Inicializa os botões de acordo com a classe selecionada
+        // Inicializa os botões de acordo com a classe selecionada
         HeroType[] heroisAtuais = heroisPorClasse[getIndiceClasse()];
 
-        //Inicializa as label de acordo com a llama selecionada
+        // Inicializa as label de acordo com a llama selecionada
         labelLlama[] labelsAtuais = labelPorLlama[getIndiceClasse()];
 
         // Se estiver sobre algum botão, vira mão
-
         for (Botao btn : botoesHerois) {
             btn.atualizarCursor(posMouse);
         }
-
         for(Botao btn : HUDbtn) {
             btn.atualizarCursor(posMouse);
         }
 
-        //----------- ANIMACAO -------------
+        // ----------- ANIMACAO -------------
         tempoAnimacao += delta;
-        /*representa o tempo, em segundos, decorrido entre o quadro atual e o quadro anterior. Sua principal função é tornar o movimento
-         * e a lógica do jogo independentes da taxa de quadros (FPS), garantindo que tudo corra na mesma velocidade, seja em um celular rápido
-         * ou lento, mantendo a consistência.
-         */
 
-        //----------- IMAGENS -------------
-        //Desenha na tela
+        // Aumenta o alpha com o tempo (fade in)
+        if (alpha < 1f) {
+            alpha += delta * 3f; // velocidade do fade
+            if (alpha > 1f) alpha = 1f;
+        }
 
-        //------------ FUNDO -----------
+        // SCALE (zoom suave)
+        if (scaleAtual < 1f) {
+            scaleAtual += delta * 2.5f;
+            if (scaleAtual > 1f) scaleAtual = 1f;
+        }
+
+        // ------------ FUNDO -----------
         fbo.begin();
         ScreenUtils.clear(0, 0, 0, 1);
-
         batch.begin();
-
-            float offsetX = (posMouse.x - 960) * 0.01f;
-            float offsetY = (posMouse.y - 540) * 0.01f;
-
-            //Fundo principal
-            batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
-
+        float offsetX = (posMouse.x - 960) * 0.01f;
+        float offsetY = (posMouse.y - 540) * 0.01f;
+        batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
         batch.end();
         fbo.end();
 
         fboTexture = fbo.getColorBufferTexture();
         fboTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
+        batch.setShader(blurShader);
         batch.begin();
-
-        // CORREÇÃO DO FBO INVERTIDO
         batch.draw(fboTexture, 0, 1080, 1920, -1080);
-
         batch.end();
 
         // SEMPRE resetar shader
         batch.setShader(null);
         batch.begin();
 
-            // glow externo
-            batch.setColor(corBackground.r, corBackground.g, corBackground.b, 1f); //0.25f
-            batch.draw(HUDimg[6], 720, 260, 1000, 1000);
+        float tempo = tempoAnimacao;
 
-            // glow interno
-            batch.setColor(corBackground.r, corBackground.g, corBackground.b, 1f); //0.45f
-            batch.draw(HUDimg[6], 880, 420, 650, 650);
+        // Pulsação suave (0 a 1)
+        float pulso = (float) Math.sin(tempo * 3f) * 0.5f + 0.5f;
 
-            // volta a cor normal
-            batch.setColor(1f, 1f, 1f, 1f);
+        // Calcula posição e escala
+        float largura = heroSelecionado.largura;
+        float altura = heroSelecionado.altura;
+        float larguraEscalada = largura * scaleAtual;
+        float alturaEscalada = altura * scaleAtual;
 
-            //Define a largura e altura do herói selecionado
-            float largura = heroSelecionado.largura;
-            float altura = heroSelecionado.altura;
+        float x = 1050 + (largura - larguraEscalada) / 2;
+        float y = 580 + (altura - alturaEscalada) / 2;
 
+        float floatY = (float) Math.sin(tempo * 2f) * 8f * HoverAlpha;
+        float yFinal = y + floatY;
 
-            //Se estiver animado, desenha a animação, caso contrário, desenha a imagem estática
-            if (heroAnimacaoAtual != null) {
-                TextureRegion frameAtual = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true); //Pega o frame atual da animação
-                batch.draw(frameAtual, 1050, 580, largura, altura); //Desenha
-            } else {
-                batch.draw(heroImagemEstatica, 1050, 580, largura, altura);
-            }
+        // ------------- GLOW 1: FUNDO SUAVE (Sempre visível e BEM APARENTE) -------------
+        // Aumentei a opacidade base de 0.5f para 0.85f.
+        // Isso deixa a cor do glow muito mais densa e forte mesmo sem o mouse.
+        float alphaBaseLayer = 0.85f + (0.15f * HoverAlpha);
+        batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaBaseLayer);
+        batch.draw(HUDimg[6], x - 220, yFinal - 190, 750, 750);
 
-            //Label
-            if (labelAtual != null) {
-                batch.draw(labelAtual, 700, 950, 700, 120);
-            }
+        // ------------- GLOW 2: BRILHO INTENSO (LUZ REAL) -------------
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
 
-        batch.end();
+        // Aumentei o aditivo base de 0.15f para 0.3f para dar um toque mais vivo,
+        // mas ainda seguro o suficiente para não "lavar" a tela de branco.
+        float alphaAditivo = 0.3f + (0.5f * HoverAlpha * pulso);
 
-        batch.setShader(null);
+        batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaAditivo);
+        batch.draw(HUDimg[6], x - 250, yFinal - 220, 850, 850);
 
-        //2. SOMBRAS
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+        batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaAditivo * 0.8f);
+        batch.draw(HUDimg[6], x - 150, yFinal - 120, 650, 650);
 
-        Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
+        // ------------- GLOW INTERNO -------------
+        // Aumentei a visibilidade base aqui também (de 0.4f para 0.7f)
+        batch.setColor(corBackground.r, corBackground.g, corBackground.b, 0.7f + (0.3f * HoverAlpha));
+        batch.draw(HUDimg[6], 880, 400, 600, 600);
+
+        // Reseta a cor ANTES de desenhar o herói para não afetar a Llama
+        batch.setColor(1f, 1f, 1f, 1f);
+
+        // ------------- ATUALIZA O HOVER DA LLAMA -------------
+        Rectangle areaLlama = new Rectangle(x, yFinal, larguraEscalada, alturaEscalada);
+        boolean hoverLlama = areaLlama.contains(posMouse);
+        float velocidade = 6f;
+
+        if (hoverLlama) {
+            HoverAlpha += delta * velocidade;
+        } else {
+            HoverAlpha -= delta * velocidade;
+        }
+        HoverAlpha = Math.max(0f, Math.min(1f, HoverAlpha));
+
+        // ------------- DESENHO DA SOMBRA -------------
+        float alphaFinal = alpha * (0.8f + 0.2f * HoverAlpha);
+        batch.setColor(0f, 0f, 0f, 0.25f * (0.5f + HoverAlpha * 0.5f));
+        float sombraOffsetX = 10f;
+        float sombraOffsetY = -10f;
+
+        if (heroAnimacaoAtual != null) {
+            TextureRegion frame = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true);
+            batch.draw(frame, x + sombraOffsetX, yFinal + sombraOffsetY, larguraEscalada, alturaEscalada);
+        } else {
+            batch.draw(heroImagemEstatica, x + sombraOffsetX, yFinal + sombraOffsetY, larguraEscalada, alturaEscalada);
+        }
+
+        // ------------- DESENHO DA LLAMA (HERÓI) -------------
+        batch.setColor(1f, 1f, 1f, alphaFinal);
+
+        if (heroAnimacaoAtual != null) {
+            TextureRegion frame = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true);
+            batch.draw(frame, x, yFinal, larguraEscalada, alturaEscalada);
+        } else {
+            batch.draw(heroImagemEstatica, x, yFinal, larguraEscalada, alturaEscalada);
+        }
+
+        // Reseta tudo no final
+        batch.setColor(1f, 1f, 1f, 1f);
+
+        // ------------- LABEL -------------
+        if (labelAtual != null) {
+            batch.draw(labelAtual, 700, 900, 700, 150);
+        }
+
+        batch.end();
+        batch.setShader(null);
+
+        // ------------ SOMBRAS (SHAPE RENDERER) ------------
+        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
         for (Botao btn : HUDbtn) {
             Rectangle r = btn.getArea();
-
-            // sombra leve
             shapeRenderer.setColor(0, 0, 0, 0.08f);
             shapeRenderer.rect(r.x + 6, r.y - 6, r.width, r.height);
-
-            // sombra principal
             shapeRenderer.setColor(0, 0, 0, 0.2f);
             shapeRenderer.rect(r.x + 3, r.y - 3, r.width, r.height);
         }
-
         shapeRenderer.end();
-
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
+        // ------------ BOTOES ------------
         batch.begin();
-        //------------ BOTOES ------------
-
         for (Botao btn : botoesHerois) {
             btn.Exibir(batch, posMouse);
         }
-
         for(Botao btn : HUDbtn) {
             btn.Exibir(batch, posMouse);
         }
-
         batch.end();
-        stage.act(delta); //Atualiza o stage
-        stage.draw(); //Desenha o stage
 
-        //---------------- RECTANGLE --------------
-        // Detecta se houve um clique na tela ou mouse
+        // ----------------------------------------------------
+        if (skinsPanel.isAberto()) {
+            // Passa a câmera para a caixa preta não ficar torta/tamanho errado
+            skinsPanel.renderShapes(viewport.getCamera().combined);
+
+            batch.begin();
+            skinsPanel.render(batch);
+            batch.end();
+        }
+        // ----------------------------------------------------
+
+        stage.act(delta);
+        stage.draw();
+
+        // ------------- CLIQUE -------------
         if (clicou) {
-
-            // Converte a posição do mouse da tela para o sistema de coordenadas do jogo
             posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
-            // Verifica se o clique aconteceu dentro da área do botão PLAY
             if (HUDbtn[0].foiClicado(posMouse, clicou)) {
-                // Troca a tela atual para a tela do jogo
                 game.setScreen(new MenuScreen(game));
             }
 
-            //Loop para exibir as llamas de acordo com o tipo de botão
             for (int i = 0; i < botoesHerois.length; i++) {
                 if (botoesHerois[i].foiClicado(posMouse, clicou)) {
-
                     for (Botao btn : botoesHerois) {
                         btn.setSelecionado(false);
                     }
 
-                    botoesHerois[i].setSelecionado(true); //Define o botão clicado como selecionado
-                    botoesHerois[i].setCorBorda(getCorBordaClasse()); //Define a borda do botão clicado
+                    botoesHerois[i].setSelecionado(true);
+                    botoesHerois[i].setCorBorda(getCorBordaClasse());
 
                     if (i < heroisAtuais.length) {
                         trocarHeroi(heroisAtuais[i]);
                     }
-
-                    //Troca a label de acordo com o botão clicado
                     if (i < labelsAtuais.length) {
                         trocarLabel(labelsAtuais[i]);
                     }
-
-                    trocarBackground(backgroundSelecionado);
+                    trocarBackground(backgroundSelecionado != null ? backgroundSelecionado : BackgroundType.CLASSICO);
                 }
             }
 
+            // Se clicou em SKINS
+            if (HUDbtn[2].foiClicado(posMouse, clicou)) {
+                // Se já estava aberto, fecha. Se estava fechado, abre e FECHA o de infos
+                if (skinsPanel.isAberto()) {
+                    skinsPanel.fechar();
+                } else {
+                    skinsPanel.abrir();
+                    // infosPanel.fechar(); <-- Adicione isso quando criar o PainelInfos
+                }
+            }
+
+            // Se clicou em INFOS
+            if (HUDbtn[3].foiClicado(posMouse, clicou)) {
+                // Exatamente a mesma lógica, mas invertida!
+            /* if (infosPanel.isAberto()) {
+                infosPanel.fechar();
+            } else {
+                infosPanel.abrir();
+                skinsPanel.fechar(); // Fecha o de skins para o de infos tomar o lugar
+            }
+            */
+            }
         }
     }
 
