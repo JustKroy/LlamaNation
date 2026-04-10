@@ -61,30 +61,39 @@ public class Botao {
         boolean hoverAtivo = estaSobre(mouse);
         Texture texturaAtual = hoverAtivo ? hover : imagem;
 
-        // animações
+        // 1. ANIMAÇÕES DE ESCALA:
+        // Se estiver selecionado (aba aberta), ele trava afundado em 0.95f.
+        // Se não, segue a lógica normal de clique e hover.
         boolean clicando = estaSobre(mouse) && Gdx.input.isTouched();
-        float targetScale = clicando ? 0.97f : (hoverAtivo ? 1.05f : 1.0f);
+        float targetScale = selecionado ? 0.95f : (clicando ? 0.97f : (hoverAtivo ? 1.05f : 1.0f));
         scaleAtual += (targetScale - scaleAtual) * 0.15f;
 
         alpha += (1f - alpha) * 0.05f;
 
-        // cálculo centralizado
+        // 2. CÁLCULO CENTRALIZADO
         float drawWidth = area.width * scaleAtual;
         float drawHeight = area.height * scaleAtual;
 
         float drawX = area.x - (drawWidth - area.width) / 2;
         float drawY = area.y - (drawHeight - area.height) / 2;
 
-        // glow + alpha combinados
-        float brilho = hoverAtivo ? 1.2f : 1f;
+        // 3. EFEITO GRAVIDADE (Afunda o botão)
+        if (selecionado) {
+            drawY -= 4f; // Desce 4 pixels na tela
+        }
+
+        // 4. BRILHO E COR:
+        // Se selecionado, fica mais escuro (0.8f) para dar profundidade.
+        float brilho = selecionado ? 0.8f : (hoverAtivo ? 1.2f : 1f);
 
         batch.setColor(brilho, brilho, brilho, alpha);
-
         batch.draw(texturaAtual, drawX, drawY, drawWidth, drawHeight);
 
-        // borda
+        // 5. BORDA (Sua lógica de colorir quando selecionado)
         if (selecionado) {
-            batch.setColor(corBorda);
+            // Apliquei 60% de opacidade (0.6f * alpha) para a cor da borda
+            // tingir o botão sem cobrir o desenho totalmente!
+            batch.setColor(corBorda.r, corBorda.g, corBorda.b, 0.6f * alpha);
             batch.draw(texturaAtual, drawX, drawY, drawWidth, drawHeight);
         }
 

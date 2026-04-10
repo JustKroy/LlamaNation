@@ -320,26 +320,30 @@ public class HeroScreen extends ScreenAdapter {
     public enum HeroType {
 
         //FALSE - ESTÁTICO && TRUE - ANIMADO
-        LLAMA("Llama.png", false, 260, 280),
-        MAGELLAMA("MageLlama.png", false, 300, 300),
-        NINJALLAMA("NinjaLlama.png", false, 330, 300),
-        ROBOTLLAMA("CyborgLlama.png", false, 260, 280),
-        ANJOLLAMA("AngelLlama.png", false, 350, 300),
-        BURGUESA("BourgeoisLlama.png", false, 330, 300),
-        CHEF("ChefLlama.png", false, 330, 300),
-        YETI("YetiLlama.png", false, 260, 280);
+        LLAMA("Llama.png", false, 260, 280, "Llama", "Cost: 50\nDamage: 80\nRange: 350\nSPA: 2.0s"),
+        MAGELLAMA("MageLlama.png", false, 300, 300, "Mage Llama", "Cost: 100\nDamage: 100\nRange: 350\nSPA: 2.0s"),
+        NINJALLAMA("NinjaLlama.png", false, 330, 300, "Ninja Llama", "Cost: 150\nDamage: 120\nRange: 350\nSPA: 2.0s"),
+        ROBOTLLAMA("CyborgLlama.png", false, 260, 280, "Cyborg Llama", "Cost: 200\nDamage: 140\nRange: 350\nSPA: 2.0s"),
+        ANJOLLAMA("AngelLlama.png", false, 350, 300, "Angel Llama", "Cost: 250\nDamage: 160\nRange: 350\nSPA: 2.0s"),
+        BURGUESA("BourgeoisLlama.png", false, 330, 300, "Bourgeois Llama", "Cost: 300\nDamage: 180\nRange: 350\nSPA: 2.0s"),
+        CHEF("ChefLlama.png", false, 330, 300, "Chef Llama", "Cost: 350\nDamage: 200\nRange: 350\nSPA: 2.0s"),
+        YETI("YetiLlama.png", false, 260, 280, "Yeti Llama", "Cost: 400\nDamage: 220\nRange: 350\nSPA: 2.0s");
 
         public final String sprite; //Caminho da imagem
         public final boolean animado; //Se é animado ou estático
         public final float largura; //Largura
         public final float altura; //Altura
+        public final String nome;
+        public final String status;
 
         //Construtor que passa os parâmetros para a classe
-        HeroType(String sprite, boolean animado, float largura, float altura) {
+        HeroType(String sprite, boolean animado, float largura, float altura, String nome, String status) {
             this.sprite = sprite;
             this.animado = animado;
             this.largura = largura;
             this.altura = altura;
+            this.nome = nome;
+            this.status = status;
         }
     }
 
@@ -383,6 +387,7 @@ public class HeroScreen extends ScreenAdapter {
         }
 
         tempoAnimacao = 0; //Limpa o tempo da animação
+        skinsPanel.setHeroiAtual(tipo);
     }
 
     public enum labelLlama {
@@ -678,26 +683,25 @@ public class HeroScreen extends ScreenAdapter {
             // Se clicou em SKINS
             if (HUDbtn[2].foiClicado(posMouse, clicou)) {
                 // Se já estava aberto, fecha. Se estava fechado, abre e FECHA o de infos
-                if (skinsPanel.isAberto()) {
-                    skinsPanel.fechar();
-                } else {
-                    skinsPanel.abrir();
-                    // infosPanel.fechar(); <-- Adicione isso quando criar o PainelInfos
-                }
+                skinsPanel.toggleSkins();
             }
 
             // Se clicou em INFOS
             if (HUDbtn[3].foiClicado(posMouse, clicou)) {
-                // Exatamente a mesma lógica, mas invertida!
-            /* if (infosPanel.isAberto()) {
-                infosPanel.fechar();
-            } else {
-                infosPanel.abrir();
-                skinsPanel.fechar(); // Fecha o de skins para o de infos tomar o lugar
+                skinsPanel.toggleInfos();
             }
-            */
+
+            // Repassa o clique para o painel tratar (seja aba de skin ou info)
+            if (skinsPanel.isAberto()) {
+                skinsPanel.detectarClique(mouseX, mouseY);
             }
         }
+
+        // =================================================================
+        // FEEDBACK VISUAL: Destaca qual aba está aberta no momento
+        // =================================================================
+        HUDbtn[2].setSelecionado(skinsPanel.getAbaAtual() == PainelSkins.AbaAtiva.SKINS);
+        HUDbtn[3].setSelecionado(skinsPanel.getAbaAtual() == PainelSkins.AbaAtiva.INFOS);
     }
 
     @Override

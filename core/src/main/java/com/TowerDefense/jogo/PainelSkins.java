@@ -27,6 +27,7 @@
         private final BitmapFont fonte; //Variável que permite desenhar texto
         // Variáveis que agora podem ser acessadas por qualquer função:
         private float larguraTela, alturaTela, mouseX, mouseY;
+        private HeroScreen.HeroType heroiAtual;
 
         //----------------------- ARRAYS ------------------------
 
@@ -42,7 +43,7 @@
             shapeRenderer = new ShapeRenderer();
             larguraTela = Gdx.graphics.getWidth();
             alturaTela = Gdx.graphics.getHeight();
-            abaAtual = AbaAtiva.INFOS;
+            abaAtual = AbaAtiva.NENHUMA;
 
             desenharPainel();
 
@@ -82,25 +83,27 @@
         }
 
         public void render(SpriteBatch batch) {
-            if (abaAtual == AbaAtiva.NENHUMA) return;
+            if (abaAtual == AbaAtiva.NENHUMA || heroiAtual == null) return;
 
             // Se for a aba de SKINS
             if (abaAtual == AbaAtiva.SKINS) {
-                fonteTitulo.draw(batch, "SKINS", areaPainel.x + 20, areaPainel.y + areaPainel.height - 20);
-                fonteNormal.draw(batch, "Escolha a sua skin favorita!", areaPainel.x + 20, areaPainel.y + areaPainel.height - 70);
-                // Aqui você desenha os botões/imagens das skins
+                fonteTitulo.draw(batch, "SKINS: " + heroiAtual.nome, areaPainel.x + 20, areaPainel.y + areaPainel.height - 20);
+                fonteNormal.draw(batch, "Skins disponíveis para " + heroiAtual.nome + ":\n- Padrão\n- Dourada", areaPainel.x + 20, areaPainel.y + areaPainel.height - 70);
+
+                // No futuro, você pode colocar imagens das skins dependendo do heroiAtual
             }
 
             // Se for a aba de INFOS
             else if (abaAtual == AbaAtiva.INFOS) {
                 fonteTitulo.draw(batch, "INFORMAÇÕES", areaPainel.x + 20, areaPainel.y + areaPainel.height - 20);
-                fonteNormal.draw(batch, "Dano: 100\nVelocidade: Rápida\nAlcance: Curto", areaPainel.x + 20, areaPainel.y + areaPainel.height - 70);
-                // Aqui você desenha os status da Llama
+
+                // Puxa o status direto do enum da Llama!
+                fonteNormal.draw(batch, heroiAtual.status, areaPainel.x + 20, areaPainel.y + areaPainel.height - 70);
             }
         }
 
         public void renderShapes(Matrix4 projectionMatrix) {
-            if (!aberto) return;
+            if (abaAtual == AbaAtiva.NENHUMA) return;
 
             atualizaMouse();
 
@@ -133,8 +136,34 @@
             areaPainel = new Rectangle(panelX, panelY, panelWidth, panelHeight);
         }
 
+        // -------------- SISTEMA DE ABAS --------------
+
+        // Função para o botão de SKINS
+        public void toggleSkins() {
+            if (abaAtual == AbaAtiva.SKINS) {
+                abaAtual = AbaAtiva.NENHUMA; // Se já tá no skins e clica de novo, fecha.
+            } else {
+                abaAtual = AbaAtiva.SKINS; // Se tava fechado ou no Infos, muda pro Skins.
+            }
+        }
+
+        // Função para o botão de INFOS
+        public void toggleInfos() {
+            if (abaAtual == AbaAtiva.INFOS) {
+                abaAtual = AbaAtiva.NENHUMA; // Se já tá no infos e clica de novo, fecha.
+            } else {
+                abaAtual = AbaAtiva.INFOS; // Se tava fechado ou no Skins, muda pro Infos.
+            }
+        }
+
         public void detectarClique(float mouseX, float mouseY) {
-            if (!aberto) return;
+            if (abaAtual == AbaAtiva.NENHUMA) return;
+
+            if (abaAtual == AbaAtiva.SKINS) {
+                // Lógica de clique nas roupinhas
+            } else if (abaAtual == AbaAtiva.INFOS) {
+                // Lógica de clique nos botões de upgrade (se houver)
+            }
         }
 
         public void textoCentralizado(String texto, Rectangle area) {
@@ -158,6 +187,13 @@
         }
 
         public boolean isAberto() {
-            return aberto;
+            return abaAtual != AbaAtiva.NENHUMA;
+        }
+        public void setHeroiAtual(HeroScreen.HeroType heroi) {
+            this.heroiAtual = heroi;
+        }
+        // Devolve qual aba tá aberta pra você fazer lógicas de clique específicas
+        public AbaAtiva getAbaAtual() {
+            return abaAtual;
         }
     }
