@@ -58,9 +58,20 @@ Configurações<br>
 ## IDEIAS
 ### LHAMAS
 - Lhama RPG, que dependendo do valor do D20 tem padroes  de ataque diferentes
-- Lhama Cozinheiro, que joga Sal nos Caracois e eles derretem
+- Llama Necromante, invocaria llama esqueleto na base
+- Llama Bomber, chuta bombas em algum caramujo, essas grudam nele e dão dano em área
+- Diabo, cospe uma poça de sangue e deixa envenenado
+- Nuclear, =lança um avião que joga uma bomba nuclear
+- Corvo, Lança penas contra inimigos
+- Operária, Dá mais attack speed com a fábrica funcionando
+- Lenda: assasino, DANO
+- Lenda: Cientista, DANO OU BUFF
+- Lenda: Sinner, NO INFO
+- Lenda: Atleta, DANO
+- Lenda: BUFF/DANO
 <br>
-PADRONIZAÇÃO DE NOME DE ARQUIVO<br>
+
+## PADRONIZAÇÃO DE NOME DE ARQUIVO
 SEMPRE EM INGLES<br>
 TUDO QUE FOR A LLAMA PADRÃO SÓ COLOCAR "LLAMA"<br>
 SEPARAR IMAGENS EM PASTAS (EX: PASTA DAS LLAMAS, PASTA DOS BOTOES)
