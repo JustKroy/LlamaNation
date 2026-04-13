@@ -10,8 +10,10 @@ Llama Anjo - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Model
 Llama Burguesa - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Llama Chef - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Abominavel Llama Das Neves - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
+LLama Operária - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Llama Ninja - Animação<br>
 Llama Padrâo - Animação
+Frames de TODAS Llamas para a página de Heros no menu principal.
 
 # AUGUSTO
 Caramujos<br>
