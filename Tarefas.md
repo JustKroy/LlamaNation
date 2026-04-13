@@ -12,7 +12,7 @@ Llama Chef - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Model
 Abominavel Llama Das Neves - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 LLama Operária - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Llama Ninja - Animação<br>
-Llama Padrâo - Animação
+Llama Padrâo - Animação<br>
 Frames de TODAS Llamas para a página de Heros no menu principal.
 
 # AUGUSTO
