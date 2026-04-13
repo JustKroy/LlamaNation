@@ -82,90 +82,109 @@ public class MenuScreen extends ScreenAdapter {
             );
 
 
-        HUDimg = new Texture[3];
+        HUDimg = new Texture[5];
             HUDimg[0] = new Texture("MenuScreen_Background.png");
             HUDimg[1] = new Texture("Popup_Background.png");
             HUDimg[2] = new Texture("painel.jpg"); //Painel popup
+            HUDimg[3] = new Texture("Cursor_normal.png");
+            HUDimg[4] = new Texture("Cursor_selected.png");
         }
 
     @Override
     public void render(float delta) {
-        // Limpa a tela com uma cor de fundo (preto no caso)
         ScreenUtils.clear(0, 0, 0, 1);
         boolean clicou = Gdx.input.justTouched();
 
         viewport.apply();
+        viewport.getCamera().update();
         batch.setProjectionMatrix(viewport.getCamera().combined);
 
-        // ATUALIZA O MOUSE EM TODO FRAME
-        posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+        // Captura o mouse real
+        Vector2 mundoMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
-        float mouseX = Gdx.input.getX();
-        float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
-
-        // Cursor padrão
-        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-
-        if (popup.isAberto()) {
-
-            if (clicou && HUDbtn[2].foiClicado(posMouse, clicou)) {
-                popup.toggle();
-            }
-
-            if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-                popup.toggle();
-            }
-
-            popup.handleInput(mouseX, mouseY);
-
-            //DESENHA FUNDO (batch)
-            batch.begin();
-            batch.draw(HUDimg[0], 0, 0, 1920, 1080);
-            batch.end();
-
-            //DESENHA FORMAS (popup - ShapeRenderer)
-            popup.renderShapes();
-
-            //DESENHA TEXTO (batch)
-            batch.begin();
-            popup.render(batch);
-            batch.end();
-            popup.renderDropdownTop(batch);
-
-            return;
+        // APLICA A INVERSÃO LITERAL DO CURSOR
+        if (ConfigManager.invertMouseX) {
+            mundoMouse.x = 1920 - mundoMouse.x;
+        }
+        if (ConfigManager.invertMouseY) {
+            mundoMouse.y = 1080 - mundoMouse.y;
         }
 
+        // Agora posMouse é o "Mouse do Contra"
+        posMouse = mundoMouse;
+
+        // ==========================================
+        // ESCONDE O CURSOR DO WINDOWS
+        // ==========================================
+        // Escondemos o cursor do sistema porque ele obedece a sua mão e vai confundir.
+        // Vamos desenhar o nosso próprio cursor invertido lá no final do render!
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
+
+        // ==========================================
+        // LÓGICA DE INPUT E CLIQUES
+        // ==========================================
+
+        // LÓGICA DO ESC (Abre/Fecha o Popup)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (popup.isAberto()) {
+                popup.toggle();
+            }
+        }
+
+        // 1. Lida com os cliques DENTRO do popup primeiro (se ele estiver aberto)
+        if (popup.isAberto()) {
+            popup.handleInput(posMouse.x, posMouse.y);
+        }
 
         for(Botao btn : HUDbtn) {
             btn.atualizarCursor(posMouse);
         }
 
-        // Lógica de clique
+        // 2. Lógica de clique do menu principal
         if (clicou) {
-
-            if (HUDbtn[0].foiClicado(posMouse, clicou)) {
-                game.setScreen(new GameScreen(game)); // Inicia o jogo
-            }
-
-            if (HUDbtn[1].foiClicado(posMouse, clicou)) {
-                // Aqui você pode colocar para ir para uma tela de heróis no futuro
-                game.setScreen(new HeroScreen(game)); // Inicia o jogo
-            }
+            // Só permite clicar no botão de "Configurações" (índice 2) ou nos outros SE o popup estiver fechado
             if (HUDbtn[2].foiClicado(posMouse, clicou)) {
                 popup.toggle();
+            } else if (!popup.isAberto()) {
+                // Impede de clicar em "Play", "Heroes" e "Shop" se o menu de config estiver na frente
+                if (HUDbtn[0].foiClicado(posMouse, clicou)) {
+                    game.setScreen(new GameScreen(game));
+                }
+                if (HUDbtn[1].foiClicado(posMouse, clicou)) {
+                    game.setScreen(new HeroScreen(game));
+                }
+                if (HUDbtn[3].foiClicado(posMouse, clicou)) {
+                    // Futura tela de Shop
+                }
             }
         }
 
-        // DESENHA NA TELA
+        // ==========================================
+        // DESENHOS (A ORDEM AQUI É CRUCIAL!)
+        // ==========================================
 
+        // 1. FUNDO (renderiza no FBO)
         // 1. FUNDO (renderiza no FBO)
         fbo.begin();
         ScreenUtils.clear(0, 0, 0, 1);
 
         batch.begin();
 
-        float offsetX = (posMouse.x - 960) * 0.01f;
-        float offsetY = (posMouse.y - 540) * 0.01f;
+        // Cria coordenadas separadas só para mover a imagem de fundo
+        float parallaxX = posMouse.x;
+        float parallaxY = posMouse.y;
+
+        // Aplica a inversão APENAS na imagem de fundo, assim provamos que a config funciona!
+        if (ConfigManager.invertMouseX) {
+            parallaxX = 1920 - parallaxX;
+        }
+        if (ConfigManager.invertMouseY) {
+            parallaxY = 1080 - parallaxY;
+        }
+
+        // Calcula o offset do fundo usando as variáveis invertidas (ou não)
+        float offsetX = (parallaxX - 960) * 0.01f;
+        float offsetY = (parallaxY - 540) * 0.01f;
 
         batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
 
@@ -176,7 +195,7 @@ public class MenuScreen extends ScreenAdapter {
         fboTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
 
-        // DESENHA NA TELA (com ou sem blur)
+        // 2. DESENHA O FUNDO NA TELA (com ou sem blur)
         if (popup.isAberto()) {
             batch.setShader(blurShader);
         } else {
@@ -184,17 +203,15 @@ public class MenuScreen extends ScreenAdapter {
         }
 
         batch.begin();
-
         // CORREÇÃO DO FBO INVERTIDO
         batch.draw(fboTexture, 0, 1080, 1920, -1080);
-
         batch.end();
 
         // SEMPRE resetar shader
         batch.setShader(null);
 
 
-        //2. SOMBRAS
+        // 3. SOMBRAS DOS BOTÕES PRINCIPAIS
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
 
         Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -204,26 +221,79 @@ public class MenuScreen extends ScreenAdapter {
 
         for (Botao btn : HUDbtn) {
             Rectangle r = btn.getArea();
-
             // sombra leve
             shapeRenderer.setColor(0, 0, 0, 0.08f);
             shapeRenderer.rect(r.x + 6, r.y - 6, r.width, r.height);
-
             // sombra principal
             shapeRenderer.setColor(0, 0, 0, 0.2f);
             shapeRenderer.rect(r.x + 3, r.y - 3, r.width, r.height);
         }
 
         shapeRenderer.end();
-
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
-        // 3. BOTÕES
+        // 4. BOTÕES PRINCIPAIS
+        batch.begin();
+        for (Botao btn : HUDbtn) {
+            btn.Exibir(batch, posMouse);
+        }
+        batch.end();
+
+        // ==========================================
+        // 5. O POPUP (POR ÚLTIMO, POR CIMA DE TUDO!)
+        // ==========================================
+        if (popup.isAberto()) {
+            // Sincroniza o ShapeRenderer INTERNO do PopupConfig com a câmera
+            popup.setProjectionMatrix(viewport.getCamera().combined);
+
+            // Camada 1: Fundo do popup e botões base
+            popup.renderShapes(posMouse.x, posMouse.y);
+
+            // Camada 2: Textos base
+            batch.begin();
+            // Atenção: PopupConfig recebe Y e X nessa ordem no seu código
+            popup.render(batch, posMouse.y, posMouse.x);
+            batch.end();
+
+            // Camada 3: Fundo do Dropdown
+            shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            popup.renderDropdownFundo(shapeRenderer, posMouse.x, posMouse.y);
+            shapeRenderer.end();
+
+            // Camada 4: Textos do Dropdown
+            batch.begin();
+            popup.renderDropdownTextos(batch, posMouse.x, posMouse.y);
+            batch.end();
+        }
+
+        // ==========================================
+        // 6. DESENHA O CURSOR DO JOGO (POR CIMA DE TUDO)
+        // ==========================================
+
+        // --- VERIFICAÇÃO DO HOVER (MÃOZINHA) ---
+        boolean mouseOverAnyButton = false;
+
+        // Só verificamos os botões da HUD principal se o popup estiver FECHADO
+        if (!popup.isAberto()) {
+            for (Botao btn : HUDbtn) {
+                // Checa se a posição X e Y do mouse bate com a área do botão
+                if (btn.getArea().contains(posMouse.x, posMouse.y)) {
+                    mouseOverAnyButton = true;
+                    break; // Achou um botão, pode parar de procurar
+                }
+            }
+        }
+
+        // --- DESENHO DO CURSOR ---
         batch.begin();
 
-            for (Botao btn : HUDbtn) {
-                btn.Exibir(batch, posMouse);
-            }
+        // Se estiver sobre um botão, usa o Cursor_selected (HUDimg[4]), senão usa o Cursor_normal (HUDimg[3])
+        Texture cursorAtual = mouseOverAnyButton ? HUDimg[4] : HUDimg[3];
+
+        // Desenhamos na posMouse (que agora está invertida, se a config estiver ativa!)
+        // Nota: o " - 32" no Y alinha a ponta do cursor com o clique, assumindo que a imagem tem 32x32.
+        batch.draw(cursorAtual, posMouse.x, posMouse.y - 32, 32, 32);
 
         batch.end();
     }
