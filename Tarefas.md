@@ -85,7 +85,13 @@ NomeDaLlamaLLama.png (NinjaLlama.png)
 NomeDaLLamaLlamaSS.png (Ex: NinjaLlamaSS.png)
 
 <h3>ATAQUES</h3>
-Attack_LlamaLlamaSS.png (Ex: AttackNinjaLlamaSS.png) 
+Attack_NomeDaLlamaLlamaSS.png (Ex: AttackNinjaLlamaSS.png) 
+
+<h3>CARAMUJOS</h3>
+NomeDoCaramujoSnail.png (Ex: DefaultSnail.png)
+
+<h3>CARAMUJO GIF (SPRITESHEET)</h3>
+NomeDoCaramujoSnailSS.png (Ex: DefaultSnailSS.png) 
 
 <h3>LABELS</h3>
 NomeDaLlamaLabel.png (Ex: NinjaLabel.png)
