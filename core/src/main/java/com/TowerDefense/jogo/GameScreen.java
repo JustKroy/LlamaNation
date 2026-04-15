@@ -150,6 +150,21 @@ public class GameScreen extends ScreenAdapter {
             this.dispose();
             game.setScreen(new MenuScreen(game));
         }
+
+        // ================= CURSOR =================
+
+        CursorManager.setDefault();
+
+        if (hud.estaSobreAlgo(posMouse)) {
+            CursorManager.setHover();
+        }
+
+        CursorManager.aplicarCursorInvisivel();
+
+        batch.begin();
+        CursorManager.desenhar(batch, posMouse);
+        batch.end();
+
     }
 
     private void renderizarDebugHitbox() {

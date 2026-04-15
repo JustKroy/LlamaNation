@@ -91,9 +91,15 @@ public class MenuScreen extends ScreenAdapter {
         }
 
     @Override
+    public void show() {
+        CursorManager.aplicarCursorInvisivel();
+    }
+
+    @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
         boolean clicou = Gdx.input.justTouched();
+        CursorManager.setDefault();
 
         viewport.apply();
         viewport.getCamera().update();
@@ -112,13 +118,6 @@ public class MenuScreen extends ScreenAdapter {
 
         // Agora posMouse é o "Mouse do Contra"
         posMouse = mundoMouse;
-
-        // ==========================================
-        // ESCONDE O CURSOR DO WINDOWS
-        // ==========================================
-        // Escondemos o cursor do sistema porque ele obedece a sua mão e vai confundir.
-        // Vamos desenhar o nosso próprio cursor invertido lá no final do render!
-        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.None);
 
         // ==========================================
         // LÓGICA DE INPUT E CLIQUES
@@ -148,7 +147,7 @@ public class MenuScreen extends ScreenAdapter {
             } else if (!popup.isAberto()) {
                 // Impede de clicar em "Play", "Heroes" e "Shop" se o menu de config estiver na frente
                 if (HUDbtn[0].foiClicado(posMouse, clicou)) {
-                    game.setScreen(new GameScreen(game));
+                    game.setScreen(new TelaSelecaoDeck(game));
                 }
                 if (HUDbtn[1].foiClicado(posMouse, clicou)) {
                     game.setScreen(new HeroScreen(game));
@@ -271,30 +270,20 @@ public class MenuScreen extends ScreenAdapter {
         // 6. DESENHA O CURSOR DO JOGO (POR CIMA DE TUDO)
         // ==========================================
 
-        // --- VERIFICAÇÃO DO HOVER (MÃOZINHA) ---
-        boolean mouseOverAnyButton = false;
-
-        // Só verificamos os botões da HUD principal se o popup estiver FECHADO
         if (!popup.isAberto()) {
             for (Botao btn : HUDbtn) {
-                // Checa se a posição X e Y do mouse bate com a área do botão
-                if (btn.getArea().contains(posMouse.x, posMouse.y)) {
-                    mouseOverAnyButton = true;
-                    break; // Achou um botão, pode parar de procurar
-                }
+                btn.atualizarCursor(posMouse);
+            }
+        } else {
+            if (popup.estaSobreElementoInterativo(posMouse)) {
+                CursorManager.setHover();
             }
         }
 
-        // --- DESENHO DO CURSOR ---
+        CursorManager.aplicarCursorInvisivel();
+
         batch.begin();
-
-        // Se estiver sobre um botão, usa o Cursor_selected (HUDimg[4]), senão usa o Cursor_normal (HUDimg[3])
-        Texture cursorAtual = mouseOverAnyButton ? HUDimg[4] : HUDimg[3];
-
-        // Desenhamos na posMouse (que agora está invertida, se a config estiver ativa!)
-        // Nota: o " - 32" no Y alinha a ponta do cursor com o clique, assumindo que a imagem tem 32x32.
-        batch.draw(cursorAtual, posMouse.x, posMouse.y - 32, 32, 32);
-
+        CursorManager.desenhar(batch, posMouse);
         batch.end();
     }
 

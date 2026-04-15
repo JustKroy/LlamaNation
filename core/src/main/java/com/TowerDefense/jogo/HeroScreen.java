@@ -547,6 +547,22 @@
             batch.setProjectionMatrix(viewport.getCamera().combined);
             boolean clicou = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
 
+            // ------------ CURSOR (INÍCIO DO RENDER) ------------
+            CursorManager.setDefault();
+
+            // BOTÕES (já define hover automaticamente)
+            for (Botao btn : botoesHerois) {
+                btn.atualizarCursor(posMouse);
+            }
+            for (Botao btn : HUDbtn) {
+                btn.atualizarCursor(posMouse);
+            }
+
+            // PAINEL DE SKINS / INFOS
+            if (skinsPanel.isAberto() && skinsPanel.estaSobre(posMouse)) {
+                CursorManager.setHover();
+            }
+
             // ATUALIZA O MOUSE EM TODO FRAME
             posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
@@ -784,6 +800,13 @@
             // =================================================================
             HUDbtn[2].setSelecionado(skinsPanel.getAbaAtual() == PainelSkins.AbaAtiva.SKINS);
             HUDbtn[3].setSelecionado(skinsPanel.getAbaAtual() == PainelSkins.AbaAtiva.INFOS);
+
+            //------------- CURSOR -------------
+            CursorManager.aplicarCursorInvisivel();
+
+            batch.begin();
+            CursorManager.desenhar(batch, posMouse);
+            batch.end();
         }
 
         @Override

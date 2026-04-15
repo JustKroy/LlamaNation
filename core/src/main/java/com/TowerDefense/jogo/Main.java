@@ -11,6 +11,7 @@ public class Main extends Game {
     @Override
     public void create() {
 
+        CursorManager.init();
 
         // ESSA LINHA É OBRIGATÓRIA:
         ConfigManager.carregar();

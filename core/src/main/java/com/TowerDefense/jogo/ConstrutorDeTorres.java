@@ -57,24 +57,24 @@ public class ConstrutorDeTorres {
     public ConstrutorDeTorres(Array<TipoLlama> deckEscolhido) {
         this.deckAtual = deckEscolhido;
 
-        imgLhama = new Texture("llama.png");
-        imgLhamaNinja = new Texture("lhamaninja.png");
-        imgCuspe = new Texture("guspe.png");
-        imgKunai = new Texture("kunai.png");
-        imgLhamaMage = new Texture("llamamage.png");
-        imgMagia = new Texture("mageattack.png");
-        imgLlamaCyborg = new Texture("LlamaCyborg.png");
-        imgCyborgAttack = new Texture("CyborgAttack.png");
-        imgLlamaAngel = new Texture("llamaAngel.png");
-        imgNuvemNasc = new Texture("nuvemAngelnasc.png");
-        imgNuvemAtiva = new Texture("nuvemAngel.png");
-        imgNuvemSum = new Texture("nuvemAngelsum.png");
-        imgAngelAttack = new Texture("Angel_Attack.png");
-        imgLlamaBurguesa = new Texture("llamaBurguesa.png");
-        imgLlamaChef = new Texture("llamaChef.png");
-        imgArmaChef = new Texture("armaChef.png");
-        imgLlamaNeves = new Texture("llamadasneves.png");
-        imgNevesAttack = new Texture("attackdasneves.png");
+        imgLhama = new Texture("LlamaSS.png");
+        imgLhamaNinja = new Texture("NinjaLlama.png");
+        imgCuspe = new Texture("Attack_Llama.png");
+        imgKunai = new Texture("Attack_NinjaLlama.png");
+        imgLhamaMage = new Texture("MageLlamaSS.png");
+        imgMagia = new Texture("Attack_MageLlama.png");
+        imgLlamaCyborg = new Texture("CyborgLlamaSS.png");
+        imgCyborgAttack = new Texture("Attack_CyborgLlama.png");
+        imgLlamaAngel = new Texture("AngelLlamaSS.png");
+        imgNuvemNasc = new Texture("NuvemNasc_AngelLlamaSS.png");
+        imgNuvemAtiva = new Texture("Nuvem_AngelLlamaSS.png");
+        imgNuvemSum = new Texture("NuvemSum_AngelLlamaSS.png");
+        imgAngelAttack = new Texture("Attack_AngelLlamaSS.png");
+        imgLlamaBurguesa = new Texture("BourgeoisLlamaSS.png");
+        imgLlamaChef = new Texture("ChefLlamaSS.png");
+        imgArmaChef = new Texture("Arma_ChefLlamaSS.png");
+        imgLlamaNeves = new Texture("YetiLlamaSS.png");
+        imgNevesAttack = new Texture("Attack_YetiLlamaSS.png");
 
         imgBtnAcelerar = new Texture("Iniciar.png");
         btnAcelerar = new Rectangle(1450, 50, 100, 100);
@@ -112,15 +112,15 @@ public class ConstrutorDeTorres {
         iconesLoja.put(TipoLlama.CHEF, iconeLlamaChef);
         iconesLoja.put(TipoLlama.NEVES, iconeLlamaNeves);
 
-        font = new BitmapFont(Gdx.files.internal("fontes.fnt"));
+        font = new BitmapFont(Gdx.files.internal("Fontes.fnt"));
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         font.getData().setScale(0.23f);
         layout = new GlyphLayout();
-        imgMoedaPequena = new Texture("moeda.png");
+        imgMoedaPequena = new Texture("Moeda.png");
         texFundoLoja = new Texture("Loja.png");
-        texFundoMenu = new Texture("fundosell.png");
-        texBtnSell = new Texture("BUTTON_sell.png");
-        texBtnSellHover = new Texture("BUTTON_sellhover.png");
+        texFundoMenu = new Texture("PainelSell.png");
+        texBtnSell = new Texture("Sell_Button.png");
+        texBtnSellHover = new Texture("Sell_ButtonHover.png");
 
         Pixmap pix = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pix.setColor(new Color(0.2f, 0.4f, 0.8f, 1f));

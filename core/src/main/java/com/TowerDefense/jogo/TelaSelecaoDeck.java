@@ -11,7 +11,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+
 import java.util.HashMap;
 
 public class TelaSelecaoDeck implements Screen {
@@ -31,24 +34,30 @@ public class TelaSelecaoDeck implements Screen {
 
     // O Deck final
     public Array<TipoLlama> deckEscolhido;
+    private final StretchViewport viewport; //Viewport - Adaptar o tamanho da tela
 
     // Hitboxes para os cliques
     private HashMap<TipoLlama, Rectangle> botoesCatalogo;
     private Array<Rectangle> slotsDeck;
     private Rectangle btnJogar;
+    private Vector2 posMouse = new Vector2();
 
     public TelaSelecaoDeck(Game game) {
         this.game = game;
         batch = new SpriteBatch();
         shape = new ShapeRenderer();
 
-        font = new BitmapFont(Gdx.files.internal("fontes.fnt"));
+        font = new BitmapFont(Gdx.files.internal("Fontes.fnt"));
         font.getData().setScale(0.4f);
 
         deckEscolhido = new Array<>();
         icones = new HashMap<>();
         botoesCatalogo = new HashMap<>();
         slotsDeck = new Array<>();
+        viewport = new StretchViewport(1920, 1080);
+
+        viewport.getCamera().position.set(1920 / 2f, 1080 / 2f, 0);
+        viewport.getCamera().update();
 
         carregarTexturas();
         configurarBotoes();
@@ -56,16 +65,14 @@ public class TelaSelecaoDeck implements Screen {
 
     private void carregarTexturas() {
 
-        imgLhama = new Texture("llama.png");
-        imgLhamaNinja = new Texture("lhamaninja.png");
-        imgLhamaMage = new Texture("llamamage.png");
-        imgLlamaCyborg = new Texture("LlamaCyborg.png");
-        imgLlamaAngel = new Texture("llamaAngel.png");
-        imgLlamaBurguesa = new Texture("llamaBurguesa.png");
-        imgLlamaChef = new Texture("llamaChef.png");
-
-        // 🔥 NOVO: Carregando a textura da Neves
-        imgLlamaNeves = new Texture("llamadasneves.png");
+        imgLhama = new Texture("LlamaSS.png");
+        imgLhamaNinja = new Texture("NinjaLlama.png");
+        imgLhamaMage = new Texture("MageLlamaSS.png");
+        imgLlamaCyborg = new Texture("CyborgLlamaSS.png");
+        imgLlamaAngel = new Texture("AngelLlamaSS.png");
+        imgLlamaBurguesa = new Texture("BourgeoisLlamaSS.png");
+        imgLlamaChef = new Texture("ChefLlamaSS.png");
+        imgLlamaNeves = new Texture("YetiLlamaSS.png");
 
         // Corta só o primeiro frame de cada lhama para ser o ícone
         icones.put(TipoLlama.NORMAL, new TextureRegion(imgLhama, 0, 0, imgLhama.getWidth() / 9, imgLhama.getHeight()));
@@ -101,41 +108,53 @@ public class TelaSelecaoDeck implements Screen {
 
     @Override
     public void render(float delta) {
+        CursorManager.setDefault();
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.2f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        tratarInputs();
+        viewport.apply();
+        viewport.getCamera().update();
 
+        batch.setProjectionMatrix(viewport.getCamera().combined);
+        shape.setProjectionMatrix(viewport.getCamera().combined); // 🔥 ESSENCIAL
+
+        // Mouse CORRETO (mesmo sistema do resto do jogo)
+        posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+
+        tratarInputs(); // agora usa posMouse corretamente
+
+        // -------- SHAPES --------
         shape.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Fundo dos slots do Deck (cinza escuro)
         shape.setColor(Color.DARK_GRAY);
         for (Rectangle slot : slotsDeck) {
             shape.rect(slot.x, slot.y, slot.width, slot.height);
         }
 
-        // Botão Jogar (Verde se o deck tiver 6, vermelho se faltar)
-        if (deckEscolhido.size == 6) shape.setColor(Color.GREEN);
-        else shape.setColor(Color.FIREBRICK);
+        // Botão Jogar
+        shape.setColor(deckEscolhido.size == 6 ? Color.GREEN : Color.FIREBRICK);
         shape.rect(btnJogar.x, btnJogar.y, btnJogar.width, btnJogar.height);
 
         shape.end();
 
+        // -------- TEXTOS E IMAGENS --------
         batch.begin();
+
         font.getData().setScale(0.8f);
         font.draw(batch, "MONTE SEU DECK (ESCOLHA 6)", 400, 950);
 
         font.getData().setScale(0.4f);
         font.draw(batch, "JOGAR!", btnJogar.x + 80, btnJogar.y + 65);
 
-        // Desenha Lhamas do Catálogo
+        // Catálogo
         for (TipoLlama tipo : TipoLlama.values()) {
             Rectangle rect = botoesCatalogo.get(tipo);
             TextureRegion icon = icones.get(tipo);
 
-            // Se já foi escolhida, fica meio transparente
-            if (deckEscolhido.contains(tipo, true)) batch.setColor(1, 1, 1, 0.3f);
-            else batch.setColor(Color.WHITE);
+            if (deckEscolhido.contains(tipo, true))
+                batch.setColor(1, 1, 1, 0.3f);
+            else
+                batch.setColor(Color.WHITE);
 
             desenharIcone(icon, rect);
             font.draw(batch, tipo.nome, rect.x - 10, rect.y - 10);
@@ -143,13 +162,53 @@ public class TelaSelecaoDeck implements Screen {
 
         batch.setColor(Color.WHITE);
 
-        // Desenha Lhamas que já estão no Deck
+        // Deck
         for (int j = 0; j < deckEscolhido.size; j++) {
             TipoLlama tipo = deckEscolhido.get(j);
             Rectangle slot = slotsDeck.get(j);
             desenharIcone(icones.get(tipo), slot);
         }
 
+        batch.end();
+
+        boolean hover = false;
+
+// Hover nos botões do catálogo
+        for (TipoLlama tipo : TipoLlama.values()) {
+            if (botoesCatalogo.get(tipo).contains(posMouse.x, posMouse.y)) {
+                hover = true;
+                break;
+            }
+        }
+
+// Hover nos slots do deck
+        for (Rectangle slot : slotsDeck) {
+            if (slot.contains(posMouse.x, posMouse.y)) {
+                hover = true;
+                break;
+            }
+        }
+
+// Hover no botão jogar
+        if (btnJogar.contains(posMouse.x, posMouse.y)) {
+            hover = true;
+        }
+
+        if (deckEscolhido.size == 6 && btnJogar.contains(posMouse.x, posMouse.y)) {
+            hover = true;
+        }
+
+// Define cursor
+        if (hover) {
+            CursorManager.setHover();
+        } else {
+            CursorManager.setDefault();
+        }
+
+        CursorManager.aplicarCursorInvisivel();
+
+        batch.begin();
+        CursorManager.desenhar(batch, posMouse);
         batch.end();
     }
 
@@ -165,20 +224,21 @@ public class TelaSelecaoDeck implements Screen {
 
     private void tratarInputs() {
         if (Gdx.input.justTouched()) {
-            float mouseX = Gdx.input.getX();
-            float mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
 
-            // Clicou no catálogo para adicionar ao deck
+            float mouseX = posMouse.x;
+            float mouseY = posMouse.y;
+
+            // Catálogo
             for (TipoLlama tipo : TipoLlama.values()) {
                 if (botoesCatalogo.get(tipo).contains(mouseX, mouseY)) {
                     if (!deckEscolhido.contains(tipo, true) && deckEscolhido.size < 6) {
                         deckEscolhido.add(tipo);
                     }
-                    return; // Sai após o clique
+                    return;
                 }
             }
 
-            // Clicou no slot do deck para remover
+            // Remover do deck
             for (int j = 0; j < deckEscolhido.size; j++) {
                 if (slotsDeck.get(j).contains(mouseX, mouseY)) {
                     deckEscolhido.removeIndex(j);
@@ -186,15 +246,21 @@ public class TelaSelecaoDeck implements Screen {
                 }
             }
 
-            // Clicou no botão JOGAR
+            // Jogar
             if (btnJogar.contains(mouseX, mouseY) && deckEscolhido.size == 6) {
                 game.setScreen(new GameScreen((Main) game, deckEscolhido));
             }
         }
     }
 
-    @Override public void show() {}
-    @Override public void resize(int width, int height) {}
+    @Override
+    public void show() {
+        CursorManager.aplicarCursorInvisivel();
+    }
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
+    }
     @Override public void pause() {}
     @Override public void resume() {}
     @Override public void hide() {}

@@ -13,9 +13,9 @@ public class Mapa {
     private Texture imgChao, imgCasa, imgFundo;
 
     public Mapa() {
-        imgChao = new Texture("point.png");
-        imgCasa = new Texture("chegada.png");
-        imgFundo = new Texture("mapa1.png");
+        imgChao = new Texture("Point.png");
+        imgCasa = new Texture("Chegada.png");
+        imgFundo = new Texture("Mapa1.png");
 
         // --- OS WAYPOINTS (Onde o caracol anda) ---
         caminho.add(new Vector2(-100, 75));

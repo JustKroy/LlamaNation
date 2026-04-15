@@ -53,11 +53,10 @@ public class Botao {
         return estaSobre(mouse) && clicou;
     }
 
-    public void atualizarCursor(Vector2 mouse){
-
-        if(estaSobre(mouse)){
+    public void atualizarCursor(Vector2 mouse) {
+        if (area.contains(mouse)) {
+            CursorManager.setHover();
         }
-
     }
 
     public void Exibir(SpriteBatch batch, Vector2 mouse) {

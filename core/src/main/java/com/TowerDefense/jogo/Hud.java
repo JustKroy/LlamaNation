@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 
 public class Hud {
 
@@ -41,19 +42,19 @@ public class Hud {
     public boolean voltarAoMenu = false;
 
     public Hud() {
-        font = new BitmapFont(Gdx.files.internal("fontes.fnt"));
+        font = new BitmapFont(Gdx.files.internal("Fontes.fnt"));
         font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         font.getData().setScale(1.0f);
 
-        imgCoracao = new Texture("coracao.png");
-        imgMoeda = new Texture("moeda.png");
+        imgCoracao = new Texture("Coracao.png");
+        imgMoeda = new Texture("Moeda.png");
 
-        imgSettings = new Texture("settings.png");
+        imgSettings = new Texture("Settings_Button.png");
 
-        texBtnContinue = new Texture("BUTTON_continue.png");
-        texBtnContinueHover = new Texture("BUTTON_continuehover.png");
-        texBtnLeave = new Texture("BUTTON_leavebattle.png");
-        texBtnLeaveHover = new Texture("BUTTON_leavebattlehover.png");
+        texBtnContinue = new Texture("Continue_Button.png");
+        texBtnContinueHover = new Texture("Continue_ButtonHover.png");
+        texBtnLeave = new Texture("LeaveBattle_Button.png");
+        texBtnLeaveHover = new Texture("LeaveBattle_ButtonHover.png");
 
         btnHitbox = new Rectangle(1600, 50, 240, 60);
         btnSettings = new Rectangle(1820, 970, 70, 70);
@@ -187,6 +188,19 @@ public class Hud {
             font.draw(batch, "PAUSED", (1920 / 2f) - (layout.width / 2f), 680);
             font.getData().setScale(1.0f);
         }
+    }
+
+    public boolean estaSobreAlgo(Vector2 mouse) {
+
+        if (btnSettings.contains(mouse)) return true;
+        if (btnHitbox.contains(mouse)) return true;
+
+        if (pausado) {
+            if (btnContinue.contains(mouse)) return true;
+            if (btnLeave.contains(mouse)) return true;
+        }
+
+        return false;
     }
 
     public void dispose() {
