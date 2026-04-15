@@ -36,6 +36,11 @@ public class Botao {
         return selecionado;
     }
 
+    public void setTextura(Texture normal, Texture hover) {
+        this.imagem = normal;
+        this.hover = hover;
+    }
+
     public void setCorBorda(Color cor) {
         corBorda = cor;
     }
@@ -51,7 +56,6 @@ public class Botao {
     public void atualizarCursor(Vector2 mouse){
 
         if(estaSobre(mouse)){
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
         }
 
     }
@@ -59,7 +63,9 @@ public class Botao {
     public void Exibir(SpriteBatch batch, Vector2 mouse) {
 
         boolean hoverAtivo = estaSobre(mouse);
-        Texture texturaAtual = hoverAtivo ? hover : imagem;
+        Texture texturaAtual = hoverAtivo && hover != null ? hover : imagem;
+
+        if (texturaAtual == null) return;
 
         // 1. ANIMAÇÕES DE ESCALA:
         // Se estiver selecionado (aba aberta), ele trava afundado em 0.95f.
@@ -102,8 +108,6 @@ public class Botao {
     }
 
     public void dispose() {
-        imagem.dispose();
-        hover.dispose();
     }
 
 }
