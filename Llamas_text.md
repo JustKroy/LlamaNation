@@ -2,7 +2,7 @@ Llama: An ordinary Llama who came from the Andes to destroy snails! He spits on 
 
 Ninja Llama: A Llama trained in the arts of Ninjutsu who came back home to help in the war against the evil ones.
 
-Mage Llama: The mage (trained with Gandalf in Valinor) and is Master in Llamagic now. When he isn't killing snails with fireballs, he likes to do crosswords and drink coffee.
+Mage Llama: The mage (trained with Gandalf, the Gray in Valinor) and is Master in Llamagic now. When he isn't killing snails with fireballs, he likes to do crosswords and drink coffee with the other Mages.
 
 Angel Llama: The holy entity of all Llamas who pray for their "Guardian Angel". He was sent by GodLlama to Protect the Llamas against the snails who atack them.
 
