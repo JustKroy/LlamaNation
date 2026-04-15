@@ -10,6 +10,16 @@ public class Main extends Game {
     // É chamado automaticamente pelo sistema apenas UMA VEZ, assim que você abre o jogo.
     @Override
     public void create() {
+
+
+        // ESSA LINHA É OBRIGATÓRIA:
+        ConfigManager.carregar();
+
+        // Se você quiser que o jogo já abra na resolução salva:
+        ConfigManager.aplicarVideo();
+
+        // Define a tela inicial como o Menu
+
         // Define qual "canal" a TV vai sintonizar primeiro.
         // O 'this' está passando o próprio Main (a TV inteira) para o Menu,
         // assim o Menu consegue trocar de tela depois usando esse mesmo Main.

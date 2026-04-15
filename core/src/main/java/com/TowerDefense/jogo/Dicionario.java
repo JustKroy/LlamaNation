@@ -2636,3 +2636,208 @@ Seu código usa esse valor para:
 FIM
 =========================================================
 */
+
+/*
+
+---------------- SOMBRA E PROFUNDIDADE -----------------
+
+// sombra (desenha antes)
+shapeRenderer.setColor(0, 0, 0, 0.3f);
+shapeRenderer.rect(x+3, y-3, width, height);
+
+// botão
+shapeRenderer.setColor(Color.RED);
+shapeRenderer.rect(x, y, width, height);
+
+---------------- GRADIENTE ---------------
+for (int y = 0; y < altura; y++) {
+    float t = (float)y / altura;
+    pixmap.setColor(
+        Color.RED.r * (1-t) + Color.DARK_GRAY.r * t,
+        Color.RED.g * (1-t) + Color.DARK_GRAY.g * t,
+        Color.RED.b * (1-t) + Color.DARK_GRAY.b * t,
+        1
+    );
+    pixmap.drawLine(0, y, largura, y);
+}
+
+---------------- BORDA E OUTLINE ---------------
+pixmap.setColor(Color.BLACK);
+pixmap.drawRectangle(0, 0, largura, altura);
+
+---------------- ANIMAÇÃO ----------------
+botao.addListener(new ClickListener() {
+    public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+        botao.addAction(Actions.scaleTo(1.05f, 1.05f, 0.1f));
+    }
+
+    public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+        botao.addAction(Actions.scaleTo(1f, 1f, 0.1f));
+    }
+});
+
+---------------- CONTAINER ---------------
+Table panel = new Table();
+
+// fundo gerado via Pixmap
+panel.setBackground(new TextureRegionDrawable(new TextureRegion(criarFundo())));
+
+--------------- LAYOUT --------------
+table.add(labelNome).left().pad(10);
+table.add(valor).right().pad(10);
+table.row();
+
+Nome à esquerda / valor à direita = padrão de jogo
+
+------------- SLIDERS -------------
+style.background = drawableBarra;
+style.knob = drawableBolinha;
+style.knobBefore = drawablePreenchido;
+
+
+---------------- SHADER --------------------
+🎨 1. BLUR REAL (Shader)
+🧠 Ideia
+
+Você:
+
+Renderiza a tela em uma textura
+Aplica um shader de blur nessa textura
+Desenha ela de volta
+
+👉 Isso cria aquele efeito de menu com fundo desfocado
+
+🔧 Passo 1 – FrameBuffer
+
+No MenuScreen:
+
+private FrameBuffer fbo;
+private Texture fboTexture;
+private ShaderProgram blurShader;
+
+No construtor:
+
+fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
+🔧 Passo 2 – Shader (blur simples)
+Vertex shader (blur.vert)
+attribute vec4 a_position;
+attribute vec2 a_texCoord0;
+
+varying vec2 v_texCoord;
+
+void main() {
+    v_texCoord = a_texCoord0;
+    gl_Position = a_position;
+}
+Fragment shader (blur.frag)
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+varying vec2 v_texCoord;
+uniform sampler2D u_texture;
+
+void main() {
+    float offset = 1.0 / 300.0;
+
+    vec4 color = vec4(0.0);
+
+    color += texture2D(u_texture, v_texCoord + vec2(-offset, 0.0)) * 0.25;
+    color += texture2D(u_texture, v_texCoord) * 0.5;
+    color += texture2D(u_texture, v_texCoord + vec2(offset, 0.0)) * 0.25;
+
+    gl_FragColor = color;
+}
+🔧 Passo 3 – Carregar shader
+blurShader = new ShaderProgram(
+    Gdx.files.internal("blur.vert"),
+    Gdx.files.internal("blur.frag")
+);
+
+if (!blurShader.isCompiled()) {
+    System.out.println(blurShader.getLog());
+}
+🔧 Passo 4 – Usar no render
+1. Renderiza fundo no FBO:
+fbo.begin();
+ScreenUtils.clear(0, 0, 0, 1);
+
+batch.begin();
+batch.draw(HUDimg[0], 0, 0, 1920, 1080);
+batch.end();
+
+fbo.end();
+2. Pega textura:
+fboTexture = fbo.getColorBufferTexture();
+3. Desenha com shader:
+
+batch.begin();
+batch.draw(fboTexture, 0, 0, 1920, 1080, 0, 0, 1, 1);
+batch.end();
+
+batch.setShader(null);
+🔥 Resultado
+
+👉 Fundo fica desfocado quando popup abre
+👉 Parece jogo profissional na hora
+
+✨ 2. POLIMENTO AAA (UI PROFISSIONAL)
+
+Agora vem o que faz teu jogo parecer “não é PNG jogado”
+
+🎯 2.1 Glow no hover
+
+No Botao.Exibir:
+
+if (hoverAtivo) {
+    batch.setColor(1, 1, 1, 1.2f); // brilho leve
+} else {
+    batch.setColor(1, 1, 1, 1f);
+}
+🎯 2.2 Sombra dinâmica (melhorada)
+
+No MenuScreen:
+
+// sombra suave
+shapeRenderer.setColor(0, 0, 0, 0.08f);
+shapeRenderer.rect(r.x + 6, r.y - 6, r.width, r.height);
+
+// sombra principal
+shapeRenderer.setColor(0, 0, 0, 0.2f);
+shapeRenderer.rect(r.x + 3, r.y - 3, r.width, r.height);
+🎯 2.3 Animação de entrada (ESSENCIAL)
+
+No botão:
+
+private float alpha = 0f;
+
+No render:
+
+alpha += (1f - alpha) * 0.05f;
+batch.setColor(1, 1, 1, alpha);
+
+👉 Botões “aparecem suavemente”
+
+🎯 2.4 Parallax (nível absurdo)
+
+No fundo:
+
+float offsetX = (posMouse.x - 960) * 0.01f;
+float offsetY = (posMouse.y - 540) * 0.01f;
+
+batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
+
+👉 Fundo se mexe com o mouse
+👉 Dá profundidade absurda
+
+🎯 2.5 Botão “vivo” (o mais importante)
+
+Você já começou com scale — agora deixa perfeito:
+
+scaleAtual += (targetScale - scaleAtual) * 0.15f;
+
+👉 mais responsivo
+👉 sensação “snappy”
+
+
+*/
