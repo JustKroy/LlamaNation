@@ -227,7 +227,7 @@
 
             HUDimg = new Texture[7];
                 HUDimg[0] = new Texture("MenuScreen_Background.png");
-                HUDimg[1] = new Texture("painel.jpg");
+                HUDimg[1] = new Texture("Painel.jpg");
                 HUDimg[2] = new Texture("Frame_aerial.png");
                 HUDimg[3] = new Texture("Frame_classic.png");
                 HUDimg[4] = new Texture("Frame_legend.png");

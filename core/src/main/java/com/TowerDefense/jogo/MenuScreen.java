@@ -85,7 +85,7 @@ public class MenuScreen extends ScreenAdapter {
         HUDimg = new Texture[5];
             HUDimg[0] = new Texture("MenuScreen_Background.png");
             HUDimg[1] = new Texture("Popup_Background.png");
-            HUDimg[2] = new Texture("painel.jpg"); //Painel popup
+            HUDimg[2] = new Texture("Painel.jpg"); //Painel popup
             HUDimg[3] = new Texture("Cursor_normal.png");
             HUDimg[4] = new Texture("Cursor_selected.png");
         }
