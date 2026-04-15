@@ -47,6 +47,8 @@ Configurações<br>
 - Background menu heróis
 - Refazer infos e skins
 - Refazer Back
+- Frame Soon
+- Frame LLamas nao desbloqueadas
 ### BOTÕES TELA PRINCIPAL
 - Background menu principal
 - Background configs
