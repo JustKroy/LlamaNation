@@ -41,17 +41,16 @@ Configurações<br>
 
 ## TAREFAS FUTURAS
 ### UI GLOBAIS
-- Cursor
 - Hover de Todos Botões
 ### BOTÕES TELA DE HERÓIS
-- Um framezinho colocando cada llama dentro dele
 - Labels Llamas
 - Background menu heróis
+- Refazer infos e skins
+- Refazer Back
 ### BOTÕES TELA PRINCIPAL
 - Background menu principal
 - Background configs
-- Botão de configurações (Geral, Áudio, Vídeo, Atalhos, Acessibilidades) - Retangular
-- Barra de volume, Botão ON/OFF
+- Botão sair do jogo e botão salvar
 ### BOTÕES TELA DE JOGO
 - Botão "Sell"
 - Botão "Leave Battle"
