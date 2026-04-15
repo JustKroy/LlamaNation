@@ -88,6 +88,9 @@ NomeDaLLamaLlamaSS.png (Ex: NinjaLlamaSS.png)
 <h3>ATAQUES</h3>
 Attack_NomeDaLlamaLlamaSS.png (Ex: AttackNinjaLlamaSS.png) 
 
+<h3>SONS DE ATAQUES</h3>
+AttackNomeDaLlama_Sound (Ex: AttackNinjaLlama_Sound.mp3) 
+
 <h3>CARAMUJOS</h3>
 NomeDoCaramujoSnail.png (Ex: DefaultSnail.png)
 
