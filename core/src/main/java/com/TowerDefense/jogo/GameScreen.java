@@ -4,10 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -16,161 +13,104 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 public class GameScreen extends ScreenAdapter {
+
+    // --- VARIÁVEIS DO SISTEMA ---
     private final Main game;
     private SpriteBatch batch;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
     private StretchViewport viewport;
+
+    // --- CLASSES AUXILIARES E GERENCIADORES ---
     private Mapa mapa;
     private Hud hud;
+    private GerenciadorDeOndas ondas;
+    private ConstrutorDeTorres construtor;
 
+    // --- LISTAS DE ENTIDADES ---
     private Array<Inimigo> listaInimigos = new Array<>();
     private Array<Torre> listaTorres = new Array<>();
     private Array<Projetil> listaProjeteis = new Array<>();
 
-    private Texture texturaCaramujo, imgLhama, imgLhamaNinja, imgCuspe, imgKunai;
-    private Animation<TextureRegion> animCaramujo;
-
-    private int vidas = 3, dinheiro = 1000, waveAtual = 1;
-    private int inimigosParaSpawnar;
-    private float timerSpawn = 0, intervaloSpawn = 1.8f, timerDescanso = 0;
-    private boolean waveEmAndamento = false, arrastando = false;
-    private Texture texturaArrastando = null;
+    // --- STATUS DO JOGADOR ---
+    private int vidas = 100, dinheiro = 1000;
     private Vector2 posMouse = new Vector2();
-    private Torre torreSelecionada = null;
-    private boolean posicaoValida = false;
 
-    public GameScreen(Main game) {
+    // --- CONSTRUTOR ---
+    public GameScreen(Main game, Array<TipoLlama> deckEscolhido) {
         this.game = game;
+
         this.batch = new SpriteBatch();
         this.shape = new ShapeRenderer();
         this.camera = new OrthographicCamera();
         this.viewport = new StretchViewport(1920, 1080, camera);
+
         this.mapa = new Mapa();
         this.hud = new Hud();
+        this.ondas = new GerenciadorDeOndas();
 
-        this.imgLhama = new Texture("Llama.png");
-        this.imgLhamaNinja = new Texture("LlamaNinja.png");
-        this.imgCuspe = new Texture("guspe.png");
-        this.imgKunai = new Texture("kunai.png");
-
-        carregarInimigo();
-        inimigosParaSpawnar = 5;
+        this.construtor = new ConstrutorDeTorres(deckEscolhido);
     }
 
-    private void carregarInimigo() {
-        texturaCaramujo = new Texture("caramujo.png");
-        TextureRegion[][] tmp = TextureRegion.split(texturaCaramujo, texturaCaramujo.getWidth() / 5, texturaCaramujo.getHeight());
-        animCaramujo = new Animation<>(0.08f, tmp[0]);
-        animCaramujo.setPlayMode(Animation.PlayMode.LOOP);
-    }
-
+    // --- MÉTODO RENDER ---
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0, 0, 0, 1);
 
+        ScreenUtils.clear(0, 0, 0, 1);
         camera.update();
+
         posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
-        // --- LÓGICA DE WAVES ---
-        if (waveEmAndamento) {
-            timerSpawn += delta;
-            if (inimigosParaSpawnar > 0 && timerSpawn >= intervaloSpawn) {
-                listaInimigos.add(new Inimigo(mapa.caminho.get(0).x, mapa.caminho.get(0).y, animCaramujo));
-                inimigosParaSpawnar--;
-                timerSpawn = 0;
-            }
-            if (inimigosParaSpawnar <= 0 && listaInimigos.size == 0 && waveAtual < 10) {
-                waveEmAndamento = false; waveAtual++;
-                inimigosParaSpawnar = waveAtual * 5;
-            }
-        } else {
-            timerDescanso += delta;
-            if (timerDescanso >= 5.0f) waveEmAndamento = true;
-        }
+        // --- 1. ATUALIZAÇÃO SEMPRE ATIVA (HUD E LOJA) ---
+        dinheiro = construtor.atualizar(posMouse, Gdx.input.justTouched(), Gdx.input.isTouched(), dinheiro, listaTorres, mapa, hud);
 
-        // --- LÓGICA DE CLIQUE E ARRASTO ---
-        if (Gdx.input.justTouched()) {
+        // ==========================================
+        // 2. A MAGIA DO PAUSE (O FREEZE)
+        // ==========================================
+        if (!hud.pausado) {
 
-            hud.verificarClique(posMouse.x, posMouse.y);
-
-            torreSelecionada = null;
-            for (Torre t : listaTorres) {
-                if (posMouse.dst(t.posicao.x + 40, t.posicao.y + 40) < 60) torreSelecionada = t;
-            }
-            if (posMouse.x >= 1600 && posMouse.x <= 1720) {
-                if (posMouse.y >= 850 && posMouse.y <= 970 && dinheiro >= 50) { arrastando = true; texturaArrastando = imgLhama; }
-                else if (posMouse.y >= 650 && posMouse.y <= 770 && dinheiro >= 150) { arrastando = true; texturaArrastando = imgLhamaNinja; }
-            }
-        }
-
-        if (arrastando) {
-            posicaoValida = true;
-            Rectangle hitboxTemp = new Rectangle(posMouse.x - 40, posMouse.y - 40, 80, 80);
-
-            if (posMouse.x > 1350) posicaoValida = false;
-
-            for (Rectangle rectCaminho : mapa.hitboxesCaminho) {
-                if (rectCaminho.overlaps(hitboxTemp)) posicaoValida = false;
+            if (construtor.jogoAcelerado) {
+                delta = delta * 3f;
             }
 
-            for (Torre t : listaTorres) {
-                if (t.hitbox.overlaps(hitboxTemp)) posicaoValida = false;
-            }
-        }
+            ondas.atualizar(delta, listaInimigos, mapa);
 
-        if (arrastando && !Gdx.input.isTouched()) {
-            if (posicaoValida) {
-                Texture tiroCerto = (texturaArrastando == imgLhamaNinja) ? imgKunai : imgCuspe;
-                listaTorres.add(new Torre(posMouse.x - 40, posMouse.y - 40, texturaArrastando, tiroCerto));
-                dinheiro -= (texturaArrastando == imgLhamaNinja) ? 150 : 50;
-            }
-            arrastando = false;
-            texturaArrastando = null;
-        }
+            // 🔥 CORREÇÃO: LOOP DOS INIMIGOS (DE TRÁS PRA FRENTE) 🔥
+            for (int i = listaInimigos.size - 1; i >= 0; i--) {
+                Inimigo inimigo = listaInimigos.get(i);
 
-        // --- ATUALIZAR INIMIGOS E TORRES ---
-        for (int i = 0; i < listaInimigos.size; i++) {
-            if (listaInimigos.get(i).atualizar(delta, mapa.caminho)) { vidas--; listaInimigos.removeIndex(i); }
-        }
-        for (Torre t : listaTorres) {
-            t.atualizar(delta, listaInimigos, listaProjeteis);
-        }
+                // 1. Checa se o inimigo morreu (seja por tiro direto ou por queimar/fogo)
+                if (inimigo.vida <= 0) {
+                    dinheiro += inimigo.recompensaMoedas;
+                    listaInimigos.removeIndex(i);
+                    continue; // Pula o resto, pois ele já é um fantasma!
+                }
 
-        // --- ATUALIZAR PROJÉTEIS E DANO ---
-        for (int i = listaProjeteis.size - 1; i >= 0; i--) {
-            Projetil p = listaProjeteis.get(i);
-            p.atualizar(delta);
-
-            if (p.ativo) {
-                for (int j = listaInimigos.size - 1; j >= 0; j--) {
-                    Inimigo in = listaInimigos.get(j);
-
-                    // Ajustado para o novo centro do projétil (tamanho 30 / 2 = 15f)
-                    float centroTiroX = p.posicao.x + p.metade;
-                    float centroTiroY = p.posicao.y + p.metade;
-                    float centroCaracolX = in.posicao.x + 25;
-                    float centroCaracolY = in.posicao.y + 25;
-
-                    float distanciaColisao = Vector2.dst(centroTiroX, centroTiroY, centroCaracolX, centroCaracolY);
-
-                    if (distanciaColisao <= 20) {
-                        in.vida -= p.dano;
-                        p.ativo = false;
-
-                        if (in.vida <= 0) {
-                            listaInimigos.removeIndex(j);
-                            dinheiro += 20;
-                        }
-                        break;
-                    }
+                // 2. Atualiza o movimento. Se retornar true, ele chegou na sua base!
+                if (inimigo.atualizar(delta, mapa.caminho)) {
+                    vidas--;
+                    listaInimigos.removeIndex(i);
                 }
             }
 
-            if (!p.ativo) listaProjeteis.removeIndex(i);
-        }
+            for (Torre t : listaTorres) {
+                dinheiro += t.atualizar(delta, listaInimigos, listaProjeteis);
+            }
 
-        // --- DESENHO NA TELA ---
+            // 🔥 CORREÇÃO: LOOP DOS PROJÉTEIS 🔥
+            for (int i = listaProjeteis.size - 1; i >= 0; i--) {
+                Projetil p = listaProjeteis.get(i);
+                p.atualizar(delta);
+
+                // Apenas dá o dano. Se o inimigo morrer, o loop lá de cima cuida de remover e dar o dinheiro!
+                p.checarColisao(listaInimigos);
+
+                if (!p.ativo) listaProjeteis.removeIndex(i);
+            }
+        }
+        // ==========================================
+
+        // --- 3. DESENHO NA TELA ---
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         mapa.desenharMapa(batch);
@@ -182,16 +122,8 @@ public class GameScreen extends ScreenAdapter {
         shape.begin(ShapeRenderer.ShapeType.Filled);
 
         mapa.desenharFundo(shape);
+        construtor.desenharHitboxes(shape, posMouse, hud);
 
-        if (torreSelecionada != null) {
-            shape.setColor(1, 1, 1, 0.15f);
-            shape.circle(torreSelecionada.posicao.x + 40, torreSelecionada.posicao.y + 40, torreSelecionada.raio);
-        }
-        if (arrastando) {
-            shape.setColor(posicaoValida ? 1 : 1, posicaoValida ? 1 : 0, 0, 0.2f);
-            float raioP = (texturaArrastando == imgLhamaNinja) ? 250f : 200f;
-            shape.circle(posMouse.x, posMouse.y, raioP);
-        }
         shape.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
@@ -200,64 +132,59 @@ public class GameScreen extends ScreenAdapter {
         for (Torre t : listaTorres) t.desenhar(batch);
         for (Projetil p : listaProjeteis) p.desenhar(batch);
 
-        // Calcula as larguras automáticas para a loja (altura fixa de 120)
-        float propLhama = (float) imgLhama.getWidth() / imgLhama.getHeight();
-        batch.draw(imgLhama, 1600, 850, 120 * propLhama, 120);
+        construtor.desenharLojaEArrasto(batch, posMouse, hud);
 
-        float propNinja = (float) imgLhamaNinja.getWidth() / imgLhamaNinja.getHeight();
-        batch.draw(imgLhamaNinja, 1600, 650, 120 * propNinja, 120);
+        hud.desenhar(batch, vidas, dinheiro, ondas.waveAtual, posMouse.x, posMouse.y);
 
-        if (arrastando && texturaArrastando != null) {
-            batch.setColor(1, posicaoValida ? 1 : 0.3f, posicaoValida ? 1 : 0.3f, 0.7f);
-
-            // Calcula largura automática para a Lhama que está no mouse (altura fixa de 80)
-            float propArrastando = (float) texturaArrastando.getWidth() / texturaArrastando.getHeight();
-            batch.draw(texturaArrastando, posMouse.x - 40, posMouse.y - 40, 80 * propArrastando, 80);
-
-            batch.setColor(1, 1, 1, 1);
-        }
-
-        hud.desenhar(batch, vidas, dinheiro, waveAtual);
         batch.end();
 
-        // =======================================================
-        // DEPURADOR LIGADO/DESLIGADO PELO HUD
-        // =======================================================
-        if (hud.mostrarHitbox) {
-            shape.begin(ShapeRenderer.ShapeType.Line);
+        // --- 4. DEPURADOR E GAME OVER ---
+        if (hud.mostrarHitbox) renderizarDebugHitbox();
 
-            shape.setColor(1, 0, 0, 1);
-            for (Rectangle r : mapa.hitboxesCaminho) shape.rect(r.x, r.y, r.width, r.height);
-
-            shape.setColor(0, 0, 1, 1);
-            for (Torre t : listaTorres) shape.rect(t.hitbox.x, t.hitbox.y, t.hitbox.width, t.hitbox.height);
-
-            for (Inimigo in : listaInimigos) {
-                shape.setColor(0, 1, 0, 1);
-                shape.rect(in.posicao.x, in.posicao.y, 50, 50);
-                shape.setColor(1, 0, 1, 1);
-                shape.circle(in.posicao.x + 25, in.posicao.y + 25, 20);
-            }
-
-            for (Projetil p : listaProjeteis) {
-                shape.setColor(1, 1, 0, 1);
-                shape.rect(p.hitbox.x, p.hitbox.y, p.hitbox.width, p.hitbox.height);
-                shape.setColor(1, 1, 1, 1);
-                // Ajustado para o novo centro de colisão (15f) também no modo visual
-                shape.circle(p.posicao.x + p.metade, p.posicao.y + p.metade, 5);
-            }
-
-            shape.end();
+        if (hud.voltarAoMenu) {
+            this.dispose();
+            game.setScreen(new MenuScreen(game));
         }
 
-        if (vidas <= 0) game.setScreen(new MenuScreen(game));
+        if (vidas <= 0) {
+            this.dispose();
+            game.setScreen(new MenuScreen(game));
+        }
     }
 
-    @Override public void resize(int w, int h) { viewport.update(w, h, true); }
+    private void renderizarDebugHitbox() {
+        shape.begin(ShapeRenderer.ShapeType.Line);
 
-    @Override public void dispose() {
-        batch.dispose(); shape.dispose(); mapa.dispose(); hud.dispose();
-        texturaCaramujo.dispose(); imgLhama.dispose(); imgLhamaNinja.dispose();
-        imgCuspe.dispose(); imgKunai.dispose();
+        shape.setColor(1, 0, 0, 1);
+        for (Rectangle r : mapa.hitboxesCaminho) shape.rect(r.x, r.y, r.width, r.height);
+
+        shape.setColor(0, 0, 1, 1);
+        for (Torre t : listaTorres) shape.rect(t.hitbox.x, t.hitbox.y, t.hitbox.width, t.hitbox.height);
+
+        for (Inimigo in : listaInimigos) {
+            shape.setColor(0, 1, 0, 1);
+            shape.rect(in.posicao.x, in.posicao.y, 50, 50);
+        }
+
+        for (Projetil p : listaProjeteis) {
+            shape.setColor(1, 1, 0, 1);
+            shape.rect(p.hitbox.x, p.hitbox.y, p.hitbox.width, p.hitbox.height);
+        }
+        shape.end();
+    }
+
+    @Override
+    public void resize(int w, int h) {
+        viewport.update(w, h, true);
+    }
+
+    @Override
+    public void dispose() {
+        batch.dispose();
+        shape.dispose();
+        mapa.dispose();
+        hud.dispose();
+        ondas.dispose();
+        construtor.dispose();
     }
 }
