@@ -33,4 +33,4 @@ Llama Chefe: Este Chefe altamente habilidoso tem uma vida prazerosa trabalhando 
 
 Llama Yeti: O Abominável Monstro das neves que aterroriza crianças em seus sonhos e nutre um ódio secreto por caracóis. quando ele soube que Os caracóis estavam atacando a ViLlama, ele não pensou duas vezes e desceu do ponto mais alto do Everest para ajudar.
 
-Llama Operária: Ele foi Funcionário do mês 32 vezes na FabriLlama, mas nunca foi promovido pelo seu chefe. Bob o Caracol. Agora, ele odeia caracóis mais do que tudo e vai fazer tudo que ele pode para ajudar na Guerra, mesmo que isso signifique Construir sua própria Fábrica.
+Llama Operária: Ele foi Funcionário do mês 32 vezes na FabriLlama, mas nunca foi promovido pelo seu chefe, Bob o Caracol. Agora, ele odeia caracóis mais do que tudo e vai fazer tudo que ele pode para ajudar na Guerra, mesmo que isso signifique construir sua própria Fábrica.
