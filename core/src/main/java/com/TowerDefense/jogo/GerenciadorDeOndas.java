@@ -31,18 +31,18 @@ public class GerenciadorDeOndas {
     public GerenciadorDeOndas() {
 
         // 1. ANIMAÇÕES DO CARAMUJO NORMAL
-        texturaCaramujo = new Texture("caramujo.png");
+        texturaCaramujo = new Texture("SnailSS.png");
         TextureRegion[][] tmp = TextureRegion.split(texturaCaramujo, texturaCaramujo.getWidth() / 5, texturaCaramujo.getHeight());
         animCaramujo = new Animation<>(0.08f, tmp[0]);
         animCaramujo.setPlayMode(Animation.PlayMode.LOOP);
 
-        texturaCaramujoVirado = new Texture("caramujovirado.png");
+        texturaCaramujoVirado = new Texture("ViradoSnailSS.png");
         TextureRegion[][] tmpVirado = TextureRegion.split(texturaCaramujoVirado, texturaCaramujoVirado.getWidth() / 5, texturaCaramujoVirado.getHeight());
         animCaramujoVirado = new Animation<>(0.08f, tmpVirado[0]);
         animCaramujoVirado.setPlayMode(Animation.PlayMode.LOOP);
 
         // 2. ANIMAÇÕES DO CARAMUJO TANQUE
-        texturaTanque = new Texture("caramujotanque.png");
+        texturaTanque = new Texture("TankSnailSS.png");
         TextureRegion[][] tmpTanque = TextureRegion.split(texturaTanque, texturaTanque.getWidth() / 5, texturaTanque.getHeight());
 
         TextureRegion[] framesTanque = tmpTanque[0];

@@ -1,6 +1,7 @@
 package com.TowerDefense.jogo;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -142,14 +143,34 @@ public class GameScreen extends ScreenAdapter {
         if (hud.mostrarHitbox) renderizarDebugHitbox();
 
         if (hud.voltarAoMenu) {
-            this.dispose();
+            hud.voltarAoMenu = false;
+
+            Screen antiga = this;
             game.setScreen(new MenuScreen(game));
+            antiga.dispose();
+
+            return;
         }
 
         if (vidas <= 0) {
             this.dispose();
             game.setScreen(new MenuScreen(game));
         }
+
+        // ================= CURSOR =================
+
+        CursorManager.setDefault();
+
+        if (hud.estaSobreAlgo(posMouse)) {
+            CursorManager.setHover();
+        }
+
+        CursorManager.aplicarCursorInvisivel();
+
+        batch.begin();
+        CursorManager.desenhar(batch, posMouse);
+        batch.end();
+
     }
 
     private void renderizarDebugHitbox() {

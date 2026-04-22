@@ -10,6 +10,7 @@
     import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
     import com.badlogic.gdx.math.Matrix4;
     import com.badlogic.gdx.math.Rectangle;
+    import com.badlogic.gdx.math.Vector2;
 
     public class PainelSkins {
 
@@ -102,12 +103,36 @@
             }
         }
 
+        public boolean estaSobre(Vector2 mouse) {
+            return areaPainel != null && areaPainel.contains(mouse.x, mouse.y);
+        }
+
+        public boolean estaSobreElementoInterativo(Vector2 mouse) {
+            if (abaAtual == AbaAtiva.NENHUMA) return false;
+
+            if (abaAtual == AbaAtiva.SKINS) {
+                // futuramente: hitbox das skins
+                return false;
+            }
+
+            if (abaAtual == AbaAtiva.INFOS) {
+                // futuramente: botões de upgrade/info
+                return false;
+            }
+
+            return false;
+        }
+
         public void renderShapes(Matrix4 projectionMatrix) {
             if (abaAtual == AbaAtiva.NENHUMA) return;
 
             atualizaMouse();
 
             shapeRenderer.setProjectionMatrix(projectionMatrix);
+
+            if (estaSobre(new Vector2(mouseX, mouseY))) {
+                CursorManager.setHover();
+            }
 
             //Ativa a opção de blending (Mexer com opacidade)
             Gdx.gl.glEnable(GL20.GL_BLEND);

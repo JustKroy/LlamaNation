@@ -34,7 +34,7 @@ public class LlamaBurguesa extends Torre {
         this.hitbox.height = alturaDesenho;
 
         // Recortando a imagem de 17 frames na horizontal
-        Texture sheet = new Texture("llamaBurguesa.png");
+        Texture sheet = new Texture("BourgeoisLlamaSS.png");
         int frameWidth = sheet.getWidth() / 17;
         int frameHeight = sheet.getHeight();
 
@@ -51,7 +51,7 @@ public class LlamaBurguesa extends Torre {
 
         // Carrega a fonte apenas na primeira Llama criada
         if (fontTexto == null) {
-            fontTexto = new BitmapFont(Gdx.files.internal("fontes.fnt"));
+            fontTexto = new BitmapFont(Gdx.files.internal("Fontes.fnt"));
             fontTexto.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
         }
     }

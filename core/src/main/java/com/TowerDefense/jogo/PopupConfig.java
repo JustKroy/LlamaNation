@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.*;
 
@@ -132,14 +133,12 @@ public class PopupConfig {
             if (i == getIndice()) shapeRenderer.setColor(0.4f, 0.4f, 0.4f, 1f);
             else if (hover) {
                 shapeRenderer.setColor(0.3f, 0.3f, 0.3f, 1f);
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
             } else shapeRenderer.setColor(0.2f, 0.2f, 0.2f, 1f);
         }
 
         boolean hoverSalvar = botaoSalvar.contains(mouseX, mouseY);
         if (hoverSalvar) {
             shapeRenderer.setColor(COR_BOTAO_HOVER);
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
         } else {
             shapeRenderer.setColor(COR_BOTAO);
         }
@@ -165,7 +164,6 @@ public class PopupConfig {
 
             boolean hover = op.area.contains(mouseX, mouseY);
             if (hover && op.tipo != TipoOpcao.DROPDOWN) {
-                Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
                 shapeRenderer.setColor(COR_HOVER);
                 shapeRenderer.rect(op.area.x, op.area.y, op.area.width, op.area.height);
             }
@@ -207,6 +205,41 @@ public class PopupConfig {
         // CÓDIGO DO DROPDOWN REMOVIDO DAQUI
         shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
+    }
+
+    public boolean estaSobreElementoInterativo(Vector2 mouse) {
+        if (!aberto) return false;
+
+        // Botões do topo
+        for (Rectangle r : opcoesMenu) {
+            if (r.contains(mouse.x, mouse.y)) return true;
+        }
+
+        // Botão salvar
+        if (botaoSalvar.contains(mouse.x, mouse.y)) return true;
+
+        // Opções (slider, toggle, etc)
+        List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
+        if (lista != null) {
+            for (OpcaoConfig op : lista) {
+                if (op.area != null && op.area.contains(mouse.x, mouse.y)) return true;
+
+                // Dropdown aberto
+                if (op.tipo == TipoOpcao.DROPDOWN && op.aberto) {
+                    float dropdownWidth = 200;
+
+                    for (int j = 0; j < op.opcoes.length; j++) {
+                        float x = op.area.x + op.area.width - dropdownWidth - 20;
+                        float y = op.area.y - (j + 1) * 50;
+
+                        Rectangle r = new Rectangle(x, y, dropdownWidth, 50);
+                        if (r.contains(mouse.x, mouse.y)) return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     // Desenha APENAS a caixa/fundo do dropdown que estiver aberto
@@ -265,6 +298,45 @@ public class PopupConfig {
                 desenharTextoDireitaCentro(fonteNormal, batch, textoOpcao, optionRect, 10);
             }
         }
+    }
+
+    public boolean estaSobre(Vector2 mouse) {
+        if (!aberto) return false;
+
+        // Área principal do popup
+        if (areaPopup.contains(mouse.x, mouse.y)) return true;
+
+        // Botões do topo (menu)
+        for (Rectangle r : opcoesMenu) {
+            if (r.contains(mouse.x, mouse.y)) return true;
+        }
+
+        // Botão salvar
+        if (botaoSalvar.contains(mouse.x, mouse.y)) return true;
+
+        // Opções (slider, toggle, etc)
+        List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
+        if (lista != null) {
+            for (OpcaoConfig op : lista) {
+                if (op.area != null && op.area.contains(mouse.x, mouse.y)) return true;
+
+                // Dropdown aberto
+                if (op.tipo == TipoOpcao.DROPDOWN && op.aberto) {
+                    float dropdownWidth = 200;
+
+                    for (int j = 0; j < op.opcoes.length; j++) {
+                        float x = op.area.x + op.area.width - dropdownWidth - 20;
+                        float y = op.area.y - (j + 1) * 50;
+
+                        Rectangle r = new Rectangle(x, y, dropdownWidth, 50);
+
+                        if (r.contains(mouse.x, mouse.y)) return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     public void handleInput(float mouseX, float mouseY) {

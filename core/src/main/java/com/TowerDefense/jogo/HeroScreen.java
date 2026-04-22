@@ -1,754 +1,855 @@
-package com.TowerDefense.jogo;
+    package com.TowerDefense.jogo;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Cursor;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.StretchViewport;
+    import com.badlogic.gdx.Gdx;
+    import com.badlogic.gdx.Input;
+    import com.badlogic.gdx.InputAdapter;
+    import com.badlogic.gdx.InputMultiplexer;
+    import com.badlogic.gdx.ScreenAdapter;
+    import com.badlogic.gdx.graphics.Color;
+    import com.badlogic.gdx.graphics.Cursor;
+    import com.badlogic.gdx.graphics.GL20;
+    import com.badlogic.gdx.graphics.Pixmap;
+    import com.badlogic.gdx.graphics.Texture;
+    import com.badlogic.gdx.graphics.g2d.Animation;
+    import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+    import com.badlogic.gdx.graphics.g2d.TextureRegion;
+    import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+    import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+    import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+    import com.badlogic.gdx.math.Matrix4;
+    import com.badlogic.gdx.math.Rectangle;
+    import com.badlogic.gdx.math.Vector2;
+    import com.badlogic.gdx.scenes.scene2d.Actor;
+    import com.badlogic.gdx.scenes.scene2d.Stage;
+    import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
+    import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+    import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+    import com.badlogic.gdx.utils.Align;
+    import com.badlogic.gdx.utils.ScreenUtils;
+    import com.badlogic.gdx.utils.viewport.ScreenViewport;
+    import com.badlogic.gdx.utils.viewport.StretchViewport;
 
-import java.util.HashMap;
-import java.util.Map;
+    import java.util.HashMap;
+    import java.util.Map;
 
-public class HeroScreen extends ScreenAdapter {
+    public class HeroScreen extends ScreenAdapter {
 
-    private final Main game; //Variável que referencia a classe principal
-    private final SpriteBatch batch; //Variável que permite desenhar na tela
-    private final StretchViewport viewport; //Variável que permite definir o tamanho da tela
-    private Animation<TextureRegion> heroAnimacaoAtual; //Variável que permite mexer com animação
-    private float tempoAnimacao; //Variável que permite mexer com animação (tempo)
-    private HeroType heroSelecionado; //Variável que inicializa o tipo do herói
-    private HeroClasse classeSelecionada; //Variável que inicializa o tipo da classe
-    private BackgroundType backgroundSelecionado; //Variável que inicializa o tipo do background
-    private Color corBackground; //Variável que permite mudar a cor do background
-    private final Stage stage; //Variável que permite desenhar na tela
-    private final Skin skin; //Variável que permite carregar imagens
-    private SelectBox<HeroClasse> listaClasse; //Variável que inicia um SelectBox
-    private Map<labelLlama, Texture> labels = new HashMap<>();
-    private final FrameBuffer fbo;
-    private Texture fboTexture;
-    private final ShaderProgram blurShader;
-    private final ShapeRenderer shapeRenderer;
-    private float scaleAtual, alpha, HoverAlpha;
-    private float mouseX, mouseY;
+        private final Main game; //Variável que referencia a classe principal
+        private final SpriteBatch batch; //Variável que permite desenhar na tela
+        private final StretchViewport viewport; //Variável que permite definir o tamanho da tela
+        private Animation<TextureRegion> heroAnimacaoAtual; //Variável que permite mexer com animação
+        private float tempoAnimacao; //Variável que permite mexer com animação (tempo)
+        private HeroType heroSelecionado; //Variável que inicializa o tipo do herói
+        private HeroClasse classeSelecionada; //Variável que inicializa o tipo da classe
+        private BackgroundType backgroundSelecionado; //Variável que inicializa o tipo do background
+        private Color corBackground; //Variável que permite mudar a cor do background
+        private final Stage stage; //Variável que permite desenhar na tela
+        private final Skin skin; //Variável que permite carregar imagens
+        private SelectBox<HeroClasse> listaClasse; //Variável que inicia um SelectBox
+        private Map<labelLlama, Texture> labels = new HashMap<>();
+        private Map<FramePorClasse, Texture> frames = new HashMap<>();
+        private final FrameBuffer fbo;
+        private Texture fboTexture;
+        private final ShaderProgram blurShader;
+        private final ShapeRenderer shapeRenderer;
+        private float scaleAtual, alpha, HoverAlpha;
 
-        //--------- ARRAY ---------
-    //Variável que permite carregar imagens
-    private Texture[] HUDimg; //Variável que permite carregar imagens
-    private HeroType[][] heroisPorClasse;
-    private labelLlama[][] labelPorLlama;
-    private Botao[] botoesHerois;
-    private float[] posX = {20, 270, 20, 270, 20};
-    private float[] posY = {580, 580, 330, 330, 80};
-    private Botao[] HUDbtn;
-    private Texture heroSpriteSheetAtual, heroImagemEstatica, frameAtual, labelAtual;
-    private PainelSkins skinsPanel;
+            //--------- ARRAY ---------
+        //Variável que permite carregar imagens
+        private Texture[] HUDimg; //Variável que permite carregar imagens
+        private HeroType[][] heroisPorClasse;
+        private labelLlama[][] labelPorLlama;
+        private FramePorClasse[][] framesPorClasse;
+        private Botao[] botoesHerois;
+        private float[] posX = {20, 270, 20, 270, 20};
+        private float[] posY = {580, 580, 330, 330, 80};
+        private Botao[] HUDbtn;
+        private Texture heroSpriteSheetAtual, heroImagemEstatica, frameAtual, labelAtual;
+        private PainelSkins skinsPanel;
 
-    // Vetor para armazenar a posição do mouse convertida para o sistema do jogo
-    private Vector2 posMouse = new Vector2();
+        // Vetor para armazenar a posição do mouse convertida para o sistema do jogo
+        private Vector2 posMouse = new Vector2();
 
-    //------------------ CONSTRUTOR ------------------
+        //------------------ CONSTRUTOR ------------------
 
-    public HeroScreen(Main game) {
-        this.game = game; //Recebe a classe principal
-        this.batch = new SpriteBatch(); //Recebe o batch para desenhar na tela
-        this.viewport = new StretchViewport(1920, 1080); //Define o tamanho da tela
-        stage = new Stage(new ScreenViewport());
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json")); //Carrega a skin
-        shapeRenderer = new ShapeRenderer();
-        skinsPanel = new PainelSkins();
-        scaleAtual = 1.0f;
-        alpha = 0f;
-        HoverAlpha = 0f;
-
-
-
-        fbo = new FrameBuffer(Pixmap.Format.RGBA8888,
-            Gdx.graphics.getWidth(),
-            Gdx.graphics.getHeight(),
-            false
-        );
-
-        //--------- SHADER ---------)
-        ShaderProgram.pedantic = false;
-
-        blurShader = new ShaderProgram(
-            Gdx.files.internal("blur.vert"),
-            Gdx.files.internal("blur.frag")
-        );
-
-        if (!blurShader.isCompiled()) {
-            throw new IllegalArgumentException("Erro no shader: " + blurShader.getLog());
-        }
-
-        //--------- COMBOBOX ---------
-        listaClasse = new SelectBox<>(skin);
-            listaClasse.setItems(
-                HeroClasse.values()
-            );
-            classeSelecionada = HeroClasse.CLASSICOS;
-            listaClasse.setSelected(classeSelecionada);
-
-            listaClasse.setPosition(100,850);
-            listaClasse.setSize(300,50);
-            listaClasse.addListener(new ChangeListener() {
-                @Override
-                public void changed(ChangeEvent event, Actor actor) {
-                   classeSelecionada = listaClasse.getSelected();
-                   setBotoesClasseAtual();
-                }
-            });
-        //Centraliza o texto que aparece no botão do SelectBox
-        listaClasse.setAlignment(Align.center);
-
-        //Define o limite de itens que aparecem no selectbox
-        listaClasse.setMaxListCount(4);
-
-        //Centraliza o texto que aparece no botão do SelectBox
-        listaClasse.getList().setAlignment(Align.center);
-
-        //Altera a cor
-        listaClasse.getStyle().fontColor = Color.WHITE;
-
-        listaClasse.getList().getStyle().fontColorSelected = Color.WHITE;
-        listaClasse.getList().getStyle().fontColorUnselected = Color.LIGHT_GRAY;
-
-        stage.addActor(listaClasse);
-        InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(stage);
-        multiplexer.addProcessor(new InputAdapter() {});
-        Gdx.input.setInputProcessor(multiplexer);
+        public HeroScreen(Main game) {
+            this.game = game; //Recebe a classe principal
+            this.batch = new SpriteBatch(); //Recebe o batch para desenhar na tela
+            this.viewport = new StretchViewport(1920, 1080); //Define o tamanho da tela
+            stage = new Stage(new ScreenViewport());
+            skin = new Skin(Gdx.files.internal("ui/uiskin.json")); //Carrega a skin
+            shapeRenderer = new ShapeRenderer();
+            skinsPanel = new PainelSkins();
+            scaleAtual = 1.0f;
+            alpha = 0f;
+            HoverAlpha = 0f;
 
 
-        //--------- Imagens -----------
 
-        heroisPorClasse = new HeroType[4][];
+            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
 
-            //CLASSICOS
-            heroisPorClasse[0] = new HeroType[]{
-                HeroType.LLAMA,
-                HeroType.MAGELLAMA,
-                HeroType.NINJALLAMA,
-                HeroType.ROBOTLLAMA
-            };
+            //--------- SHADER ---------)
+            ShaderProgram.pedantic = false;
 
-            //SUPORTES
-            heroisPorClasse[1] = new HeroType[]{
-                HeroType.BURGUESA,
-                HeroType.YETI
-            };
-
-            //AEREOS
-            heroisPorClasse[2] = new HeroType[]{
-                HeroType.ANJOLLAMA
-            };
-
-            //LENDAS
-            heroisPorClasse[3] = new HeroType[]{
-                HeroType.CHEF
-            };
-
-        labelPorLlama = new labelLlama[4][];
-
-            //CLÁSSICOS
-            labelPorLlama[0] = new labelLlama[]{
-                labelLlama.LABEL_LLAMA,
-                labelLlama.LABEL_MAGELLAMA,
-                labelLlama.LABEL_NINJALLAMA,
-                labelLlama.LABEL_ROBOTLLAMA
-            };
-
-            //SUPORTES
-            labelPorLlama[1] = new labelLlama[]{
-                labelLlama.LABEL_BURGUESA
-            };
-
-            //AEREOS
-            labelPorLlama[2] = new labelLlama[] {
-                labelLlama.LABEL_ANJOLLAMA
-            };
-
-            //LENDAS
-            labelPorLlama[3] = new labelLlama[] {
-                labelLlama.LABEL_CHEF
-            };
-
-
-        HUDimg = new Texture[7];
-            HUDimg[0] = new Texture("MenuScreen_Background.png");
-            HUDimg[1] = new Texture("painel.jpg");
-            HUDimg[2] = new Texture("Frame_aerial.png");
-            HUDimg[3] = new Texture("Frame_classic.png");
-            HUDimg[4] = new Texture("Frame_legend.png");
-            HUDimg[5] = new Texture("Frame_support.png");
-            HUDimg[6] = new Texture("Glow.png");
-            HUDimg[6].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-
-        //--------- LABEL LLAMAS -----------
-        for (labelLlama l : labelLlama.values()) {
-            labels.put(l, new Texture(Gdx.files.internal(l.label)));
-        }
-
-        //-------- PADRÃO ---------
-        classeSelecionada = HeroClasse.CLASSICOS;
-        frameAtual = HUDimg[3];
-        trocarBackground(BackgroundType.CLASSICO);
-        trocarHeroi(HeroType.LLAMA);
-        trocarLabel(labelLlama.LABEL_LLAMA);
-        setBotoesClasseAtual();
-
-        //-------- Botões ----------
-        botoesHerois = new Botao[5];
-        for (int i = 0; i < botoesHerois.length; i++) {
-            botoesHerois[i] = new Botao(frameAtual, frameAtual, posX[i], posY[i], 200, 200);
-        }
-
-        HUDbtn = new Botao[4];
-            //Voltar
-            HUDbtn[0] = new Botao(
-                new Texture("Back_Button.png"),
-                //hover
-                new Texture("Back_Button.png"),
-                20,975,180,80
+            blurShader = new ShaderProgram(
+                Gdx.files.internal("blur.vert"),
+                Gdx.files.internal("blur.frag")
             );
 
-            //Select
-            HUDbtn[1] = new Botao(
-                new Texture("Select_Button.png"),
-                new Texture("Select_ButtonHover.png"),
-                1000, 430, 400, 100
-            );
-
-            //Skins
-            HUDbtn[2] = new Botao(
-                new Texture("Skins_Button.png"),
-                new Texture("Skins_Button.png"),
-                850, 430, 100, 100
-            );
-
-            //Infos
-            HUDbtn[3] = new Botao(
-                new Texture("Infos_Button.png"),
-                new Texture("Infos_Button.png"),
-                700, 430, 100, 100
-            );
-
-
-    }
-
-    private int getIndiceClasse() {
-        switch (classeSelecionada) {
-            case CLASSICOS: return 0;
-            case SUPORTES: return 1;
-            case AEREOS: return 2;
-            case LENDAS: return 3;
-        }
-        return 0;
-    }
-
-    public enum HeroClasse {
-        CLASSICOS,
-        SUPORTES,
-        AEREOS,
-        LENDAS
-
-    }
-
-    public void setClasseSelecionada (HeroClasse classe) {
-        this.classeSelecionada = classe;
-    }
-
-
-    private void setBotoesClasseAtual() {
-
-        if (botoesHerois == null) {
-            botoesHerois = new Botao[5];
-        }
-
-        switch (classeSelecionada) {
-            case CLASSICOS:
-                frameAtual = HUDimg[3];
-                trocarBackground(BackgroundType.CLASSICO);
-                trocarHeroi(HeroType.LLAMA);
-                trocarLabel(labelLlama.LABEL_LLAMA);
-                break;
-            case SUPORTES:
-                frameAtual = HUDimg[5];
-                trocarBackground(BackgroundType.SUPPORT);
-                trocarHeroi(HeroType.BURGUESA);
-                trocarLabel(labelLlama.LABEL_BURGUESA);
-                break;
-            case AEREOS:
-                frameAtual = HUDimg[2];
-                trocarBackground(BackgroundType.AERIAL);
-                trocarHeroi(HeroType.ANJOLLAMA);
-                trocarLabel(labelLlama.LABEL_ANJOLLAMA);
-                break;
-            case LENDAS:
-                frameAtual = HUDimg[4];
-                trocarBackground(BackgroundType.LENDA);
-                trocarHeroi(HeroType.CHEF);
-                trocarLabel(labelLlama.LABEL_CHEF);
-                break;
-        }
-
-        for (int i = 0; i < botoesHerois.length; i++) {
-            botoesHerois[i] = new Botao(frameAtual, frameAtual, posX[i], posY[i], 200, 200);
-        }
-
-    }
-
-    //Função que inicializa imagem de acordo com o tipo(animação ou estática)
-    public enum HeroType {
-
-        //FALSE - ESTÁTICO && TRUE - ANIMADO
-        LLAMA("Llama.png", false, 260, 280, "Llama", "Cost: 50\nDamage: 80\nRange: 350\nSPA: 2.0s"),
-        MAGELLAMA("MageLlama.png", false, 300, 300, "Mage Llama", "Cost: 100\nDamage: 100\nRange: 350\nSPA: 2.0s"),
-        NINJALLAMA("NinjaLlama.png", false, 330, 300, "Ninja Llama", "Cost: 150\nDamage: 120\nRange: 350\nSPA: 2.0s"),
-        ROBOTLLAMA("CyborgLlama.png", false, 260, 280, "Cyborg Llama", "Cost: 200\nDamage: 140\nRange: 350\nSPA: 2.0s"),
-        ANJOLLAMA("AngelLlama.png", false, 350, 300, "Angel Llama", "Cost: 250\nDamage: 160\nRange: 350\nSPA: 2.0s"),
-        BURGUESA("BourgeoisLlama.png", false, 330, 300, "Bourgeois Llama", "Cost: 300\nDamage: 180\nRange: 350\nSPA: 2.0s"),
-        CHEF("ChefLlama.png", false, 330, 300, "Chef Llama", "Cost: 350\nDamage: 200\nRange: 350\nSPA: 2.0s"),
-        YETI("YetiLlama.png", false, 260, 280, "Yeti Llama", "Cost: 400\nDamage: 220\nRange: 350\nSPA: 2.0s");
-
-        public final String sprite; //Caminho da imagem
-        public final boolean animado; //Se é animado ou estático
-        public final float largura; //Largura
-        public final float altura; //Altura
-        public final String nome;
-        public final String status;
-
-        //Construtor que passa os parâmetros para a classe
-        HeroType(String sprite, boolean animado, float largura, float altura, String nome, String status) {
-            this.sprite = sprite;
-            this.animado = animado;
-            this.largura = largura;
-            this.altura = altura;
-            this.nome = nome;
-            this.status = status;
-        }
-    }
-
-
-    //Função que troca o herói passano o parâmetro tipo
-    private void trocarHeroi(HeroType tipo) {
-
-        alpha = 0f;
-        scaleAtual = 0.7f; // começa menor e cresce
-
-        heroSelecionado = tipo; //Salva o tipo
-
-        //--------- LIMPA A MEMÓRIA ---------
-        if(heroSpriteSheetAtual != null){
-            heroSpriteSheetAtual.dispose();
-        }
-
-        if(heroImagemEstatica != null){
-            heroImagemEstatica.dispose();
-        }
-
-        //--------- CARREGA A IMG ---------
-        if(tipo.animado){ //Se for animação
-
-            heroSpriteSheetAtual = new Texture(tipo.sprite); //Carrega a imagem
-
-            TextureRegion[][] tmp = TextureRegion.split(heroSpriteSheetAtual, 64, 64); //Quebra a imagem em partes  de 64x64(Split)
-
-            heroAnimacaoAtual = new Animation<>(0.08f, tmp[0]); //Cria a animação, juntando essas partes
-
-            heroAnimacaoAtual.setPlayMode(Animation.PlayMode.LOOP); //Faz a animação repetir
-
-            heroImagemEstatica = null; //Limpa a imagem estática
-
-        }else{
-            //Carrega a imagem estática
-            heroImagemEstatica = new Texture(tipo.sprite);
-
-            //Limpa a animação
-            heroAnimacaoAtual = null;
-        }
-
-        tempoAnimacao = 0; //Limpa o tempo da animação
-        skinsPanel.setHeroiAtual(tipo);
-    }
-
-    public enum labelLlama {
-        LABEL_LLAMA("LlamaLabel.png"),
-        LABEL_MAGELLAMA("LlamaLabel.png"),
-        LABEL_NINJALLAMA("LlamaLabel.png"),
-        LABEL_ROBOTLLAMA("LlamaLabel.png"),
-        LABEL_ANJOLLAMA("LlamaLabel.png"),
-        LABEL_BURGUESA("LlamaLabel.png"),
-        LABEL_CHEF("LlamaLabel.png");
-
-        public final String label;
-
-        labelLlama(String label) {
-            this.label = label;
-        }
-
-    }
-
-        private void trocarLabel(labelLlama label) {
-            labelAtual = labels.get(label);
-        }
-
-    public enum BackgroundType {
-        CLASSICO,
-        SUPPORT,
-        AERIAL,
-        LENDA
-    }
-
-    public Color getCorBordaClasse() {
-        return switch(classeSelecionada) {
-            case CLASSICOS -> new Color(0.55f, 0.75f, 0.55f, 1f);
-            case SUPORTES -> new Color(0.85f, 0.65f, 0.85f, 1f);
-            case AEREOS -> new Color(0.45f, 0.65f, 0.85f, 1f);
-            case LENDAS -> new Color(0.95f, 0.80f, 0.35f, 1f);
-        };
-    }
-
-    public void trocarBackground(BackgroundType tipo) {
-        backgroundSelecionado = tipo;
-
-        switch (tipo) {
-
-            case CLASSICO:
-                corBackground = new Color(0.55f, 0.75f, 0.55f, 1f);
-                break;
-
-            case SUPPORT:
-                corBackground = new Color(0.85f, 0.60f, 0.75f, 1f);
-                break;
-
-            case AERIAL:
-                corBackground = new Color(0.68f, 0.60f, 0.85f, 1f);
-                break;
-
-            case LENDA:
-                corBackground = new Color(0.85f, 0.76f, 0.52f, 1f);
-                break;
-        }
-
-    }
-
-    @Override
-    public void render(float delta) {
-        // Limpa a tela
-        ScreenUtils.clear(0.1f, 0.1f, 0.1f, 1);
-
-        viewport.apply();
-        batch.setProjectionMatrix(viewport.getCamera().combined);
-        boolean clicou = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
-
-        // ATUALIZA O MOUSE EM TODO FRAME
-        posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
-
-        mouseX = Gdx.input.getX();
-        mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
-
-        // Cursor padrão
-        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-
-        // Inicializa os botões de acordo com a classe selecionada
-        HeroType[] heroisAtuais = heroisPorClasse[getIndiceClasse()];
-
-        // Inicializa as label de acordo com a llama selecionada
-        labelLlama[] labelsAtuais = labelPorLlama[getIndiceClasse()];
-
-        // Se estiver sobre algum botão, vira mão
-        for (Botao btn : botoesHerois) {
-            btn.atualizarCursor(posMouse);
-        }
-        for(Botao btn : HUDbtn) {
-            btn.atualizarCursor(posMouse);
-        }
-
-        // ----------- ANIMACAO -------------
-        tempoAnimacao += delta;
-
-        // Aumenta o alpha com o tempo (fade in)
-        if (alpha < 1f) {
-            alpha += delta * 3f; // velocidade do fade
-            if (alpha > 1f) alpha = 1f;
-        }
-
-        // SCALE (zoom suave)
-        if (scaleAtual < 1f) {
-            scaleAtual += delta * 2.5f;
-            if (scaleAtual > 1f) scaleAtual = 1f;
-        }
-
-        // ------------ FUNDO -----------
-        fbo.begin();
-        ScreenUtils.clear(0, 0, 0, 1);
-        batch.begin();
-        float offsetX = (posMouse.x - 960) * 0.01f;
-        float offsetY = (posMouse.y - 540) * 0.01f;
-        batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
-        batch.end();
-        fbo.end();
-
-        fboTexture = fbo.getColorBufferTexture();
-        fboTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-
-        batch.setShader(blurShader);
-        batch.begin();
-        batch.draw(fboTexture, 0, 1080, 1920, -1080);
-        batch.end();
-
-        // SEMPRE resetar shader
-        batch.setShader(null);
-        batch.begin();
-
-        float tempo = tempoAnimacao;
-
-        // Pulsação suave (0 a 1)
-        float pulso = (float) Math.sin(tempo * 3f) * 0.5f + 0.5f;
-
-        // Calcula posição e escala
-        float largura = heroSelecionado.largura;
-        float altura = heroSelecionado.altura;
-        float larguraEscalada = largura * scaleAtual;
-        float alturaEscalada = altura * scaleAtual;
-
-        float x = 1050 + (largura - larguraEscalada) / 2;
-        float y = 580 + (altura - alturaEscalada) / 2;
-
-        float floatY = (float) Math.sin(tempo * 2f) * 8f * HoverAlpha;
-        float yFinal = y + floatY;
-
-        // ------------- GLOW 1: FUNDO SUAVE (Sempre visível e BEM APARENTE) -------------
-        // Aumentei a opacidade base de 0.5f para 0.85f.
-        // Isso deixa a cor do glow muito mais densa e forte mesmo sem o mouse.
-        float alphaBaseLayer = 0.85f + (0.15f * HoverAlpha);
-        batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaBaseLayer);
-        batch.draw(HUDimg[6], x - 220, yFinal - 190, 750, 750);
-
-        // ------------- GLOW 2: BRILHO INTENSO (LUZ REAL) -------------
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-
-        // Aumentei o aditivo base de 0.15f para 0.3f para dar um toque mais vivo,
-        // mas ainda seguro o suficiente para não "lavar" a tela de branco.
-        float alphaAditivo = 0.3f + (0.5f * HoverAlpha * pulso);
-
-        batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaAditivo);
-        batch.draw(HUDimg[6], x - 250, yFinal - 220, 850, 850);
-
-        batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaAditivo * 0.8f);
-        batch.draw(HUDimg[6], x - 150, yFinal - 120, 650, 650);
-
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-        // ------------- GLOW INTERNO -------------
-        // Aumentei a visibilidade base aqui também (de 0.4f para 0.7f)
-        batch.setColor(corBackground.r, corBackground.g, corBackground.b, 0.7f + (0.3f * HoverAlpha));
-        batch.draw(HUDimg[6], 880, 400, 600, 600);
-
-        // Reseta a cor ANTES de desenhar o herói para não afetar a Llama
-        batch.setColor(1f, 1f, 1f, 1f);
-
-        // ------------- ATUALIZA O HOVER DA LLAMA -------------
-        Rectangle areaLlama = new Rectangle(x, yFinal, larguraEscalada, alturaEscalada);
-        boolean hoverLlama = areaLlama.contains(posMouse);
-        float velocidade = 6f;
-
-        if (hoverLlama) {
-            HoverAlpha += delta * velocidade;
-        } else {
-            HoverAlpha -= delta * velocidade;
-        }
-        HoverAlpha = Math.max(0f, Math.min(1f, HoverAlpha));
-
-        // ------------- DESENHO DA SOMBRA -------------
-        float alphaFinal = alpha * (0.8f + 0.2f * HoverAlpha);
-        batch.setColor(0f, 0f, 0f, 0.25f * (0.5f + HoverAlpha * 0.5f));
-        float sombraOffsetX = 10f;
-        float sombraOffsetY = -10f;
-
-        if (heroAnimacaoAtual != null) {
-            TextureRegion frame = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true);
-            batch.draw(frame, x + sombraOffsetX, yFinal + sombraOffsetY, larguraEscalada, alturaEscalada);
-        } else {
-            batch.draw(heroImagemEstatica, x + sombraOffsetX, yFinal + sombraOffsetY, larguraEscalada, alturaEscalada);
-        }
-
-        // ------------- DESENHO DA LLAMA (HERÓI) -------------
-        batch.setColor(1f, 1f, 1f, alphaFinal);
-
-        if (heroAnimacaoAtual != null) {
-            TextureRegion frame = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true);
-            batch.draw(frame, x, yFinal, larguraEscalada, alturaEscalada);
-        } else {
-            batch.draw(heroImagemEstatica, x, yFinal, larguraEscalada, alturaEscalada);
-        }
-
-        // Reseta tudo no final
-        batch.setColor(1f, 1f, 1f, 1f);
-
-        // ------------- LABEL -------------
-        if (labelAtual != null) {
-            batch.draw(labelAtual, 700, 900, 700, 150);
-        }
-
-        batch.end();
-        batch.setShader(null);
-
-        // ------------ SOMBRAS (SHAPE RENDERER) ------------
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
-        for (Botao btn : HUDbtn) {
-            Rectangle r = btn.getArea();
-            shapeRenderer.setColor(0, 0, 0, 0.08f);
-            shapeRenderer.rect(r.x + 6, r.y - 6, r.width, r.height);
-            shapeRenderer.setColor(0, 0, 0, 0.2f);
-            shapeRenderer.rect(r.x + 3, r.y - 3, r.width, r.height);
-        }
-        shapeRenderer.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
-
-        // ------------ BOTOES ------------
-        batch.begin();
-        for (Botao btn : botoesHerois) {
-            btn.Exibir(batch, posMouse);
-        }
-        for(Botao btn : HUDbtn) {
-            btn.Exibir(batch, posMouse);
-        }
-        batch.end();
-
-        // ----------------------------------------------------
-        if (skinsPanel.isAberto()) {
-            // Passa a câmera para a caixa preta não ficar torta/tamanho errado
-            skinsPanel.renderShapes(viewport.getCamera().combined);
-
-            batch.begin();
-            skinsPanel.render(batch);
-            batch.end();
-        }
-        // ----------------------------------------------------
-
-        stage.act(delta);
-        stage.draw();
-
-        // ------------- CLIQUE -------------
-        if (clicou) {
-            posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
-
-            if (HUDbtn[0].foiClicado(posMouse, clicou)) {
-                game.setScreen(new MenuScreen(game));
+            if (!blurShader.isCompiled()) {
+                System.out.println(blurShader.getLog());
             }
+
+            //--------- COMBOBOX ---------
+            listaClasse = new SelectBox<>(skin);
+                listaClasse.setItems(
+                    HeroClasse.values()
+                );
+                classeSelecionada = HeroClasse.CLASSICOS;
+                listaClasse.setSelected(classeSelecionada);
+
+                listaClasse.setPosition(100,850);
+                listaClasse.setSize(300,50);
+                listaClasse.addListener(new ChangeListener() {
+                    @Override
+                    public void changed(ChangeEvent event, Actor actor) {
+                       classeSelecionada = listaClasse.getSelected();
+                       setBotoesClasseAtual();
+                    }
+                });
+            //Centraliza o texto que aparece no botão do SelectBox
+            listaClasse.setAlignment(Align.center);
+
+            //Define o limite de itens que aparecem no selectbox
+            listaClasse.setMaxListCount(4);
+
+            //Centraliza o texto que aparece no botão do SelectBox
+            listaClasse.getList().setAlignment(Align.center);
+
+            //Altera a cor
+            listaClasse.getStyle().fontColor = Color.WHITE;
+
+            listaClasse.getList().getStyle().fontColorSelected = Color.WHITE;
+            listaClasse.getList().getStyle().fontColorUnselected = Color.LIGHT_GRAY;
+
+            stage.addActor(listaClasse);
+            InputMultiplexer multiplexer = new InputMultiplexer();
+            multiplexer.addProcessor(stage);
+            multiplexer.addProcessor(new InputAdapter() {});
+            Gdx.input.setInputProcessor(multiplexer);
+
+            //--------- CURSOR ----------
+            Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+            pixmap.setColor(0, 0, 0, 0);
+            pixmap.fill();
+
+            Cursor cursorVazio = Gdx.graphics.newCursor(pixmap, 0, 0);
+            Gdx.graphics.setCursor(cursorVazio);
+
+            pixmap.dispose();
+
+
+            //--------- Imagens -----------
+
+            heroisPorClasse = new HeroType[4][];
+
+                //CLASSICOS
+                heroisPorClasse[0] = new HeroType[]{
+                    HeroType.LLAMA,
+                    HeroType.MAGELLAMA,
+                    HeroType.NINJALLAMA,
+                    HeroType.ROBOTLLAMA
+                };
+
+                //SUPORTES
+                heroisPorClasse[1] = new HeroType[]{
+                    HeroType.BURGUESA,
+                    HeroType.YETI
+                };
+
+                //AEREOS
+                heroisPorClasse[2] = new HeroType[]{
+                    HeroType.ANJOLLAMA
+                };
+
+                //LENDAS
+                heroisPorClasse[3] = new HeroType[]{
+                    HeroType.CHEF
+                };
+
+            labelPorLlama = new labelLlama[4][];
+
+                //CLÁSSICOS
+                labelPorLlama[0] = new labelLlama[]{
+                    labelLlama.LABEL_LLAMA,
+                    labelLlama.LABEL_MAGELLAMA,
+                    labelLlama.LABEL_NINJALLAMA,
+                    labelLlama.LABEL_ROBOTLLAMA
+                };
+
+                //SUPORTES
+                labelPorLlama[1] = new labelLlama[]{
+                    labelLlama.LABEL_BURGUESA
+                };
+
+                //AEREOS
+                labelPorLlama[2] = new labelLlama[] {
+                    labelLlama.LABEL_ANJOLLAMA
+                };
+
+                //LENDAS
+                labelPorLlama[3] = new labelLlama[] {
+                    labelLlama.LABEL_CHEF
+                };
+
+            framesPorClasse = new FramePorClasse[4][];
+
+                framesPorClasse[0] = new FramePorClasse[]{
+                    FramePorClasse.LLAMACLASSIC,
+                    FramePorClasse.MAGECLASSIC,
+                    FramePorClasse.NINJACLASSIC,
+                    FramePorClasse.CYBORGCLASSIC
+                };
+
+                framesPorClasse[1] = new FramePorClasse[]{
+                    FramePorClasse.BURGUESSUPPORT,
+                    FramePorClasse.YETISUPPORT
+                };
+
+                framesPorClasse[2] = new FramePorClasse[]{
+                    FramePorClasse.ANGELAERIAL
+                };
+
+                framesPorClasse[3] = new FramePorClasse[]{
+                    FramePorClasse.CHEFLEGEND
+                };
+
+
+            HUDimg = new Texture[7];
+                HUDimg[0] = new Texture("MenuScreen_Background.png");
+                HUDimg[1] = new Texture("Painel.jpg");
+                HUDimg[2] = new Texture("Frame_aerial.png");
+                HUDimg[3] = new Texture("Frame_classic.png");
+                HUDimg[4] = new Texture("Frame_legend.png");
+                HUDimg[5] = new Texture("Frame_support.png");
+                HUDimg[6] = new Texture("Glow.png");
+                HUDimg[6].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+            //--------- LABEL LLAMAS -----------
+            for (labelLlama l : labelLlama.values()) {
+                labels.put(l, new Texture(Gdx.files.internal(l.label)));
+            }
+
+            //--------- FRAMES -----------
+            for (FramePorClasse f : FramePorClasse.values()) {
+                frames.put(f, new Texture(Gdx.files.internal(f.frame)));
+            }
+
+            //-------- PADRÃO ---------
+            classeSelecionada = HeroClasse.CLASSICOS;
+            frameAtual = HUDimg[3];
+            trocarBackground(BackgroundType.CLASSICO);
+            trocarHeroi(HeroType.LLAMA);
+            trocarLabel(labelLlama.LABEL_LLAMA);
+            setBotoesClasseAtual();
+
+            //-------- Botões ----------
+            botoesHerois = new Botao[5];
+            FramePorClasse[] framesAtuais = framesPorClasse[getIndiceClasse()];
 
             for (int i = 0; i < botoesHerois.length; i++) {
-                if (botoesHerois[i].foiClicado(posMouse, clicou)) {
-                    for (Botao btn : botoesHerois) {
-                        btn.setSelecionado(false);
+
+                if (botoesHerois[i] == null) {
+                    Texture texturaFrame;
+
+                    if (i < framesAtuais.length) {
+                        texturaFrame = frames.get(framesAtuais[i]);
+                    } else {
+                        texturaFrame = frameAtual;
                     }
 
-                    botoesHerois[i].setSelecionado(true);
-                    botoesHerois[i].setCorBorda(getCorBordaClasse());
-
-                    if (i < heroisAtuais.length) {
-                        trocarHeroi(heroisAtuais[i]);
-                    }
-                    if (i < labelsAtuais.length) {
-                        trocarLabel(labelsAtuais[i]);
-                    }
-                    trocarBackground(backgroundSelecionado != null ? backgroundSelecionado : BackgroundType.CLASSICO);
+                    botoesHerois[i] = new Botao(texturaFrame, texturaFrame, posX[i], posY[i], 200, 200);
                 }
             }
 
-            // Se clicou em SKINS
-            if (HUDbtn[2].foiClicado(posMouse, clicou)) {
-                // Se já estava aberto, fecha. Se estava fechado, abre e FECHA o de infos
-                skinsPanel.toggleSkins();
+            HUDbtn = new Botao[4];
+                //Voltar
+                HUDbtn[0] = new Botao(
+                    new Texture("Back_Button.png"),
+                    //hover
+                    new Texture("Back_Button.png"),
+                    20,975,180,80
+                );
+
+                //Select
+                HUDbtn[1] = new Botao(
+                    new Texture("Select_Button.png"),
+                    new Texture("Select_ButtonHover.png"),
+                    1000, 430, 400, 100
+                );
+
+                //Skins
+                HUDbtn[2] = new Botao(
+                    new Texture("Skins_Button.png"),
+                    new Texture("Skins_Button.png"),
+                    850, 430, 100, 100
+                );
+
+                //Infos
+                HUDbtn[3] = new Botao(
+                    new Texture("Infos_Button.png"),
+                    new Texture("Infos_Button.png"),
+                    700, 430, 100, 100
+                );
+
+
+        }
+
+        private int getIndiceClasse() {
+            switch (classeSelecionada) {
+                case CLASSICOS: return 0;
+                case SUPORTES: return 1;
+                case AEREOS: return 2;
+                case LENDAS: return 3;
+            }
+            return 0;
+        }
+
+        public enum HeroClasse {
+            CLASSICOS,
+            SUPORTES,
+            AEREOS,
+            LENDAS
+
+        }
+
+        public void setClasseSelecionada (HeroClasse classe) {
+            this.classeSelecionada = classe;
+        }
+
+
+        private void setBotoesClasseAtual() {
+
+            if (botoesHerois == null) {
+                botoesHerois = new Botao[5];
             }
 
-            // Se clicou em INFOS
-            if (HUDbtn[3].foiClicado(posMouse, clicou)) {
-                skinsPanel.toggleInfos();
+            switch (classeSelecionada) {
+                case CLASSICOS:
+                    frameAtual = HUDimg[3];
+                    trocarBackground(BackgroundType.CLASSICO);
+                    trocarHeroi(HeroType.LLAMA);
+                    trocarLabel(labelLlama.LABEL_LLAMA);
+                    break;
+                case SUPORTES:
+                    frameAtual = HUDimg[5];
+                    trocarBackground(BackgroundType.SUPPORT);
+                    trocarHeroi(HeroType.BURGUESA);
+                    trocarLabel(labelLlama.LABEL_BURGUESA);
+                    break;
+                case AEREOS:
+                    frameAtual = HUDimg[2];
+                    trocarBackground(BackgroundType.AERIAL);
+                    trocarHeroi(HeroType.ANJOLLAMA);
+                    trocarLabel(labelLlama.LABEL_ANJOLLAMA);
+                    break;
+                case LENDAS:
+                    frameAtual = HUDimg[4];
+                    trocarBackground(BackgroundType.LENDA);
+                    trocarHeroi(HeroType.CHEF);
+                    trocarLabel(labelLlama.LABEL_CHEF);
+                    break;
             }
 
-            // Repassa o clique para o painel tratar (seja aba de skin ou info)
+            FramePorClasse[] framesAtuais = framesPorClasse[getIndiceClasse()];
+
+            for (int i = 0; i < botoesHerois.length; i++) {
+
+                if (botoesHerois[i] == null) {
+                    botoesHerois[i] = new Botao(frameAtual, frameAtual, posX[i], posY[i], 200, 200);
+                }
+
+                if (i < framesAtuais.length) {
+
+                    Texture texturaFrame = frames.get(framesAtuais[i]);
+
+                    if (texturaFrame != null) {
+                        botoesHerois[i].setTextura(texturaFrame, texturaFrame);
+                    } else {
+                        System.out.println("Frame não encontrado: " + framesAtuais[i]);
+                    }
+
+                } else {
+                    // botão vazio
+                    botoesHerois[i].setTextura(frameAtual, frameAtual);
+                }
+            }
+
+        }
+
+        //Função que inicializa imagem de acordo com o tipo(animação ou estática)
+        public enum HeroType {
+
+            //FALSE - ESTÁTICO && TRUE - ANIMADO
+            LLAMA("Llama.png", false, 260, 280, "Llama", "Cost: 50\nDamage: 80\nRange: 350\nSPA: 2.0s"),
+            MAGELLAMA("MageLlama.png", false, 300, 300, "Mage Llama", "Cost: 100\nDamage: 100\nRange: 350\nSPA: 2.0s"),
+            NINJALLAMA("NinjaLlama.png", false, 330, 300, "Ninja Llama", "Cost: 150\nDamage: 120\nRange: 350\nSPA: 2.0s"),
+            ROBOTLLAMA("CyborgLlama.png", false, 260, 280, "Cyborg Llama", "Cost: 200\nDamage: 140\nRange: 350\nSPA: 2.0s"),
+            ANJOLLAMA("AngelLlama.png", false, 350, 300, "Angel Llama", "Cost: 250\nDamage: 160\nRange: 350\nSPA: 2.0s"),
+            BURGUESA("BourgeoisLlama.png", false, 330, 300, "Bourgeois Llama", "Cost: 300\nDamage: 180\nRange: 350\nSPA: 2.0s"),
+            CHEF("ChefLlama.png", false, 330, 300, "Chef Llama", "Cost: 350\nDamage: 200\nRange: 350\nSPA: 2.0s"),
+            YETI("YetiLlama.png", false, 260, 280, "Yeti Llama", "Cost: 400\nDamage: 220\nRange: 350\nSPA: 2.0s");
+
+            public final String sprite; //Caminho da imagem
+            public final boolean animado; //Se é animado ou estático
+            public final float largura; //Largura
+            public final float altura; //Altura
+            public final String nome;
+            public final String status;
+
+            //Construtor que passa os parâmetros para a classe
+            HeroType(String sprite, boolean animado, float largura, float altura, String nome, String status) {
+                this.sprite = sprite;
+                this.animado = animado;
+                this.largura = largura;
+                this.altura = altura;
+                this.nome = nome;
+                this.status = status;
+            }
+        }
+
+
+        //Função que troca o herói passano o parâmetro tipo
+        private void trocarHeroi(HeroType tipo) {
+
+            alpha = 0f;
+            scaleAtual = 0.7f; // começa menor e cresce
+
+            heroSelecionado = tipo; //Salva o tipo
+
+            //--------- LIMPA A MEMÓRIA ---------
+            if(heroSpriteSheetAtual != null){
+                heroSpriteSheetAtual.dispose();
+            }
+
+            if(heroImagemEstatica != null){
+                heroImagemEstatica.dispose();
+            }
+
+            //--------- CARREGA A IMG ---------
+            if(tipo.animado){ //Se for animação
+
+                heroSpriteSheetAtual = new Texture(tipo.sprite); //Carrega a imagem
+
+                TextureRegion[][] tmp = TextureRegion.split(heroSpriteSheetAtual, 64, 64); //Quebra a imagem em partes  de 64x64(Split)
+
+                heroAnimacaoAtual = new Animation<>(0.08f, tmp[0]); //Cria a animação, juntando essas partes
+
+                heroAnimacaoAtual.setPlayMode(Animation.PlayMode.LOOP); //Faz a animação repetir
+
+                heroImagemEstatica = null; //Limpa a imagem estática
+
+            }else{
+                //Carrega a imagem estática
+                heroImagemEstatica = new Texture(tipo.sprite);
+
+                //Limpa a animação
+                heroAnimacaoAtual = null;
+            }
+
+            tempoAnimacao = 0; //Limpa o tempo da animação
+            skinsPanel.setHeroiAtual(tipo);
+        }
+
+        public enum labelLlama {
+            LABEL_LLAMA("LlamaLabel.png"),
+            LABEL_MAGELLAMA("LlamaLabel.png"),
+            LABEL_NINJALLAMA("LlamaLabel.png"),
+            LABEL_ROBOTLLAMA("LlamaLabel.png"),
+            LABEL_ANJOLLAMA("LlamaLabel.png"),
+            LABEL_BURGUESA("LlamaLabel.png"),
+            LABEL_CHEF("LlamaLabel.png");
+
+            public final String label;
+
+            labelLlama(String label) {
+                this.label = label;
+            }
+
+        }
+
+            private void trocarLabel(labelLlama label) {
+                labelAtual = labels.get(label);
+            }
+
+        public enum BackgroundType {
+            CLASSICO,
+            SUPPORT,
+            AERIAL,
+            LENDA
+        }
+
+        public Color getCorBordaClasse() {
+            return switch(classeSelecionada) {
+                case CLASSICOS -> new Color(0.55f, 0.75f, 0.55f, 1f);
+                case SUPORTES -> new Color(0.85f, 0.65f, 0.85f, 1f);
+                case AEREOS -> new Color(0.45f, 0.65f, 0.85f, 1f);
+                case LENDAS -> new Color(0.95f, 0.80f, 0.35f, 1f);
+            };
+        }
+
+        public void trocarBackground(BackgroundType tipo) {
+            backgroundSelecionado = tipo;
+
+            switch (tipo) {
+
+                case CLASSICO:
+                    corBackground = new Color(0.55f, 0.75f, 0.55f, 1f);
+                    break;
+
+                case SUPPORT:
+                    corBackground = new Color(0.85f, 0.60f, 0.75f, 1f);
+                    break;
+
+                case AERIAL:
+                    corBackground = new Color(0.68f, 0.60f, 0.85f, 1f);
+                    break;
+
+                case LENDA:
+                    corBackground = new Color(0.85f, 0.76f, 0.52f, 1f);
+                    break;
+            }
+
+        }
+
+        public enum FramePorClasse {
+            LLAMACLASSIC("LlamaFrame_Classic.png"),
+            MAGECLASSIC("MageFrame_Classic.png"),
+            CYBORGCLASSIC("CyborgFrame_Classic.png"),
+            NINJACLASSIC("NinjaFrame_Classic.png"),
+            BURGUESSUPPORT("BurguesaFrame_Suporte.png"),
+            ANGELAERIAL("AngelFrame_Aereo.png"),
+            YETISUPPORT("YetiFrame_Suporte.png"),
+            CHEFLEGEND("ChefFrame_Legend.png");
+
+            public final String frame;
+            FramePorClasse(String frame) {
+                this.frame = frame;
+            }
+        }
+
+        @Override
+        public void render(float delta) {
+            // Limpa a tela
+            ScreenUtils.clear(0.1f, 0.1f, 0.1f, 1);
+
+            viewport.apply();
+            batch.setProjectionMatrix(viewport.getCamera().combined);
+            boolean clicou = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+
+            // ------------ CURSOR (INÍCIO DO RENDER) ------------
+            CursorManager.setDefault();
+
+            // BOTÕES (já define hover automaticamente)
+            for (Botao btn : botoesHerois) {
+                btn.atualizarCursor(posMouse);
+            }
+            for (Botao btn : HUDbtn) {
+                btn.atualizarCursor(posMouse);
+            }
+
+            // PAINEL DE SKINS / INFOS
+            if (skinsPanel.isAberto() && skinsPanel.estaSobre(posMouse)) {
+                CursorManager.setHover();
+            }
+
+            // ATUALIZA O MOUSE EM TODO FRAME
+            posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+
+            // Inicializa os botões de acordo com a classe selecionada
+            HeroType[] heroisAtuais = heroisPorClasse[getIndiceClasse()];
+
+            // Inicializa as label de acordo com a llama selecionada
+            labelLlama[] labelsAtuais = labelPorLlama[getIndiceClasse()];
+
+            // Se estiver sobre algum botão, vira mão
+            for (Botao btn : botoesHerois) {
+                btn.atualizarCursor(posMouse);
+            }
+            for(Botao btn : HUDbtn) {
+                btn.atualizarCursor(posMouse);
+            }
+
+            // ----------- ANIMACAO -------------
+            tempoAnimacao += delta;
+
+            // Aumenta o alpha com o tempo (fade in)
+            if (alpha < 1f) {
+                alpha += delta * 3f; // velocidade do fade
+                if (alpha > 1f) alpha = 1f;
+            }
+
+            // SCALE (zoom suave)
+            if (scaleAtual < 1f) {
+                scaleAtual += delta * 2.5f;
+                if (scaleAtual > 1f) scaleAtual = 1f;
+            }
+
+            // ------------ FUNDO -----------
+            fbo.begin();
+            ScreenUtils.clear(0, 0, 0, 1);
+            batch.begin();
+            float offsetX = (posMouse.x - 960) * 0.01f;
+            float offsetY = (posMouse.y - 540) * 0.01f;
+            batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
+            batch.end();
+            fbo.end();
+
+            fboTexture = fbo.getColorBufferTexture();
+            fboTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+            batch.setShader(blurShader);
+            batch.begin();
+            batch.draw(fboTexture, 0, 1080, 1920, -1080);
+            batch.end();
+
+            // SEMPRE resetar shader
+            batch.setShader(null);
+            batch.begin();
+
+            float tempo = tempoAnimacao;
+
+            // Pulsação suave (0 a 1)
+            float pulso = (float) Math.sin(tempo * 3f) * 0.5f + 0.5f;
+
+            // Calcula posição e escala
+            float largura = heroSelecionado.largura;
+            float altura = heroSelecionado.altura;
+            float larguraEscalada = largura * scaleAtual;
+            float alturaEscalada = altura * scaleAtual;
+
+            float x = 1050 + (largura - larguraEscalada) / 2;
+            float y = 580 + (altura - alturaEscalada) / 2;
+
+            float floatY = (float) Math.sin(tempo * 2f) * 8f * HoverAlpha;
+            float yFinal = y + floatY;
+
+            // ------------- GLOW 1: FUNDO SUAVE (Sempre visível e BEM APARENTE) -------------
+            // Aumentei a opacidade base de 0.5f para 0.85f.
+            // Isso deixa a cor do glow muito mais densa e forte mesmo sem o mouse.
+            float alphaBaseLayer = 0.85f + (0.15f * HoverAlpha);
+            batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaBaseLayer);
+            batch.draw(HUDimg[6], x - 220, yFinal - 190, 750, 750);
+
+            // ------------- GLOW 2: BRILHO INTENSO (LUZ REAL) -------------
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+
+            // Aumentei o aditivo base de 0.15f para 0.3f para dar um toque mais vivo,
+            // mas ainda seguro o suficiente para não "lavar" a tela de branco.
+            float alphaAditivo = 0.3f + (0.5f * HoverAlpha * pulso);
+
+            batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaAditivo);
+            batch.draw(HUDimg[6], x - 250, yFinal - 220, 850, 850);
+
+            batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaAditivo * 0.8f);
+            batch.draw(HUDimg[6], x - 150, yFinal - 120, 650, 650);
+
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+            // ------------- GLOW INTERNO -------------
+            // Aumentei a visibilidade base aqui também (de 0.4f para 0.7f)
+            batch.setColor(corBackground.r, corBackground.g, corBackground.b, 0.7f + (0.3f * HoverAlpha));
+            batch.draw(HUDimg[6], 880, 400, 600, 600);
+
+            // Reseta a cor ANTES de desenhar o herói para não afetar a Llama
+            batch.setColor(1f, 1f, 1f, 1f);
+
+            // ------------- ATUALIZA O HOVER DA LLAMA -------------
+            Rectangle areaLlama = new Rectangle(x, yFinal, larguraEscalada, alturaEscalada);
+            boolean hoverLlama = areaLlama.contains(posMouse);
+            float velocidade = 6f;
+
+            if (hoverLlama) {
+                HoverAlpha += delta * velocidade;
+            } else {
+                HoverAlpha -= delta * velocidade;
+            }
+            HoverAlpha = Math.max(0f, Math.min(1f, HoverAlpha));
+
+            // ------------- DESENHO DA SOMBRA -------------
+            float alphaFinal = alpha * (0.8f + 0.2f * HoverAlpha);
+            batch.setColor(0f, 0f, 0f, 0.25f * (0.5f + HoverAlpha * 0.5f));
+            float sombraOffsetX = 10f;
+            float sombraOffsetY = -10f;
+
+            if (heroAnimacaoAtual != null) {
+                TextureRegion frame = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true);
+                batch.draw(frame, x + sombraOffsetX, yFinal + sombraOffsetY, larguraEscalada, alturaEscalada);
+            } else {
+                batch.draw(heroImagemEstatica, x + sombraOffsetX, yFinal + sombraOffsetY, larguraEscalada, alturaEscalada);
+            }
+
+            // ------------- DESENHO DA LLAMA (HERÓI) -------------
+            batch.setColor(1f, 1f, 1f, alphaFinal);
+
+            if (heroAnimacaoAtual != null) {
+                TextureRegion frame = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true);
+                batch.draw(frame, x, yFinal, larguraEscalada, alturaEscalada);
+            } else {
+                batch.draw(heroImagemEstatica, x, yFinal, larguraEscalada, alturaEscalada);
+            }
+
+            // Reseta tudo no final
+            batch.setColor(1f, 1f, 1f, 1f);
+
+            // ------------- LABEL -------------
+            if (labelAtual != null) {
+                batch.draw(labelAtual, 700, 900, 700, 150);
+            }
+
+            batch.end();
+            batch.setShader(null);
+
+            // ------------ SOMBRAS (SHAPE RENDERER) ------------
+            shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+            for (Botao btn : HUDbtn) {
+                Rectangle r = btn.getArea();
+                shapeRenderer.setColor(0, 0, 0, 0.08f);
+                shapeRenderer.rect(r.x + 6, r.y - 6, r.width, r.height);
+                shapeRenderer.setColor(0, 0, 0, 0.2f);
+                shapeRenderer.rect(r.x + 3, r.y - 3, r.width, r.height);
+            }
+            shapeRenderer.end();
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+
+            // ------------ BOTOES ------------
+            batch.begin();
+            for (Botao btn : botoesHerois) {
+                if (btn != null && btn.getArea() != null) {
+                    btn.Exibir(batch, posMouse);
+                }
+            }
+            for(Botao btn : HUDbtn) {
+                btn.Exibir(batch, posMouse);
+            }
+            batch.end();
+
+            // ----------------------------------------------------
             if (skinsPanel.isAberto()) {
-                skinsPanel.detectarClique(mouseX, mouseY);
+                // Passa a câmera para a caixa preta não ficar torta/tamanho errado
+                skinsPanel.renderShapes(viewport.getCamera().combined);
+
+                batch.begin();
+                skinsPanel.render(batch);
+                batch.end();
+            }
+            // ----------------------------------------------------
+
+            stage.act(delta);
+            stage.draw();
+
+            // ------------- CLIQUE -------------
+            if (clicou) {
+
+                if (HUDbtn[0].foiClicado(posMouse, clicou)) {
+                    game.setScreen(new MenuScreen(game));
+                }
+
+                for (int i = 0; i < botoesHerois.length; i++) {
+                    if (botoesHerois[i].foiClicado(posMouse, clicou)) {
+                        for (Botao btn : botoesHerois) {
+                            btn.setSelecionado(false);
+                        }
+
+                        botoesHerois[i].setSelecionado(true);
+                        botoesHerois[i].setCorBorda(getCorBordaClasse());
+
+                        if (i < heroisAtuais.length) {
+                            trocarHeroi(heroisAtuais[i]);
+                        }
+                        if (i < labelsAtuais.length) {
+                            trocarLabel(labelsAtuais[i]);
+                        }
+                        trocarBackground(backgroundSelecionado != null ? backgroundSelecionado : BackgroundType.CLASSICO);
+                    }
+                }
+
+                // Se clicou em SKINS
+                if (HUDbtn[2].foiClicado(posMouse, clicou)) {
+                    // Se já estava aberto, fecha. Se estava fechado, abre e FECHA o de infos
+                    skinsPanel.toggleSkins();
+                }
+
+                // Se clicou em INFOS
+                if (HUDbtn[3].foiClicado(posMouse, clicou)) {
+                    skinsPanel.toggleInfos();
+                }
+
+                // Repassa o clique para o painel tratar (seja aba de skin ou info)
+                if (skinsPanel.isAberto()) {
+                    skinsPanel.detectarClique(posMouse.x, posMouse.y);
+                }
+            }
+
+            // =================================================================
+            // FEEDBACK VISUAL: Destaca qual aba está aberta no momento
+            // =================================================================
+            HUDbtn[2].setSelecionado(skinsPanel.getAbaAtual() == PainelSkins.AbaAtiva.SKINS);
+            HUDbtn[3].setSelecionado(skinsPanel.getAbaAtual() == PainelSkins.AbaAtiva.INFOS);
+
+            //------------- CURSOR -------------
+            CursorManager.aplicarCursorInvisivel();
+
+            batch.begin();
+            CursorManager.desenhar(batch, posMouse);
+            batch.end();
+        }
+
+        @Override
+        public void resize(int width, int height) {
+
+            viewport.update(width, height, true); //Atualiza o viewport de acordo com o tamanho da tela
+            stage.getViewport().update(width, height, true); //Atualiza o stage de acordo com o tamanho da tela
+        }
+
+        @Override
+        public void dispose() {
+            batch.dispose();
+            //------ IMG ------
+
+            for (Texture img : HUDimg) {
+                img.dispose();
+            }
+
+            if (heroSpriteSheetAtual != null) {
+                heroSpriteSheetAtual.dispose();
+            }
+
+            if(heroImagemEstatica != null) {
+                heroImagemEstatica.dispose();
+            }
+
+            for (Texture t : labels.values()) {
+                t.dispose();
+            }
+
+            //------ STAGE ------
+            stage.dispose();
+
+            //------ SKIN ------
+            skin.dispose();
+
+
+            //----- BTN ------
+            for(Botao btn : botoesHerois) {
+                btn.dispose();
+            }
+            for (Botao btn : HUDbtn) {
+                btn.dispose();
             }
         }
-
-        // =================================================================
-        // FEEDBACK VISUAL: Destaca qual aba está aberta no momento
-        // =================================================================
-        HUDbtn[2].setSelecionado(skinsPanel.getAbaAtual() == PainelSkins.AbaAtiva.SKINS);
-        HUDbtn[3].setSelecionado(skinsPanel.getAbaAtual() == PainelSkins.AbaAtiva.INFOS);
     }
-
-    @Override
-    public void resize(int width, int height) {
-
-        viewport.update(width, height, true); //Atualiza o viewport de acordo com o tamanho da tela
-        stage.getViewport().update(width, height, true); //Atualiza o stage de acordo com o tamanho da tela
-    }
-
-    @Override
-    public void dispose() {
-        batch.dispose();
-        //------ IMG ------
-
-        for (Texture img : HUDimg) {
-            img.dispose();
-        }
-
-        if (heroSpriteSheetAtual != null) {
-            heroSpriteSheetAtual.dispose();
-        }
-
-        if(heroImagemEstatica != null) {
-            heroImagemEstatica.dispose();
-        }
-
-        for (Texture t : labels.values()) {
-            t.dispose();
-        }
-
-        //------ STAGE ------
-        stage.dispose();
-
-        //------ SKIN ------
-        skin.dispose();
-
-
-        //----- BTN ------
-        for(Botao btn : botoesHerois) {
-            btn.dispose();
-        }
-        for (Botao btn : HUDbtn) {
-            btn.dispose();
-        }
-    }
-}
