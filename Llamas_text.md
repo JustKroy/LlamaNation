@@ -4,7 +4,7 @@ Llama: An ordinary Llama who came from the Andes to destroy snails! He spits on 
 
 Ninja Llama: A Llama trained in the arts of Ninjutsu who came back home to help in the war against the evil ones.
 
-Mage Llama: The mage (trained with Gandalf, the Gray in Valinor) and is Master in Llamagic now. When he isn't killing snails with fireballs, he likes to do crosswords and drink coffee with other Mages.
+Mage Llama: The Mage trained for three years in Scotland and is Master in Llamagic now. When he isn't killing snails with fireballs, he likes to do crosswords and drink coffee with other Mages.
 
 Angel Llama: The holy entity of all Llamas who pray for their "Guardian Angel". He was sent by GodLlama to Protect the Llamas against the snails who atack them.
 
@@ -23,7 +23,7 @@ Llama: uma llama comum que veio dos Andes para destruir caracóis! Ele cospe nel
 
 Llama Ninja: uma Llama treinada nas artes do Ninjutsu que voltou para casa para ajudar na guerra contra os caracóis.
 
-Llama Maga: O Mago treinou com Gandalf, O Cinza em Valinor e é mestre em magia hoje em dia. quando não está queimando caracóis com suas bolas de fogo, ele gosta de fazer palavras cruzadas e beber café 
+Llama Maga: O Mago treinou por três anos na Escócia e é mestre em Llamagia hoje em dia. quando não está queimando caracóis com suas bolas de fogo, ele gosta de fazer palavras cruzadas e beber café 
 
 Llama Anjo: A entidade sagrada para todas as Llamas que rezam pelo seu "Anjinho da Guarda". Ele foi mandado pela LlamaDeus para proteger as Llamas contra os caracóis que os atacarem.
 
