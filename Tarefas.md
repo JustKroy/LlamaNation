@@ -47,18 +47,12 @@ Configurações<br>
 - Labels Llamas
 - Background menu heróis
 - Refazer infos e skins
-- Refazer Back
-- Frame Soon
-- Frame LLamas nao desbloqueadas
 - Botão Menu Dropdown + hover de todas as classes
 ### BOTÕES TELA PRINCIPAL
 - Background menu principal
 - Background configs
-- Botão sair do jogo e botão salvar
+- Botão salvar
 ### BOTÕES TELA DE JOGO
-- Botão "Sell"
-- Botão "Leave Battle"
-- Botão "Continue" 
 
 ## IDEIAS
 ### LHAMAS
