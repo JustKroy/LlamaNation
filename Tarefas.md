@@ -13,6 +13,7 @@ Abominavel Llama Das Neves - Desenho, Animação, Mecânica e ataque (Design, Ha
 LLama Operária - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Llama Ninja - Animação<br>
 Llama Padrâo - Animação<br>
+Sons de ataque das llamas, de botões, opções e cliques<br>
 Frames de TODAS Llamas para a página de Heros no menu principal.
 
 # AUGUSTO
