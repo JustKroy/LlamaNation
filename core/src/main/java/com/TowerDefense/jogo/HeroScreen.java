@@ -253,25 +253,6 @@
             trocarLabel(labelLlama.LABEL_LLAMA);
             setBotoesClasseAtual();
 
-            //-------- Botões ----------
-            botoesHerois = new Botao[5];
-            FramePorClasse[] framesAtuais = framesPorClasse[getIndiceClasse()];
-
-            for (int i = 0; i < botoesHerois.length; i++) {
-
-                if (botoesHerois[i] == null) {
-                    Texture texturaFrame;
-
-                    if (i < framesAtuais.length) {
-                        texturaFrame = frames.get(framesAtuais[i]);
-                    } else {
-                        texturaFrame = frameAtual;
-                    }
-
-                    botoesHerois[i] = new Botao(texturaFrame, texturaFrame, posX[i], posY[i], 200, 200);
-                }
-            }
-
             HUDbtn = new Botao[4];
                 //Voltar
                 HUDbtn[0] = new Botao(
@@ -330,10 +311,28 @@
 
         private void setBotoesClasseAtual() {
 
-            if (botoesHerois == null) {
-                botoesHerois = new Botao[5];
+            HeroType[] heroisAtuais = heroisPorClasse[getIndiceClasse()];
+            FramePorClasse[] framesAtuais = framesPorClasse[getIndiceClasse()];
+
+            botoesHerois = new Botao[heroisAtuais.length];
+
+            for (int i = 0; i < heroisAtuais.length; i++) {
+
+                Texture texturaFrame;
+
+                if (i < framesAtuais.length && frames.get(framesAtuais[i]) != null) {
+                    texturaFrame = frames.get(framesAtuais[i]);
+                } else {
+                    texturaFrame = frameAtual; // fallback
+                }
+
+                float x = 20 + (i % 2) * 250;
+                float y = 580 - (i / 2) * 250;
+
+                botoesHerois[i] = new Botao(texturaFrame, texturaFrame, x, y, 200, 200);
             }
 
+            // Atualiza padrão da classe
             switch (classeSelecionada) {
                 case CLASSICOS:
                     frameAtual = HUDimg[3];
@@ -341,18 +340,21 @@
                     trocarHeroi(HeroType.LLAMA);
                     trocarLabel(labelLlama.LABEL_LLAMA);
                     break;
+
                 case SUPORTES:
                     frameAtual = HUDimg[5];
                     trocarBackground(BackgroundType.SUPPORT);
                     trocarHeroi(HeroType.BURGUESA);
                     trocarLabel(labelLlama.LABEL_BURGUESA);
                     break;
+
                 case AEREOS:
                     frameAtual = HUDimg[2];
                     trocarBackground(BackgroundType.AERIAL);
                     trocarHeroi(HeroType.ANJOLLAMA);
                     trocarLabel(labelLlama.LABEL_ANJOLLAMA);
                     break;
+
                 case LENDAS:
                     frameAtual = HUDimg[4];
                     trocarBackground(BackgroundType.LENDA);
@@ -360,31 +362,6 @@
                     trocarLabel(labelLlama.LABEL_CHEF);
                     break;
             }
-
-            FramePorClasse[] framesAtuais = framesPorClasse[getIndiceClasse()];
-
-            for (int i = 0; i < botoesHerois.length; i++) {
-
-                if (botoesHerois[i] == null) {
-                    botoesHerois[i] = new Botao(frameAtual, frameAtual, posX[i], posY[i], 200, 200);
-                }
-
-                if (i < framesAtuais.length) {
-
-                    Texture texturaFrame = frames.get(framesAtuais[i]);
-
-                    if (texturaFrame != null) {
-                        botoesHerois[i].setTextura(texturaFrame, texturaFrame);
-                    } else {
-                        System.out.println("Frame não encontrado: " + framesAtuais[i]);
-                    }
-
-                } else {
-                    // botão vazio
-                    botoesHerois[i].setTextura(frameAtual, frameAtual);
-                }
-            }
-
         }
 
         //Função que inicializa imagem de acordo com o tipo(animação ou estática)
