@@ -10,7 +10,7 @@ Llama Anjo - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Model
 Llama Burguesa - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Llama Chef - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
 Abominavel Llama Das Neves - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
-LLama Operária - Desenho, Animação, Mecânica e ataque (Design, Habilidades, Modelo)<br>
+LLama Operária - Desenho, Animação, Mecânica, Ataque e Upgrades (Design, Habilidades, Modelo)<br>
 Llama Ninja - Animação<br>
 Llama Padrâo - Animação<br>
 Sons de ataque das llamas, de botões, opções e cliques<br>
