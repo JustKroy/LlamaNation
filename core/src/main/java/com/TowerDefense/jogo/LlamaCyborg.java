@@ -20,7 +20,7 @@ public class LlamaCyborg extends Torre {
 
         // Dano
         this.dano = 60;
-        this.raio = 250f;
+        this.raio = TipoLlama.CYBORG.raioInicial;
         // Cooldawn
         this.cooldown = 0.1f;
         this.velocidadeProjetil = 1000f;

@@ -19,7 +19,10 @@ public class LhamaMage extends Torre {
         super(x, y, sheetMago, imgMagia);
 
         this.dano = 150;
-        this.raio = 300f; // Diâmetro visual na loja deve ser 600!
+
+        // 🔥 A MÁGICA ACONTECE AQUI! Puxando o raio direto do Enum 🔥
+        this.raio = TipoLlama.MAGE.raioInicial;
+
         this.cooldown = 2.5f;
 
         this.tamanhoProjetil = 20f;

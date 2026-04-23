@@ -1,7 +1,6 @@
 package com.TowerDefense.jogo;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -11,252 +10,124 @@ import com.badlogic.gdx.utils.Array;
 
 public class ProjetilAngel extends Projetil {
 
-    private enum EstadoNuvem {
-        NASCENDO, ATIVA, SUMINDO
-    }
+    private enum EstadoNuvem { NASCENDO, ATIVA, SUMINDO }
     private EstadoNuvem estadoAtual = EstadoNuvem.NASCENDO;
 
-    private Animation<TextureRegion> animNascendo;
-    private Animation<TextureRegion> animAtiva;
-    private Animation<TextureRegion> animSumindo;
+    private Animation<TextureRegion> animNascendo, animAtiva, animSumindo, animAttackVisual;
+    private float tempoAnimacaoNuvem, tempoAnimacaoAttackVisual, timerVoo, timerVisualRaio;
 
-    private Animation<TextureRegion> animAttackVisual;
-    private float tempoAnimacaoAttackVisual;
+    private Vector2 posBaseNuvem = new Vector2(), posNuvem = new Vector2();
+    // Altura reduzida para ficar bem em cima do caramujo
+    private float alturaNuvem = 100f, velocidadeMovimento = 300f, raioExplosao, raioVisualY;
+    private float intervaloAtaque = 1.2f, timerDano = 0;
 
-    private float velAttackVisual = 0.02f;
+    private boolean danoPendente = false, precisaExplodir = false;
+    private float origemTorreX, origemTorreY, raioPermitido;
 
-    private float tempoAnimacaoNuvem;
-    private float velocidadeMovimento = 250f;
+    public ProjetilAngel(Inimigo alvo, float danoBase, Texture imgNasc, Texture imgAtiv, Texture imgSum, Texture imgAtq, float oX, float oY, float raioPerm, float raioExplo) {
+        super(alvo.posicao.x, alvo.posicao.y + 100f, alvo, imgAtq, (int)(danoBase), 40f, 100f, 0f, 1f);
 
-    private float velNascendo = 0.08f;
-    private float velAtiva = 0.15f;
-    private float velSumindo = 0.08f;
+        this.origemTorreX = oX; this.origemTorreY = oY;
+        this.raioPermitido = raioPerm; this.raioExplosao = raioExplo;
+        this.dano = (int)(danoBase);
 
-    private Texture imgAtaque;
+        // Inicializar Animações
+        animNascendo = criarAnim(imgNasc, 8, 0.08f, Animation.PlayMode.NORMAL);
+        animAtiva = criarAnim(imgAtiv, 5, 0.15f, Animation.PlayMode.LOOP);
+        animSumindo = criarAnim(imgSum, 5, 0.08f, Animation.PlayMode.NORMAL);
+        animAttackVisual = criarAnim(imgAtq, 10, 0.03f, Animation.PlayMode.NORMAL);
 
-    private Vector2 posBaseNuvem = new Vector2();
-    private Vector2 posNuvem = new Vector2();
-    private float alturaNuvem = 100f;
+        // Nasce um pouco mais baixa
+        this.posBaseNuvem.set(oX, oY + 60f);
+    }
 
-    private float intervaloAtaque = 1.0f;
-    private float timerDano = intervaloAtaque;
-
-    private float timerVisualRaio = 0f;
-    private float raioVisualY = 0f;
-
-    private Inimigo inimigoMorto = null;
-
-    // 🔥 VARIÁVEIS NOVAS PARA ATRASAR O DANO
-    private boolean danoPendente = false;
-    private Inimigo alvoPendente = null;
-
-    private float origemTorreX;
-    private float origemTorreY;
-    private float raioPermitido;
-
-    private float timerVoo = 0f;
-
-    public ProjetilAngel(Inimigo alvo, float danoBaseTorre, Texture imgNascendo, Texture imgAtiva, Texture imgSumindo, Texture imgAtaque, float origemX, float origemY, float raioPermitido) {
-        super(alvo.posicao.x, alvo.posicao.y + 180f, alvo, imgAtaque, (int)(danoBaseTorre / 4f), 40f, 100f, 0f, 1f);
-
-        this.imgAtaque = imgAtaque;
-        this.ativo = true;
-        this.dano = (int) (danoBaseTorre / 4f);
-        this.origemTorreX = origemX;
-        this.origemTorreY = origemY;
-        this.raioPermitido = raioPermitido;
-
-        imgNascendo.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-        imgAtiva.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-        imgSumindo.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-        imgAtaque.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
-
-        int largNasc = imgNascendo.getWidth() / 8;
-        int altNasc = imgNascendo.getHeight();
-        Array<TextureRegion> framesNascendo = new Array<>();
-        for (int i = 0; i < 8; i++) {
-            framesNascendo.add(new TextureRegion(imgNascendo, i * largNasc, 0, largNasc, altNasc));
-        }
-        animNascendo = new Animation<>(velNascendo, framesNascendo, Animation.PlayMode.NORMAL);
-
-        int largAtiva = imgAtiva.getWidth() / 5;
-        int altAtiva = imgAtiva.getHeight();
-        Array<TextureRegion> framesAtiva = new Array<>();
-        for (int i = 0; i < 5; i++) {
-            framesAtiva.add(new TextureRegion(imgAtiva, i * largAtiva, 0, largAtiva, altAtiva));
-        }
-        animAtiva = new Animation<>(velAtiva, framesAtiva, Animation.PlayMode.LOOP);
-
-        int largSum = imgSumindo.getWidth() / 5;
-        int altSum = imgSumindo.getHeight();
-        Array<TextureRegion> framesSumindo = new Array<>();
-        for (int i = 0; i < 5; i++) {
-            framesSumindo.add(new TextureRegion(imgSumindo, i * largSum, 0, largSum, altSum));
-        }
-        animSumindo = new Animation<>(velSumindo, framesSumindo, Animation.PlayMode.NORMAL);
-
-        int largAttackVisual = imgAtaque.getWidth() / 10;
-        int altAttackVisual = imgAtaque.getHeight();
-        Array<TextureRegion> framesAttackVisual = new Array<>();
-        for (int i = 0; i < 10; i++) {
-            framesAttackVisual.add(new TextureRegion(imgAtaque, i * largAttackVisual, 0, largAttackVisual, altAttackVisual));
-        }
-        animAttackVisual = new Animation<>(velAttackVisual, framesAttackVisual, Animation.PlayMode.NORMAL);
-
-        this.tempoAnimacaoNuvem = 0f;
-
-        this.posBaseNuvem.set(origemTorreX, origemTorreY + 50f);
-        this.posNuvem.set(posBaseNuvem);
+    private Animation<TextureRegion> criarAnim(Texture tex, int frames, float vel, Animation.PlayMode mode) {
+        int w = tex.getWidth() / frames;
+        Array<TextureRegion> f = new Array<>();
+        for (int i = 0; i < frames; i++) f.add(new TextureRegion(tex, i * w, 0, w, tex.getHeight()));
+        return new Animation<>(vel, f, mode);
     }
 
     @Override
     public void atualizar(float delta) {
         if (!ativo) return;
+        tempoAnimacaoNuvem += delta; timerVoo += delta; tempoAnimacaoAttackVisual += delta;
+        if (timerVisualRaio > 0) timerVisualRaio -= delta;
 
-        tempoAnimacaoNuvem += delta;
-        timerVoo += delta;
-        tempoAnimacaoAttackVisual += delta;
-
-        if (timerVisualRaio > 0) {
-            timerVisualRaio -= delta;
+        // Lógica de Dano Sincronizado com o Frame
+        if (danoPendente && tempoAnimacaoAttackVisual >= (9 * 0.03f)) {
+            precisaExplodir = true;
+            danoPendente = false;
         }
 
-        // 🔥 APLICA O DANO NO ÚLTIMO FRAME DA ANIMAÇÃO DO RAIO 🔥
-        if (danoPendente) {
-            float tempoUltimoFrame = 9 * velAttackVisual; // O 9º frame é o último da sua imagem
-            if (tempoAnimacaoAttackVisual >= tempoUltimoFrame) {
-                if (alvoPendente != null && alvoPendente.vida > 0) {
-                    alvoPendente.vida -= this.dano;
-                    if (alvoPendente.vida <= 0) {
-                        inimigoMorto = alvoPendente;
-                    }
-                }
-                danoPendente = false; // Finaliza o pendente
-                alvoPendente = null;
-            }
+        if (estadoAtual == EstadoNuvem.NASCENDO && animNascendo.isAnimationFinished(tempoAnimacaoNuvem)) {
+            estadoAtual = EstadoNuvem.ATIVA; tempoAnimacaoNuvem = 0;
+        }
+        else if (estadoAtual == EstadoNuvem.SUMINDO) {
+            // Volta para a torre numa altura menor
+            posBaseNuvem.lerp(new Vector2(origemTorreX, origemTorreY + 60f), 0.1f);
+            if (animSumindo.isAnimationFinished(tempoAnimacaoNuvem)) { ativo = false; return; }
         }
 
-        if (estadoAtual == EstadoNuvem.NASCENDO) {
-            if (animNascendo.isAnimationFinished(tempoAnimacaoNuvem)) {
-                estadoAtual = EstadoNuvem.ATIVA;
-                tempoAnimacaoNuvem = 0f;
-            }
-        } else if (estadoAtual == EstadoNuvem.SUMINDO) {
-            float destinoTorreX = origemTorreX;
-            float destinoTorreY = origemTorreY + 50f;
-            float dx = destinoTorreX - posBaseNuvem.x;
-            float dy = destinoTorreY - posBaseNuvem.y;
-            float distBaseTorre = Vector2.dst(posBaseNuvem.x, posBaseNuvem.y, destinoTorreX, destinoTorreY);
-
-            if (distBaseTorre > 5f) {
-                posBaseNuvem.x += (dx / distBaseTorre) * velocidadeMovimento * delta;
-                posBaseNuvem.y += (dy / distBaseTorre) * velocidadeMovimento * delta;
-            }
-
-            if (animSumindo.isAnimationFinished(tempoAnimacaoNuvem)) {
-                this.ativo = false;
-                return;
-            }
-        }
-
+        // Perseguição do Alvo
+        // Perseguição do Alvo
         if (estadoAtual != EstadoNuvem.SUMINDO && alvo != null && alvo.vida > 0) {
-            float alvoX = alvo.posicao.x + (alvo.largura / 2f);
-            float alvoY = alvo.posicao.y + (alvo.altura / 2f);
-            float distAteTorre = Vector2.dst(origemTorreX, origemTorreY, alvoX, alvoY);
+            float dist = Vector2.dst(origemTorreX, origemTorreY, alvo.posicao.x, alvo.posicao.y);
+            if (dist > raioPermitido + 100f) { alvo = null; }
+            else {
+                Vector2 destino = new Vector2(alvo.posicao.x + alvo.largura/2, alvo.posicao.y + alturaNuvem);
+                posBaseNuvem.lerp(destino, 0.15f);
 
-            if (distAteTorre > raioPermitido) {
-                alvo = null;
-            } else {
-                float destinoX = alvo.posicao.x + (alvo.largura / 2f);
-                float destinoY = alvo.posicao.y + alturaNuvem;
-
-                float difX = destinoX - posBaseNuvem.x;
-                float difY = destinoY - posBaseNuvem.y;
-                float distBase = Vector2.dst(posBaseNuvem.x, posBaseNuvem.y, destinoX, destinoY);
-
-                if (distBase > 5f) {
-                    posBaseNuvem.x += (difX / distBase) * velocidadeMovimento * delta;
-                    posBaseNuvem.y += (difY / distBase) * velocidadeMovimento * delta;
-                } else {
-                    posBaseNuvem.set(destinoX, destinoY);
+                // NOVIDADE: Mantém a mira do raio grudada no alvo na vertical enquanto "carrega"
+                if (danoPendente) {
+                    raioVisualY = alvo.posicao.y;
                 }
-            }
-        }
 
-        float offsetX = MathUtils.sin(timerVoo * 2f) * 30f;
-        float offsetY = MathUtils.cos(timerVoo * 1.5f) * 10f;
-
-        posNuvem.x = posBaseNuvem.x + offsetX;
-        posNuvem.y = posBaseNuvem.y + offsetY;
-
-        this.posicao.set(posNuvem);
-        this.hitbox.setPosition(posNuvem.x, posNuvem.y);
-
-        // Dispara o visual do ataque sem dar o dano imediatamente
-        if (estadoAtual == EstadoNuvem.ATIVA && alvo != null && alvo.vida > 0) {
-            float distBaseAlvo = Vector2.dst(posBaseNuvem.x, posBaseNuvem.y, alvo.posicao.x + (alvo.largura / 2f), alvo.posicao.y + alturaNuvem);
-            if (distBaseAlvo <= 15f) {
-                if (!danoPendente) {
+                // Disparar Raio
+                if (posBaseNuvem.dst(destino) < 30f && !danoPendente) {
                     timerDano += delta;
-
                     if (timerDano >= intervaloAtaque) {
-                        // SÓ COMEÇA O RAIO!
-                        tempoAnimacaoAttackVisual = 0f;
-                        timerVisualRaio = 10 * velAttackVisual;
-                        raioVisualY = alvo.posicao.y + (alvo.altura / 2f);
-
-                        alvoPendente = alvo;
-                        danoPendente = true; // Avisa o sistema que o dano está "voando"
+                        tempoAnimacaoAttackVisual = 0;
+                        timerVisualRaio = 0.3f;
+                        raioVisualY = alvo.posicao.y;
+                        danoPendente = true;
                         timerDano = 0;
                     }
                 }
-            } else {
-                if (timerDano < intervaloAtaque && !danoPendente) {
-                    timerDano += delta;
-                }
             }
         }
+
+        // Balanço da nuvem
+        posNuvem.set(posBaseNuvem.x + MathUtils.sin(timerVoo * 2f) * 20f, posBaseNuvem.y + MathUtils.cos(timerVoo * 1.5f) * 10f);
     }
 
     @Override
     public Inimigo checarColisao(Array<Inimigo> listaInimigos) {
-        if (inimigoMorto != null) {
-            listaInimigos.removeValue(inimigoMorto, true);
-            inimigoMorto = null;
-            if (alvo == inimigoMorto) alvo = null;
+        if (precisaExplodir) {
+            for (int i = listaInimigos.size - 1; i >= 0; i--) {
+                Inimigo in = listaInimigos.get(i);
+
+                // NOVIDADE: Agora medimos do centro da explosão para o centro do inimigo
+                float centroExplosaoY = raioVisualY + (in.altura / 2f);
+                float d = Vector2.dst(posBaseNuvem.x, centroExplosaoY, in.posicao.x + in.largura/2, in.posicao.y + in.altura/2);
+
+                if (d <= raioExplosao) {
+                    in.vida -= this.dano;
+                    if (in.vida <= 0 && alvo == in) { alvo = null; }
+                }
+            }
+            precisaExplodir = false;
         }
 
-        if (alvo == null && estadoAtual != EstadoNuvem.SUMINDO) {
-            Inimigo novoAlvo = null;
-            float menorDistancia = Float.MAX_VALUE;
-
+        // Se perder o alvo, tenta achar outro por perto
+        if (alvo == null && estadoAtual == EstadoNuvem.ATIVA && !danoPendente) {
             for (Inimigo in : listaInimigos) {
-                if (in.vida > 0) {
-                    float inX = in.posicao.x + (in.largura / 2f);
-                    float inY = in.posicao.y + (in.altura / 2f);
-
-                    float distAteTorre = Vector2.dst(origemTorreX, origemTorreY, inX, inY);
-
-                    if (distAteTorre <= raioPermitido) {
-                        float distAteNuvem = Vector2.dst(posNuvem.x, posNuvem.y, inX, in.posicao.y + alturaNuvem);
-                        if (distAteNuvem < menorDistancia) {
-                            menorDistancia = distAteNuvem;
-                            novoAlvo = in;
-                        }
-                    }
+                if (in.vida > 0 && Vector2.dst(origemTorreX, origemTorreY, in.posicao.x, in.posicao.y) <= raioPermitido) {
+                    alvo = in; break;
                 }
             }
-
-            if (novoAlvo != null) {
-                alvo = novoAlvo;
-            } else {
-                if (timerVisualRaio <= 0 && estadoAtual == EstadoNuvem.ATIVA && !danoPendente) {
-                    estadoAtual = EstadoNuvem.SUMINDO;
-                    tempoAnimacaoNuvem = 0f;
-                }
-            }
+            if (alvo == null) { estadoAtual = EstadoNuvem.SUMINDO; tempoAnimacaoNuvem = 0; }
         }
-
         return null;
     }
 
@@ -264,37 +135,21 @@ public class ProjetilAngel extends Projetil {
     public void desenhar(SpriteBatch batch) {
         if (!ativo) return;
 
-        if (timerVisualRaio > 0 && estadoAtual != EstadoNuvem.SUMINDO) {
-            TextureRegion frameAtaque = animAttackVisual.getKeyFrame(tempoAnimacaoAttackVisual);
-
-            if (frameAtaque != null) {
-                float larguraRaioVisual = 80f;
-
-                float eixoY_TopoAtaque = posNuvem.y + 20f;
-                float alturaAtaqueSuavizado = eixoY_TopoAtaque - raioVisualY;
-
-                batch.draw(frameAtaque, posNuvem.x - (larguraRaioVisual / 2f), raioVisualY, larguraRaioVisual, alturaAtaqueSuavizado);
-            }
+        // Desenha o Raio (Ataque Visual mais fino)
+        if (timerVisualRaio > 0) {
+            TextureRegion frameRaio = animAttackVisual.getKeyFrame(tempoAnimacaoAttackVisual);
+            float largRaio = raioExplosao * 2.0f; // Multiplicador reduzido para estreitar o raio
+            batch.draw(frameRaio, posBaseNuvem.x - largRaio/2, raioVisualY, largRaio, posNuvem.y - raioVisualY + 20);
         }
 
-        TextureRegion regionAtual = null;
+        // Desenha a Nuvem (Escala reduzida)
+        TextureRegion r = (estadoAtual == EstadoNuvem.NASCENDO) ? animNascendo.getKeyFrame(tempoAnimacaoNuvem) :
+            (estadoAtual == EstadoNuvem.SUMINDO) ? animSumindo.getKeyFrame(tempoAnimacaoNuvem) :
+                animAtiva.getKeyFrame(tempoAnimacaoNuvem);
 
-        if (estadoAtual == EstadoNuvem.NASCENDO) {
-            regionAtual = animNascendo.getKeyFrame(tempoAnimacaoNuvem);
-        } else if (estadoAtual == EstadoNuvem.ATIVA) {
-            regionAtual = animAtiva.getKeyFrame(tempoAnimacaoNuvem);
-        } else if (estadoAtual == EstadoNuvem.SUMINDO) {
-            regionAtual = animSumindo.getKeyFrame(tempoAnimacaoNuvem);
-        }
-
-        if (regionAtual != null) {
-            batch.draw(regionAtual, posNuvem.x - 60, posNuvem.y, 120f, 80f);
-        }
+        // Diminuí de 150x100 para 110x75
+        batch.draw(r, posNuvem.x - 55, posNuvem.y, 110, 75);
     }
 
-    public void mudarAlvo(Inimigo novoAlvo) {
-        if (novoAlvo != null && this.alvo != novoAlvo && estadoAtual != EstadoNuvem.SUMINDO) {
-            this.alvo = novoAlvo;
-        }
-    }
+    public void mudarAlvo(Inimigo n) { if (estadoAtual != EstadoNuvem.SUMINDO) this.alvo = n; }
 }

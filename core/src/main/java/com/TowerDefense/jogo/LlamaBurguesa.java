@@ -25,7 +25,7 @@ public class LlamaBurguesa extends Torre {
     public LlamaBurguesa(float x, float y) {
         // Usa o novo construtor simplificado da classe mãe
         super(x, y);
-        this.raio = 0; // Llama não atira, então raio é 0
+        this.raio = TipoLlama.BURGUESA.raioInicial;
 
         // Ajuste aqui o tamanho final da Llama no mapa se ficar muito grande ou pequena
         this.larguraDesenho = 80f;
@@ -34,7 +34,7 @@ public class LlamaBurguesa extends Torre {
         this.hitbox.height = alturaDesenho;
 
         // Recortando a imagem de 17 frames na horizontal
-        Texture sheet = new Texture("llamaBurguesa.png");
+        Texture sheet = new Texture("BourgeoisLlamaSS.png");
         int frameWidth = sheet.getWidth() / 17;
         int frameHeight = sheet.getHeight();
 
@@ -67,7 +67,7 @@ public class LlamaBurguesa extends Torre {
         // O frame 17 da imagem é o índice 16 no código
         if (frameAtual == 16) {
             if (!jaDeuDinheiroNesseCiclo) {
-                dinheiroGerado = 50;
+                dinheiroGerado = 10;
                 jaDeuDinheiroNesseCiclo = true;
 
                 // Dispara a subida do texto
@@ -104,7 +104,7 @@ public class LlamaBurguesa extends Torre {
             fontTexto.getData().setScale(0.8f);
             fontTexto.setColor(1f, 0.8f, 0f, 1f); // Amarelo Dourado
 
-            fontTexto.draw(batch, "+50", posicao.x + (larguraDesenho / 2f) - 15, textoY);
+            fontTexto.draw(batch, "+10", posicao.x + (larguraDesenho / 2f) - 15, textoY);
 
             // Reseta a cor para não bugar outras fontes do jogo
             fontTexto.setColor(1f, 1f, 1f, 1f);

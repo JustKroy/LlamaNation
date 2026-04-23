@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 
 public class Hud {
 
@@ -48,12 +49,12 @@ public class Hud {
         imgCoracao = new Texture("coracao.png");
         imgMoeda = new Texture("moeda.png");
 
-        imgSettings = new Texture("settings.png");
+        imgSettings = new Texture("Settings_Button.png");
 
-        texBtnContinue = new Texture("BUTTON_continue.png");
-        texBtnContinueHover = new Texture("BUTTON_continuehover.png");
-        texBtnLeave = new Texture("BUTTON_leavebattle.png");
-        texBtnLeaveHover = new Texture("BUTTON_leavebattlehover.png");
+        texBtnContinue = new Texture("Continue_Button.png");
+        texBtnContinueHover = new Texture("Continue_ButtonHover.png");
+        texBtnLeave = new Texture("LeaveBattle_Button.png");
+        texBtnLeaveHover = new Texture("LeaveBattle_ButtonHover.png");
 
         btnHitbox = new Rectangle(1600, 50, 240, 60);
         btnSettings = new Rectangle(1820, 970, 70, 70);
@@ -170,13 +171,16 @@ public class Hud {
         if (pausado) {
             batch.draw(texFundoPausa, 0, 0, 1920, 1080);
 
-            if (btnContinue.contains(mouseX, mouseY)) {
+            boolean isMobile = Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.Android ||
+                               Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.iOS;
+
+            if (!isMobile && btnContinue.contains(mouseX, mouseY)) {
                 batch.draw(texBtnContinueHover, rectDesenhoContinue.x, rectDesenhoContinue.y, rectDesenhoContinue.width, rectDesenhoContinue.height);
             } else {
                 batch.draw(texBtnContinue, rectDesenhoContinue.x, rectDesenhoContinue.y, rectDesenhoContinue.width, rectDesenhoContinue.height);
             }
 
-            if (btnLeave.contains(mouseX, mouseY)) {
+            if (!isMobile && btnLeave.contains(mouseX, mouseY)) {
                 batch.draw(texBtnLeaveHover, rectDesenhoLeave.x, rectDesenhoLeave.y, rectDesenhoLeave.width, rectDesenhoLeave.height);
             } else {
                 batch.draw(texBtnLeave, rectDesenhoLeave.x, rectDesenhoLeave.y, rectDesenhoLeave.width, rectDesenhoLeave.height);
@@ -187,6 +191,19 @@ public class Hud {
             font.draw(batch, "PAUSED", (1920 / 2f) - (layout.width / 2f), 680);
             font.getData().setScale(1.0f);
         }
+    }
+
+    public boolean estaSobreAlgo(Vector2 mouse) {
+
+        if (btnSettings.contains(mouse)) return true;
+        if (btnHitbox.contains(mouse)) return true;
+
+        if (pausado) {
+            if (btnContinue.contains(mouse)) return true;
+            if (btnLeave.contains(mouse)) return true;
+        }
+
+        return false;
     }
 
     public void dispose() {

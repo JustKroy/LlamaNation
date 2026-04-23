@@ -9,9 +9,9 @@ public class CaramujoTanque extends Inimigo {
         super(x, y, animacaoNormal, animacaoVirada);
 
         // --- STATUS DO TANQUE ---
-        this.vida = 500;
+        this.vida = 3000;
         this.velocidade = 40f;      // Aumentado (antes era 25f, agora é quase o dobro, mas ainda mais lento que um normal)
-        this.recompensaMoedas = 25;
+        this.recompensaMoedas = 40;
 
         // --- TAMANHO GIGANTE ---
         this.largura = 75f;         // 50% maior que o normal!

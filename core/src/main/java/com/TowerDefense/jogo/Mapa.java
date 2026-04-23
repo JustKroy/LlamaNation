@@ -14,7 +14,6 @@ public class Mapa {
 
     public Mapa() {
         imgChao = new Texture("point.png");
-        imgCasa = new Texture("chegada.png");
         imgFundo = new Texture("mapa1.png");
 
         // --- OS WAYPOINTS (Onde o caracol anda) ---
@@ -28,7 +27,7 @@ public class Mapa {
         caminho.add(new Vector2(813, 790));
         caminho.add(new Vector2(813, 250));
         caminho.add(new Vector2(1035, 250));
-        caminho.add(new Vector2(1035, 900));
+        caminho.add(new Vector2(1035, 1080));
 
         // =====================================================================
         // --- CONTROLE MANUAL DAS HITBOXES (O SEU "EDITOR") ---
@@ -64,15 +63,7 @@ public class Mapa {
         hitboxesCaminho.add(new Rectangle(803, 235, 288, 55));
 
         // 10. Décimo trecho (Vertical subindo para a casa)
-        hitboxesCaminho.add(new Rectangle(1030, 240, 58, 650));
-
-        // --- HITBOX DA CASA (FINAL) ---
-        // Você também pode ajustar esses valores aqui embaixo
-        float casaHitboxX = 965;
-        float casaHitboxY = 870;
-        float casaHitboxLargura = 185;
-        float casaHitboxAltura = 195;
-        hitboxesCaminho.add(new Rectangle(casaHitboxX, casaHitboxY, casaHitboxLargura, casaHitboxAltura));
+        hitboxesCaminho.add(new Rectangle(1030, 240, 58, 810));
     }
 
     public void desenharFundo(ShapeRenderer shape) {
@@ -87,12 +78,10 @@ public class Mapa {
         for (Vector2 ponto : caminho) {
             batch.draw(imgChao, ponto.x - 16, ponto.y - 16, 32, 32);
         }
-        batch.draw(imgCasa, 925, 800, 300, 300);
     }
 
     public void dispose() {
         imgChao.dispose();
-        imgCasa.dispose();
         imgFundo.dispose();
     }
 }

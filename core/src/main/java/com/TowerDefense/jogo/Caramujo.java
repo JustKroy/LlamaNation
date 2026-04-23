@@ -9,7 +9,7 @@ public class Caramujo extends Inimigo {
         super(x, y, animNormal, animVirada);
 
         // Status únicos do Caramujo!
-        this.vida = 100;
+        this.vida = 150;
         this.velocidade = 100f;
         this.recompensaMoedas = 20;
     }

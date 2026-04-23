@@ -25,7 +25,7 @@ public class LlamaChef extends Torre {
     public LlamaChef(float x, float y, Texture imgLlama, Texture imgArma) {
         super(x, y);
 
-        this.raio = 150f;
+        this.raio = TipoLlama.CHEF.raioInicial;
         this.dano = 10;
         this.cooldown = 0.05f;
 

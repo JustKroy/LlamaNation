@@ -19,7 +19,10 @@ public class LhamaNormal extends Torre {
         super(x, y, sheetLlama, imgAtaque);
 
         this.dano = 50;
-        this.raio = 200f;
+
+        // 🔥 Puxando o raio direto do Enum 🔥
+        this.raio = TipoLlama.NORMAL.raioInicial;
+
         this.cooldown = 1.0f;
         this.velocidadeProjetil = 800f;
 

@@ -13,6 +13,8 @@ public class Botao {
     private Texture imagem, hover, borda;
     private Rectangle area;
     private Color corBorda;
+    private float scaleAtual = 1.0f;
+    private float alpha = 0f;
     private boolean selecionado = false; //Variável que permite mudar o estado do botão
 
 
@@ -22,12 +24,21 @@ public class Botao {
         this.area = new Rectangle(x, y, largura, altura);
         corBorda = new Color(1,1,1,1);
     }
+
+    public Rectangle getArea() {
+        return new Rectangle(area);
+    }
     public void setSelecionado(boolean selecionado) {
         this.selecionado = selecionado;
     }
 
     public boolean isSelecionado() {
         return selecionado;
+    }
+
+    public void setTextura(Texture normal, Texture hover) {
+        this.imagem = normal;
+        this.hover = hover;
     }
 
     public void setCorBorda(Color cor) {
@@ -38,35 +49,70 @@ public class Botao {
         return area.contains(mouse.x, mouse.y);
     }
 
-    public Boolean foiClicado(Vector2 mouse) {
-        return area.contains(mouse.x,mouse.y);
+    public boolean foiClicado(Vector2 mouse, boolean clicou) {
+        return estaSobre(mouse) && clicou;
     }
 
-    public void atualizarCursor(Vector2 mouse){
-
-        if(estaSobre(mouse)){
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
+    public void atualizarCursor(Vector2 mouse) {
+        if (Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.Android ||
+            Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.iOS) {
+            return;
         }
-
+        if (area.contains(mouse)) {
+            CursorManager.setHover();
+        }
     }
 
     public void Exibir(SpriteBatch batch, Vector2 mouse) {
-        if (estaSobre(mouse)) {
-            batch.draw(hover, area.x, area.y, area.width, area.height);
-        } else {
-            batch.draw(imagem, area.x, area.y, area.width, area.height);
+
+        boolean isMobile = Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.Android ||
+                           Gdx.app.getType() == com.badlogic.gdx.Application.ApplicationType.iOS;
+        boolean hoverAtivo = !isMobile && estaSobre(mouse);
+        Texture texturaAtual = hoverAtivo && hover != null ? hover : imagem;
+
+        if (texturaAtual == null) return;
+
+        // 1. ANIMAÇÕES DE ESCALA:
+        // Se estiver selecionado (aba aberta), ele trava afundado em 0.95f.
+        // Se não, segue a lógica normal de clique e hover.
+        boolean clicando = estaSobre(mouse) && Gdx.input.isTouched();
+        float targetScale = selecionado ? 0.95f : (clicando ? 0.97f : (hoverAtivo ? 1.05f : 1.0f));
+        scaleAtual += (targetScale - scaleAtual) * 0.15f;
+
+        alpha += (1f - alpha) * 0.05f;
+
+        // 2. CÁLCULO CENTRALIZADO
+        float drawWidth = area.width * scaleAtual;
+        float drawHeight = area.height * scaleAtual;
+
+        float drawX = area.x - (drawWidth - area.width) / 2;
+        float drawY = area.y - (drawHeight - area.height) / 2;
+
+        // 3. EFEITO GRAVIDADE (Afunda o botão)
+        if (selecionado) {
+            drawY -= 4f; // Desce 4 pixels na tela
         }
 
+        // 4. BRILHO E COR:
+        // Se selecionado, fica mais escuro (0.8f) para dar profundidade.
+        float brilho = selecionado ? 0.8f : (hoverAtivo ? 1.2f : 1f);
+
+        batch.setColor(brilho, brilho, brilho, alpha);
+        batch.draw(texturaAtual, drawX, drawY, drawWidth, drawHeight);
+
+        // 5. BORDA (Sua lógica de colorir quando selecionado)
         if (selecionado) {
-            batch.setColor(corBorda);
-            batch.draw(imagem, area.x - 10, area.y - 10, area.width + 20, area.height + 20);
-            batch.setColor(1, 1, 1, 1);
+            // Apliquei 60% de opacidade (0.6f * alpha) para a cor da borda
+            // tingir o botão sem cobrir o desenho totalmente!
+            batch.setColor(corBorda.r, corBorda.g, corBorda.b, 0.6f * alpha);
+            batch.draw(texturaAtual, drawX, drawY, drawWidth, drawHeight);
         }
+
+        // reset obrigatório
+        batch.setColor(Color.WHITE);
     }
 
     public void dispose() {
-        imagem.dispose();
-        hover.dispose();
     }
 
 }

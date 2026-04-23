@@ -22,8 +22,8 @@ public class Lwjgl3Launcher {
         configuration.useVsync(true);
         configuration.setForegroundFPS(60);
 
-        // ATIVA O MODO TELA CHEIA (Pega a resolução atual do seu monitor)
-        configuration.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
+        // Define um modo janela por padrão para evitar erros de inicialização em alguns monitores
+        configuration.setWindowedMode(1280, 720);
 
         return configuration;
     }

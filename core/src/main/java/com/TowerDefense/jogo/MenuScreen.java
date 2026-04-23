@@ -3,131 +3,199 @@ package com.TowerDefense.jogo;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
-// ScreenAdapter indica que esta é uma das telas do nosso jogo (como um "canal de TV")
 public class MenuScreen extends ScreenAdapter {
 
-    // --- FERRAMENTAS DO SISTEMA ---
-    private final Main game; // O motor principal (usado para trocar de tela)
-    private SpriteBatch batch; // O "pincel" para desenhar as imagens
-    private StretchViewport viewport; // Mantém a tela esticada na proporção 1920x1080, não importa o monitor
+    private final Main game;
+    private final SpriteBatch batch;
+    private final StretchViewport viewport;
+    private Vector2 posMouse = new Vector2();
 
-    // --- IMAGENS (TEXTURAS) ---
-    private Texture imgPlay; // Imagem do botão de jogar
-    private Texture imgHeroes; // Imagem do botão da enciclopédia/loja de heróis
-    private Texture imgFundo; // (Opcional) Uma imagem de fundo bem bonita para o menu
+    private Botao[] HUDbtn;
+    private Texture[] HUDimg;
 
-    // --- HITBOXES (Áreas de Clique) ---
-    private Rectangle btnPlay; // O retângulo invisível que define a área clicável do "Play"
-    private Rectangle btnHeroes; // O retângulo invisível do "Heroes"
-    private Vector2 posMouse = new Vector2(); // Guarda a posição (X e Y) de onde o mouse/dedo tocou
+    private PopupConfig popup;
+    private final ShapeRenderer shapeRenderer;
+    private FrameBuffer fbo;
+    private Texture fboTexture;
+    private ShaderProgram blurShader;
 
-    // --- CONSTRUTOR ---
-    // É chamado no exato momento em que o Main diz: "Abra a tela de Menu!"
     public MenuScreen(Main game) {
         this.game = game;
         this.batch = new SpriteBatch();
-
-        // Define o tamanho "virtual" do nosso menu. Tudo será calculado com base em 1920x1080.
+        this.shapeRenderer = new ShapeRenderer();
         this.viewport = new StretchViewport(1920, 1080);
+        this.popup = new PopupConfig();
+        this.fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
 
-        // 1. CARREGANDO AS IMAGENS da pasta 'assets'
-        imgPlay = new Texture("play.png");
-        imgHeroes = new Texture("heroes.png");
-        // imgFundo = new Texture("fundo_menu.png"); // Remova as barras (//) se for usar um fundo!
+        ShaderProgram.pedantic = false;
+        blurShader = new ShaderProgram(
+            Gdx.files.internal("blur.vert"),
+            Gdx.files.internal("blur.frag")
+        );
 
-        // 2. DEFININDO O TAMANHO DOS BOTÕES
-        float larguraBtn = 400; // Os botões terão 400 pixels de largura...
-        float alturaBtn = 150;  // ...e 150 pixels de altura
+        if (!blurShader.isCompiled()) {
+            System.out.println(blurShader.getLog());
+        }
 
-        // 3. POSICIONANDO OS BOTÕES (A Matemática de Centralizar)
-        // Para centralizar perfeitamente no eixo X:
-        // Pegamos a largura total da tela (1920), dividimos por 2 (960, que é o meio),
-        // e subtraímos a METADE da largura do botão.
-        // Se a gente não subtrair a metade, o botão começa a desenhar no meio e vai para a direita, ficando torto.
+        HUDbtn = new Botao[4];
+        HUDbtn[0] = new Botao(new Texture("Play_Button.png"), new Texture("Play_ButtonHover.png"), 760, 720, 400, 100);
+        HUDbtn[1] = new Botao(new Texture("Heroes_Button.png"), new Texture("Heroes_ButtonHover.png"), 760, 520, 400, 100);
+        HUDbtn[2] = new Botao(new Texture("Settings_Button.png"), new Texture("Settings_Button.png"), 1800, 950, 100, 100);
+        HUDbtn[3] = new Botao(new Texture("Shop_Button.png"), new Texture("Shop_ButtonHover.png"), 760, 320, 400, 100);
 
-        // Botão Play (Mais para cima, no Y = 600)
-        btnPlay = new Rectangle(1920 / 2f - larguraBtn / 2f, 600, larguraBtn, alturaBtn);
-
-        // Botão Heroes (Um pouco abaixo do Play, no Y = 400)
-        btnHeroes = new Rectangle(1920 / 2f - larguraBtn / 2f, 400, larguraBtn, alturaBtn);
+        HUDimg = new Texture[1];
+        HUDimg[0] = new Texture("MenuScreen_Background.png");
     }
 
-    // --- ATUALIZAÇÃO E DESENHO ---
-    // Roda várias vezes por segundo para manter a tela viva
+    @Override
+    public void show() {
+        CursorManager.aplicarCursorInvisivel();
+    }
+
     @Override
     public void render(float delta) {
-
-        // 1. Limpa a tela inteira com a cor preta (para não borrar o fundo)
         ScreenUtils.clear(0, 0, 0, 1);
+        boolean clicou = Gdx.input.justTouched();
+        CursorManager.setDefault();
 
-        // 2. Aplica as regras do Viewport (o esticamento da tela)
         viewport.apply();
-        // Diz para o pincel (batch) usar a lente da câmera do Viewport
         batch.setProjectionMatrix(viewport.getCamera().combined);
 
-        // --- LÓGICA DE CLIQUE ---
-        // justTouched() só dá "true" no exato frame em que o jogador aperta o botão do mouse/tela
-        if (Gdx.input.justTouched()) {
+        // --- LÓGICA DO MOUSE E CONFIGS ---
+        Vector2 mundoMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+        if (ConfigManager.invertMouseX) mundoMouse.x = 1920 - mundoMouse.x;
+        if (ConfigManager.invertMouseY) mundoMouse.y = 1080 - mundoMouse.y;
+        posMouse = mundoMouse;
 
-            // Pega a posição "física" do mouse no monitor e converte (unproject) para o mundo virtual do jogo (1920x1080)
-            posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+        // --- LÓGICA DE INPUT ---
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && popup.isAberto()) {
+            popup.toggle();
+        }
 
-            // Se o ponto do clique (X, Y) caiu dentro do retângulo do Botão Play...
-            if (btnPlay.contains(posMouse.x, posMouse.y)) {
-                // ...Pede para o Main fechar o Menu e abrir o Jogo!
-                game.setScreen(new TelaSelecaoDeck(game));
-            }
-
-            // Se o ponto do clique caiu dentro do retângulo do Botão Heroes...
-            if (btnHeroes.contains(posMouse.x, posMouse.y)) {
-                // Aqui você pode colocar para ir para uma "HeroesScreen" no futuro!
-                System.out.println("Clicou em Heróis!"); // Por enquanto, só avisa no console do computador
+        if (popup.isAberto()) {
+            popup.handleInput(posMouse.x, posMouse.y);
+            if (popup.estaSobreElementoInterativo(posMouse)) {
+                CursorManager.setHover();
             }
         }
 
-        // --- DESENHO DAS IMAGENS ---
-        batch.begin(); // "Levanta a caneta e começa a pintar"
+        // Atualiza hover dos botões apenas se popup estiver fechado
+        if (!popup.isAberto()) {
+            for (Botao btn : HUDbtn) btn.atualizarCursor(posMouse);
+        }
 
-        // Se você ativou o fundo lá em cima, ele seria desenhado primeiro para ficar atrás de tudo
-        // batch.draw(imgFundo, 0, 0, 1920, 1080);
+        // Lógica de Cliques Unificada
+        if (clicou) {
+            if (HUDbtn[2].foiClicado(posMouse, clicou)) { // Botão Config
+                popup.toggle();
+            } else if (!popup.isAberto()) {
+                if (HUDbtn[0].foiClicado(posMouse, clicou)) {
+                    game.setScreen(new TelaSelecaoDeck(game));
+                } else if (HUDbtn[1].foiClicado(posMouse, clicou)) {
+                    game.setScreen(new HeroScreen(game));
+                } else if (HUDbtn[3].foiClicado(posMouse, clicou)) {
+                    // game.setScreen(new ShopScreen(game));
+                }
+            }
+        }
 
-        // Desenha a imagem do botão Play exatamente nas coordenadas do retângulo btnPlay
-        batch.draw(imgPlay, btnPlay.x, btnPlay.y, btnPlay.width, btnPlay.height);
+        // --- RENDERIZAÇÃO ---
 
-        // Desenha a imagem do botão Heroes exatamente nas coordenadas do retângulo btnHeroes
-        batch.draw(imgHeroes, btnHeroes.x, btnHeroes.y, btnHeroes.width, btnHeroes.height);
+        // 1. Fundo com Parallax no FBO
+        fbo.begin();
+        ScreenUtils.clear(0, 0, 0, 1);
+        batch.begin();
 
-        batch.end(); // "Guarda a caneta"
+        float offsetX = 0;
+        float offsetY = 0;
+
+        // Só aplica parallax se NÃO for mobile
+        if (Gdx.app.getType() != com.badlogic.gdx.Application.ApplicationType.Android &&
+            Gdx.app.getType() != com.badlogic.gdx.Application.ApplicationType.iOS) {
+            float pX = ConfigManager.invertMouseX ? 1920 - posMouse.x : posMouse.x;
+            float pY = ConfigManager.invertMouseY ? 1080 - posMouse.y : posMouse.y;
+            offsetX = (pX - 960) * 0.01f;
+            offsetY = (pY - 540) * 0.01f;
+        }
+
+        batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
+        batch.end();
+        fbo.end();
+
+        // 2. Fundo na tela (com Blur se popup aberto)
+        fboTexture = fbo.getColorBufferTexture();
+        fboTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+        if (popup.isAberto()) batch.setShader(blurShader);
+        batch.begin();
+        batch.draw(fboTexture, 0, 1080, 1920, -1080); // Inversão de Y necessária para FBO
+        batch.end();
+        batch.setShader(null);
+
+        // 3. Sombras e Botões Principais
+        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        for (Botao btn : HUDbtn) {
+            Rectangle r = btn.getArea();
+            shapeRenderer.setColor(0, 0, 0, 0.2f);
+            shapeRenderer.rect(r.x + 3, r.y - 3, r.width, r.height);
+        }
+        shapeRenderer.end();
+
+        batch.begin();
+        for (Botao btn : HUDbtn) btn.Exibir(batch, posMouse);
+        batch.end();
+
+        // 4. Popup (Camada superior)
+        if (popup.isAberto()) {
+            popup.setProjectionMatrix(viewport.getCamera().combined);
+            popup.renderShapes(posMouse.x, posMouse.y);
+            batch.begin();
+            popup.render(batch, posMouse.y, posMouse.x);
+            batch.end();
+
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            popup.renderDropdownFundo(shapeRenderer, posMouse.x, posMouse.y);
+            shapeRenderer.end();
+
+            batch.begin();
+            popup.renderDropdownTextos(batch, posMouse.x, posMouse.y);
+            batch.end();
+        }
+
+        // 5. Cursor customizado
+        CursorManager.aplicarCursorInvisivel();
+        batch.begin();
+        CursorManager.desenhar(batch, posMouse);
+        batch.end();
     }
 
-    // --- REDIMENSIONAMENTO ---
-    // Chamado sempre que o jogador arrasta as bordas da janela do PC para mudar o tamanho
     @Override
     public void resize(int width, int height) {
-        // Pede para o Viewport recalcular o esticamento
         viewport.update(width, height, true);
         popup.atualizarLayout();
     }
 
-    // --- FAXINA ---
-    // Quando o Menu fecha (ex: quando o jogador entra no jogo), jogamos fora as texturas para liberar memória de vídeo
     @Override
     public void dispose() {
         batch.dispose();
-        for(Botao btn : HUDbtn) {
-            btn.dispose();
-        }
-
-        for (Texture t : HUDimg) {
-            t.dispose();
-        }
+        shapeRenderer.dispose();
+        fbo.dispose();
+        blurShader.dispose();
+        for (Botao btn : HUDbtn) btn.dispose();
+        for (Texture t : HUDimg) t.dispose();
     }
 }
