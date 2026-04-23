@@ -50,6 +50,7 @@ Configurações<br>
 - Refazer Back
 - Frame Soon
 - Frame LLamas nao desbloqueadas
+- Botão Menu Dropdown + hover de todas as classes
 ### BOTÕES TELA PRINCIPAL
 - Background menu principal
 - Background configs
