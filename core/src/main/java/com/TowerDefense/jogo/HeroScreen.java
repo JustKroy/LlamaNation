@@ -11,8 +11,10 @@
     import com.badlogic.gdx.graphics.Pixmap;
     import com.badlogic.gdx.graphics.Texture;
     import com.badlogic.gdx.graphics.g2d.Animation;
+    import com.badlogic.gdx.graphics.g2d.BitmapFont;
     import com.badlogic.gdx.graphics.g2d.SpriteBatch;
     import com.badlogic.gdx.graphics.g2d.TextureRegion;
+    import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
     import com.badlogic.gdx.graphics.glutils.FrameBuffer;
     import com.badlogic.gdx.graphics.glutils.ShaderProgram;
     import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -53,6 +55,10 @@
         private final ShaderProgram blurShader;
         private final ShapeRenderer shapeRenderer;
         private float scaleAtual, alpha, HoverAlpha;
+        private Botao btnClasse;
+        private Boolean menuAberto = false;
+        BitmapFont fonteTitulo;
+        BitmapFont fonteNormal;
 
             //--------- ARRAY ---------
         //Variável que permite carregar imagens
@@ -64,8 +70,10 @@
         private float[] posX = {20, 270, 20, 270, 20};
         private float[] posY = {580, 580, 330, 330, 80};
         private Botao[] HUDbtn;
+        private Botao[] opcoesClasse;
         private Texture heroSpriteSheetAtual, heroImagemEstatica, frameAtual, labelAtual;
         private PainelSkins skinsPanel;
+        private final BitmapFont fonte;
 
         // Vetor para armazenar a posição do mouse convertida para o sistema do jogo
         private Vector2 posMouse = new Vector2();
@@ -84,6 +92,21 @@
             alpha = 0f;
             HoverAlpha = 0f;
 
+            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Raleway-Regular.ttf"));
+            FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+            param.size = 28;
+            param.color = Color.WHITE;
+            param.minFilter = Texture.TextureFilter.Linear;
+            param.magFilter = Texture.TextureFilter.Linear;
+
+            fonte = generator.generateFont(param);
+            param.size = 32;
+            fonteTitulo = generator.generateFont(param);
+            param.size = 22;
+            fonteNormal = generator.generateFont(param);
+            generator.dispose();
+
 
 
             fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
@@ -101,42 +124,26 @@
             }
 
             //--------- COMBOBOX ---------
-            listaClasse = new SelectBox<>(skin);
-                listaClasse.setItems(
-                    HeroClasse.values()
+            btnClasse = new Botao(
+                new Texture("ui/Dropdown_Button.png"), //normal
+                new Texture("ui/Dropdown_ButtonHover.png"), //hover
+                100, 850, 300, 80
+            );
+
+            HeroClasse[] classes = HeroClasse.values();
+            opcoesClasse = new Botao[classes.length];
+
+            for (int i = 0; i < classes.length; i++) {
+
+                opcoesClasse[i] = new Botao(
+                    new Texture("ui/Dropdown_Option.png"),       // normal
+                    new Texture("ui/Dropdown_OptionHover.png"), // hover
+                    100,
+                    850 - (i + 1) * 80,
+                    300,
+                    80
                 );
-                classeSelecionada = HeroClasse.CLASSICOS;
-                listaClasse.setSelected(classeSelecionada);
-
-                listaClasse.setPosition(100,850);
-                listaClasse.setSize(300,50);
-                listaClasse.addListener(new ChangeListener() {
-                    @Override
-                    public void changed(ChangeEvent event, Actor actor) {
-                       classeSelecionada = listaClasse.getSelected();
-                       setBotoesClasseAtual();
-                    }
-                });
-            //Centraliza o texto que aparece no botão do SelectBox
-            listaClasse.setAlignment(Align.center);
-
-            //Define o limite de itens que aparecem no selectbox
-            listaClasse.setMaxListCount(4);
-
-            //Centraliza o texto que aparece no botão do SelectBox
-            listaClasse.getList().setAlignment(Align.center);
-
-            //Altera a cor
-            listaClasse.getStyle().fontColor = Color.WHITE;
-
-            listaClasse.getList().getStyle().fontColorSelected = Color.WHITE;
-            listaClasse.getList().getStyle().fontColorUnselected = Color.LIGHT_GRAY;
-
-            stage.addActor(listaClasse);
-            InputMultiplexer multiplexer = new InputMultiplexer();
-            multiplexer.addProcessor(stage);
-            multiplexer.addProcessor(new InputAdapter() {});
-            Gdx.input.setInputProcessor(multiplexer);
+            }
 
             //--------- CURSOR ----------
             Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -534,10 +541,17 @@
             for (Botao btn : HUDbtn) {
                 btn.atualizarCursor(posMouse);
             }
+            btnClasse.atualizarCursor(posMouse);
 
             // PAINEL DE SKINS / INFOS
             if (skinsPanel.isAberto() && skinsPanel.estaSobre(posMouse)) {
                 CursorManager.setHover();
+            }
+
+            if (menuAberto) {
+                for (Botao b : opcoesClasse) {
+                    b.atualizarCursor(posMouse);
+                }
             }
 
             // ATUALIZA O MOUSE EM TODO FRAME
@@ -713,7 +727,25 @@
             for(Botao btn : HUDbtn) {
                 btn.Exibir(batch, posMouse);
             }
+            btnClasse.Exibir(batch, posMouse);
+
             batch.end();
+            if (menuAberto) {
+                batch.begin();
+
+                for (int i = 0; i < opcoesClasse.length; i++) {
+                    opcoesClasse[i].Exibir(batch, posMouse);
+
+                    // TEXTO POR CIMA (opcional)
+                    fonteNormal.draw(batch,
+                        HeroClasse.values()[i].name(),
+                        opcoesClasse[i].getArea().x + 20,
+                        opcoesClasse[i].getArea().y + 50
+                    );
+                }
+
+                batch.end();
+            }
 
             // ----------------------------------------------------
             if (skinsPanel.isAberto()) {
@@ -769,6 +801,27 @@
                 // Repassa o clique para o painel tratar (seja aba de skin ou info)
                 if (skinsPanel.isAberto()) {
                     skinsPanel.detectarClique(posMouse.x, posMouse.y);
+                }
+
+                // ABRIR / FECHAR MENU
+                if (btnClasse.foiClicado(posMouse, clicou)) {
+                    menuAberto = !menuAberto;
+                }
+
+                // CLICAR NAS OPÇÕES
+                if (menuAberto) {
+                    HeroClasse[] classes = HeroClasse.values();
+
+                    for (int i = 0; i < classes.length; i++) {
+                        if (opcoesClasse[i].foiClicado(posMouse, clicou)) {
+
+                            classeSelecionada = HeroClasse.values()[i];
+                            setBotoesClasseAtual();
+
+                            menuAberto = false;
+                            break;
+                        }
+                    }
                 }
             }
 

@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 import java.util.*;
 
@@ -25,7 +26,6 @@ public class PopupConfig {
     private String[] textosMenu = {"Geral", "Áudio", "Vídeo", "Atalhos", "Acessibilidade"};
     private Texture[] imagensMenu;
     private float[] escalaMenu;
-
     private boolean aberto;
     private Rectangle areaPopup;
     private TipoConfig tipoSelecionado;
@@ -34,10 +34,13 @@ public class PopupConfig {
     private final Color COR_HOVER = new Color(1,1,1,0.05f);
     BitmapFont fonteTitulo;
     BitmapFont fonteNormal;
+    private Vector2 mouse = new Vector2();
+    private StretchViewport viewport;
 
     public PopupConfig() {
         shapeRenderer = new ShapeRenderer();
         aberto = false;
+        viewport = new StretchViewport(1920, 1080);
 
         opcoesMenu = new Rectangle[textosMenu.length];
         escalaMenu = new float[textosMenu.length];
@@ -58,12 +61,14 @@ public class PopupConfig {
         fonteNormal = generator.generateFont(param);
         generator.dispose();
 
-        imagensMenu = new Texture[5];
+        imagensMenu = new Texture[7];
         imagensMenu[0] = new Texture("Settings_Button.png");
         imagensMenu[1] = new Texture("Settings_Audio.png");
         imagensMenu[2] = new Texture("Settings_Video.png");
         imagensMenu[3] = new Texture("Settings_Controls.png");
         imagensMenu[4] = new Texture("Settings_Acessibility.png");
+        imagensMenu[5] = new Texture("ui/On_ButtonWBall.png");
+        imagensMenu[6] = new Texture("ui/Off_ButtonWBall.png");
 
         tipoSelecionado = TipoConfig.GERAL;
 
@@ -186,20 +191,7 @@ public class PopupConfig {
                 shapeRenderer.circle(knobX, barY + 4, 8);
             }
 
-            if (op.tipo == TipoOpcao.TOGGLE) {
-                float w = 60;
-                float h = 30;
-                float x = op.area.x + op.area.width - w - paddingRight;
-                float y = op.area.y + 5;
 
-                if (op.estado) shapeRenderer.setColor(COR_PRIMARIA);
-                else shapeRenderer.setColor(0.4f, 0.4f, 0.4f, 1);
-                shapeRenderer.rect(x, y, w, h);
-
-                float bolinhaX = op.estado ? x + w - 15 : x + 15;
-                shapeRenderer.setColor(Color.WHITE);
-                shapeRenderer.circle(bolinhaX, y + h/2, 10);
-            }
         }
 
         // CÓDIGO DO DROPDOWN REMOVIDO DAQUI
@@ -464,7 +456,34 @@ public class PopupConfig {
 
             switch (op.tipo) {
                 case TOGGLE:
-                    desenharTextoDireitaCentro(fonteNormal, batch, op.estado ? "ON" : "OFF", op.area, paddingRight + 70);
+                    float w = 90;
+                    float h = 40;
+                    float x = op.area.x + op.area.width - w - 20;
+                    float y = op.area.y;
+
+                    Rectangle areaToggle = new Rectangle(x, y, w, h);
+                    boolean hover = areaToggle.contains(mouse.x, mouse.y);
+
+                    Texture tex = op.estado ? imagensMenu[5] : imagensMenu[6];
+
+                    // efeito de brilho no hover
+                    if (hover) {
+                        batch.setColor(1f, 1f, 1f, 1f); // normal
+                    } else {
+                        batch.setColor(1f, 1f, 1f, 0.8f); // levemente apagado
+                    }
+
+                    float scale = hover ? 1.1f : 1f;
+
+                    float width = w * scale;
+                    float height = h * scale;
+
+                    float drawX = x - (width - w) / 2;
+                    float drawY = y - (height - h) / 2;
+
+                    batch.draw(tex, drawX, drawY, width, height);
+                    batch.setColor(Color.WHITE);
+
                     break;
                 case SLIDER:
                     desenharTextoDireitaCentro(fonteNormal, batch, (int)(op.valor * 100) + "%", op.area, paddingRight + 170);
@@ -674,4 +693,8 @@ public class PopupConfig {
     private int getIndice() { return tipoSelecionado.ordinal(); }
     public void toggle() { aberto = !aberto; }
     public boolean isAberto() { return aberto; }
+
+    public void resize(int width, int height) {
+        viewport.update(width, height, true);
+    }
 }
