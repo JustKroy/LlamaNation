@@ -1,5 +1,6 @@
 package com.TowerDefense.jogo;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ScreenAdapter;
@@ -61,6 +62,8 @@ public class GameScreen extends ScreenAdapter {
         camera.update();
 
         posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+        if (ConfigManager.invertMouseX) posMouse.x = 1920 - posMouse.x;
+        if (ConfigManager.invertMouseY) posMouse.y = 1080 - posMouse.y;
 
         // --- 1. ATUALIZAÇÃO SEMPRE ATIVA (HUD E LOJA) ---
         dinheiro = construtor.atualizar(posMouse, Gdx.input.justTouched(), Gdx.input.isTouched(), dinheiro, listaTorres, mapa, hud);
@@ -161,15 +164,18 @@ public class GameScreen extends ScreenAdapter {
 
         CursorManager.setDefault();
 
-        if (hud.estaSobreAlgo(posMouse)) {
-            CursorManager.setHover();
+        if(Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.iOS) {
+
+            if (hud.estaSobreAlgo(posMouse)) {
+                CursorManager.setHover();
+            }
+
+            CursorManager.aplicarCursorInvisivel();
+
+            batch.begin();
+            CursorManager.desenhar(batch, posMouse);
+            batch.end();
         }
-
-        CursorManager.aplicarCursorInvisivel();
-
-        batch.begin();
-        CursorManager.desenhar(batch, posMouse);
-        batch.end();
 
     }
 

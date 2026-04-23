@@ -1,5 +1,6 @@
 package com.TowerDefense.jogo;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
@@ -105,18 +106,18 @@ public class MenuScreen extends ScreenAdapter {
         viewport.getCamera().update();
         batch.setProjectionMatrix(viewport.getCamera().combined);
 
-        // Captura o mouse real
         Vector2 mundoMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
-        // APLICA A INVERSÃO LITERAL DO CURSOR
-        if (ConfigManager.invertMouseX) {
-            mundoMouse.x = 1920 - mundoMouse.x;
-        }
-        if (ConfigManager.invertMouseY) {
-            mundoMouse.y = 1080 - mundoMouse.y;
+        // Só inverte se NÃO for mobile (ou se você realmente quiser esse desafio no touch)
+        if (Gdx.app.getType() == Application.ApplicationType.Desktop) {
+            if (ConfigManager.invertMouseX) {
+                mundoMouse.x = 1920 - mundoMouse.x;
+            }
+            if (ConfigManager.invertMouseY) {
+                mundoMouse.y = 1080 - mundoMouse.y;
+            }
         }
 
-        // Agora posMouse é o "Mouse do Contra"
         posMouse = mundoMouse;
 
         // ==========================================
@@ -270,21 +271,23 @@ public class MenuScreen extends ScreenAdapter {
         // 6. DESENHA O CURSOR DO JOGO (POR CIMA DE TUDO)
         // ==========================================
 
-        if (!popup.isAberto()) {
-            for (Botao btn : HUDbtn) {
-                btn.atualizarCursor(posMouse);
+        if(Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.iOS) {
+            if (!popup.isAberto()) {
+                for (Botao btn : HUDbtn) {
+                    btn.atualizarCursor(posMouse);
+                }
+            } else {
+                if (popup.estaSobreElementoInterativo(posMouse)) {
+                    CursorManager.setHover();
+                }
             }
-        } else {
-            if (popup.estaSobreElementoInterativo(posMouse)) {
-                CursorManager.setHover();
-            }
+
+            CursorManager.aplicarCursorInvisivel();
+
+            batch.begin();
+            CursorManager.desenhar(batch, posMouse);
+            batch.end();
         }
-
-        CursorManager.aplicarCursorInvisivel();
-
-        batch.begin();
-        CursorManager.desenhar(batch, posMouse);
-        batch.end();
     }
 
     @Override

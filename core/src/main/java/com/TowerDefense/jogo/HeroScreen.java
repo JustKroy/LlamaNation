@@ -1,5 +1,6 @@
     package com.TowerDefense.jogo;
 
+    import com.badlogic.gdx.Application;
     import com.badlogic.gdx.Gdx;
     import com.badlogic.gdx.Input;
     import com.badlogic.gdx.InputAdapter;
@@ -832,11 +833,13 @@
             HUDbtn[3].setSelecionado(skinsPanel.getAbaAtual() == PainelSkins.AbaAtiva.INFOS);
 
             //------------- CURSOR -------------
-            CursorManager.aplicarCursorInvisivel();
+            if(Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.iOS) {
+                CursorManager.aplicarCursorInvisivel();
 
-            batch.begin();
-            CursorManager.desenhar(batch, posMouse);
-            batch.end();
+                batch.begin();
+                CursorManager.desenhar(batch, posMouse);
+                batch.end();
+            }
         }
 
         @Override

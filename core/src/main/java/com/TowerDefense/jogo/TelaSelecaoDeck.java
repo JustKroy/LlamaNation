@@ -1,5 +1,6 @@
 package com.TowerDefense.jogo;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -121,6 +122,13 @@ public class TelaSelecaoDeck implements Screen {
         // Mouse CORRETO (mesmo sistema do resto do jogo)
         posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
+        if (ConfigManager.invertMouseX) {
+            posMouse.x = 1920 - posMouse.x;
+        }
+        if (ConfigManager.invertMouseY) {
+            posMouse.y = 1080 - posMouse.y;
+        }
+
         tratarInputs(); // agora usa posMouse corretamente
 
         // -------- SHAPES --------
@@ -173,43 +181,40 @@ public class TelaSelecaoDeck implements Screen {
 
         boolean hover = false;
 
-// Hover nos botões do catálogo
-        for (TipoLlama tipo : TipoLlama.values()) {
-            if (botoesCatalogo.get(tipo).contains(posMouse.x, posMouse.y)) {
+// Verifica se está sobre algum botão do catálogo
+        for (Rectangle rect : botoesCatalogo.values()) {
+            if (rect.contains(posMouse.x, posMouse.y)) {
                 hover = true;
                 break;
             }
         }
 
-// Hover nos slots do deck
-        for (Rectangle slot : slotsDeck) {
-            if (slot.contains(posMouse.x, posMouse.y)) {
-                hover = true;
-                break;
+// Verifica se está sobre os slots do deck (apenas os ocupados ou todos, conforme sua preferência)
+        if (!hover) {
+            for (int j = 0; j < deckEscolhido.size; j++) {
+                if (slotsDeck.get(j).contains(posMouse.x, posMouse.y)) {
+                    hover = true;
+                    break;
+                }
             }
         }
 
-// Hover no botão jogar
-        if (btnJogar.contains(posMouse.x, posMouse.y)) {
+// Verifica botão jogar
+        if (!hover && btnJogar.contains(posMouse.x, posMouse.y) && deckEscolhido.size == 6) {
             hover = true;
         }
 
-        if (deckEscolhido.size == 6 && btnJogar.contains(posMouse.x, posMouse.y)) {
-            hover = true;
+// Só processa cursor visual se não for mobile
+        if (Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.iOS) {
+            if (hover) CursorManager.setHover();
+            else CursorManager.setDefault();
+
+            CursorManager.aplicarCursorInvisivel();
+
+            batch.begin();
+            CursorManager.desenhar(batch, posMouse);
+            batch.end();
         }
-
-// Define cursor
-        if (hover) {
-            CursorManager.setHover();
-        } else {
-            CursorManager.setDefault();
-        }
-
-        CursorManager.aplicarCursorInvisivel();
-
-        batch.begin();
-        CursorManager.desenhar(batch, posMouse);
-        batch.end();
     }
 
     private void desenharIcone(TextureRegion icon, Rectangle rect) {
