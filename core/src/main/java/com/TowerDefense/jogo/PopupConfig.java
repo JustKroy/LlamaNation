@@ -336,11 +336,11 @@ public class PopupConfig {
 
         // CLIQUE NO BOTÃO SALVAR
         if (Gdx.input.justTouched() && botaoSalvar.contains(mouseX, mouseY)) {
-            ConfigManager.aplicarVideo();
             ConfigManager.salvar();
+            ConfigManager.aplicarTudo();
             atualizarLayout();
             System.out.println("Configurações salvas e aplicadas com sucesso!");
-            //toggle(); // Fecha o menu ao salvar
+            toggle();
             return;
         }
 
@@ -399,10 +399,11 @@ public class PopupConfig {
                         if (op.texto.equalsIgnoreCase("Mute")) ConfigManager.mute = op.estado;
                         if (op.texto.equalsIgnoreCase("Show FPS")) ConfigManager.showFps = op.estado;
                         if (op.texto.equalsIgnoreCase("Map Effects")) ConfigManager.mapEffects = op.estado;
-                        if (op.texto.equalsIgnoreCase("Invert Camera-X-Asis")) ConfigManager.invertCameraX = op.estado;
-                        if (op.texto.equalsIgnoreCase("Invert Camera-Y-Asis")) ConfigManager.invertCameraY = op.estado;
-                        if (op.texto.equalsIgnoreCase("Invert Mouse-X-Asis")) ConfigManager.invertMouseX = op.estado;
-                        if (op.texto.equalsIgnoreCase("Invert Mouse-Y-Asis")) ConfigManager.invertMouseY = op.estado;
+                        // Sincroniza IMEDIATAMENTE com o ConfigManager para teste em tempo real
+                        if (op.texto.equals("Invert Camera-X-Asis")) ConfigManager.invertCameraX = op.estado;
+                        if (op.texto.equals("Invert Camera-Y-Asis")) ConfigManager.invertCameraY = op.estado;
+                        if (op.texto.equals("Invert Mouse-X-Asis")) ConfigManager.invertMouseX = op.estado;
+                        if (op.texto.equals("Invert Mouse-Y-Asis")) ConfigManager.invertMouseY = op.estado;
                         break;
                     case SLIDER:
                         op.arrastando = true;
@@ -599,8 +600,9 @@ public class PopupConfig {
 
         // GERAL
         List<OpcaoConfig> geral = new ArrayList<>();
+
         OpcaoConfig invCamX = criarToggle("Invert Camera-X-Asis");
-        invCamX.estado = ConfigManager.invertCameraX;
+        invCamX.estado = ConfigManager.invertCameraX; // Puxa do ConfigManager
         geral.add(invCamX);
 
         OpcaoConfig invCamY = criarToggle("Invert Camera-Y-Asis");
@@ -614,6 +616,7 @@ public class PopupConfig {
         OpcaoConfig invMouseY = criarToggle("Invert Mouse-Y-Asis");
         invMouseY.estado = ConfigManager.invertMouseY;
         geral.add(invMouseY);
+
         opcoes.put(TipoConfig.GERAL, geral);
 
         // ATALHOS

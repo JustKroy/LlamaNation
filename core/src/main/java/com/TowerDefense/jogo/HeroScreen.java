@@ -126,8 +126,8 @@
 
             //--------- COMBOBOX ---------
             btnClasse = new Botao(
-                new Texture("ui/Dropdown_Button.png"), //normal
-                new Texture("ui/Dropdown_ButtonHover.png"), //hover
+                new Texture("Painel.jpg"), //normal - ui/Dropdown_Button.png
+                new Texture("Painel.jpg"), //hover - Dropdown_ButtonHover
                 100, 850, 300, 80
             );
 
@@ -137,8 +137,8 @@
             for (int i = 0; i < classes.length; i++) {
 
                 opcoesClasse[i] = new Botao(
-                    new Texture("ui/Dropdown_Option.png"),       // normal
-                    new Texture("ui/Dropdown_OptionHover.png"), // hover
+                    new Texture("Painel.jpg"),       // normal - Dropdown_Classe
+                    new Texture("Painel.jpg"), // hover - Dropdown_ClasseHover
                     100,
                     850 - (i + 1) * 80,
                     300,

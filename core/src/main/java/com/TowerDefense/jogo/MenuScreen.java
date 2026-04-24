@@ -80,14 +80,23 @@ public class MenuScreen extends ScreenAdapter {
         batch.setProjectionMatrix(viewport.getCamera().combined);
 
         // --- LÓGICA DE MOUSE CENTRALIZADA ---
-        // 1. Pegamos a posição "crua" do viewport
+        // 1. Processamos o Mouse (Aqui ele inverte se a config de mouse mandar)
         Vector2 mouseCru = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
-
-        // 2. Processamos através do ConfigManager para aplicar inversões de eixo
         posMouse.set(
             ConfigManager.processarMouseX(mouseCru.x),
             ConfigManager.processarMouseY(mouseCru.y)
         );
+
+        // 2. Cálculo do Parallax focado APENAS no Cursor Visual (posMouse)
+        // Se Invert Camera estiver OFF, ele segue o padrão.
+        // Se Invert Camera estiver ON, ele inverte a relação com o cursor.
+        float direcaoCamX = ConfigManager.getDirecaoCameraX(); // invertCameraX ? -1f : 1f
+        float direcaoCamY = ConfigManager.getDirecaoCameraY();
+
+        // Note que aqui NÃO usamos o mouseCru e NÃO usamos a inversão do mouse.
+        // O offsetX vai depender apenas de onde o posMouse está.
+        float offsetX = (posMouse.x - 960) * 0.01f * direcaoCamX;
+        float offsetY = (posMouse.y - 540) * 0.01f * direcaoCamY;
 
         // LÓGICA DE INPUT
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && popup.isAberto()) {
@@ -116,9 +125,6 @@ public class MenuScreen extends ScreenAdapter {
         ScreenUtils.clear(0, 0, 0, 1);
         batch.begin();
 
-        // O fundo usa a posição já processada (invertida ou não) para o efeito parallax
-        float offsetX = (posMouse.x - 960) * 0.01f;
-        float offsetY = (posMouse.y - 540) * 0.01f;
         batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
 
         batch.end();
