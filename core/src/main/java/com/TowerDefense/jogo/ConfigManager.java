@@ -101,6 +101,40 @@ public class ConfigManager {
         System.out.println("Configurações Gerais (Inversões) atualizadas na memória!");
     }
 
+    /**
+     * Processa a coordenada X do mouse/entrada.
+     * Se invertMouseX for true, ele inverte o valor baseado na largura da tela.
+     */
+    public static float processarMouseX(float x) {
+        if (invertMouseX) {
+            return Gdx.graphics.getWidth() - x;
+        }
+        return x;
+    }
+
+    /**
+     * Processa a coordenada Y do mouse/entrada.
+     * Se invertMouseY for true, ele inverte o valor baseado na altura da tela.
+     */
+    public static float processarMouseY(float y) {
+        if (invertMouseY) {
+            return Gdx.graphics.getHeight() - y;
+        }
+        return y;
+    }
+
+    /**
+     * Processa o delta (movimento relativo) do mouse.
+     * Útil para movimentação de câmera.
+     */
+    public static float filtrarMovimentoX(float deltaX) {
+        return invertCameraX ? -deltaX : deltaX;
+    }
+
+    public static float filtrarMovimentoY(float deltaY) {
+        return invertCameraY ? -deltaY : deltaY;
+    }
+
     // 6. Atalho para aplicar TUDO quando clicar no botão SALVAR
     public static void aplicarTudo() {
         aplicarVideo();

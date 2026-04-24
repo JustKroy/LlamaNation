@@ -16,32 +16,26 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 public class GameScreen extends ScreenAdapter {
 
-    // --- VARIÁVEIS DO SISTEMA ---
     private final Main game;
     private SpriteBatch batch;
     private ShapeRenderer shape;
     private OrthographicCamera camera;
     private StretchViewport viewport;
 
-    // --- CLASSES AUXILIARES E GERENCIADORES ---
     private Mapa mapa;
     private Hud hud;
     private GerenciadorDeOndas ondas;
     private ConstrutorDeTorres construtor;
 
-    // --- LISTAS DE ENTIDADES ---
     private Array<Inimigo> listaInimigos = new Array<>();
     private Array<Torre> listaTorres = new Array<>();
     private Array<Projetil> listaProjeteis = new Array<>();
 
-    // --- STATUS DO JOGADOR ---
     private int vidas = 100, dinheiro = 1000;
     private Vector2 posMouse = new Vector2();
 
-    // --- CONSTRUTOR ---
     public GameScreen(Main game, Array<TipoLlama> deckEscolhido) {
         this.game = game;
-
         this.batch = new SpriteBatch();
         this.shape = new ShapeRenderer();
         this.camera = new OrthographicCamera();
@@ -50,153 +44,122 @@ public class GameScreen extends ScreenAdapter {
         this.mapa = new Mapa();
         this.hud = new Hud();
         this.ondas = new GerenciadorDeOndas();
-
         this.construtor = new ConstrutorDeTorres(deckEscolhido);
     }
 
-    // --- MÉTODO RENDER ---
     @Override
     public void render(float delta) {
-
         ScreenUtils.clear(0, 0, 0, 1);
+
+        // --- 1. MOUSE E CÂMERA ---
         camera.update();
+        Vector2 mouseCru = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+        posMouse.set(
+            ConfigManager.processarMouseX(mouseCru.x),
+            ConfigManager.processarMouseY(mouseCru.y)
+        );
 
-        posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
-        if (ConfigManager.invertMouseX) posMouse.x = 1920 - posMouse.x;
-        if (ConfigManager.invertMouseY) posMouse.y = 1080 - posMouse.y;
-
-        // --- 1. ATUALIZAÇÃO SEMPRE ATIVA (HUD E LOJA) ---
+        // --- 2. ATUALIZAÇÃO DE LÓGICA (HUD E CONSTRUTOR) ---
+        // O dinheiro é atualizado pelo construtor (compras/vendas)
         dinheiro = construtor.atualizar(posMouse, Gdx.input.justTouched(), Gdx.input.isTouched(), dinheiro, listaTorres, mapa, hud);
 
-        // ==========================================
-        // 2. A MAGIA DO PAUSE (O FREEZE)
-        // ==========================================
+        // LÓGICA DO JOGO (Se não estiver pausado)
         if (!hud.pausado) {
+            float deltaFinal = construtor.jogoAcelerado ? delta * 3f : delta;
 
-            if (construtor.jogoAcelerado) {
-                delta = delta * 3f;
-            }
+            ondas.atualizar(deltaFinal, listaInimigos, mapa);
 
-            ondas.atualizar(delta, listaInimigos, mapa);
-
-            // 🔥 CORREÇÃO: LOOP DOS INIMIGOS (DE TRÁS PRA FRENTE) 🔥
+            // Inimigos
             for (int i = listaInimigos.size - 1; i >= 0; i--) {
                 Inimigo inimigo = listaInimigos.get(i);
-
-                // 1. Checa se o inimigo morreu (seja por tiro direto ou por queimar/fogo)
                 if (inimigo.vida <= 0) {
                     dinheiro += inimigo.recompensaMoedas;
                     listaInimigos.removeIndex(i);
-                    continue; // Pula o resto, pois ele já é um fantasma!
+                    continue;
                 }
-
-                // 2. Atualiza o movimento. Se retornar true, ele chegou na sua base!
-                if (inimigo.atualizar(delta, mapa.caminho)) {
+                if (inimigo.atualizar(deltaFinal, mapa.caminho)) {
                     vidas--;
                     listaInimigos.removeIndex(i);
                 }
             }
 
+            // Torres
             for (Torre t : listaTorres) {
-                dinheiro += t.atualizar(delta, listaInimigos, listaProjeteis);
+                dinheiro += t.atualizar(deltaFinal, listaInimigos, listaProjeteis);
             }
 
-            // 🔥 CORREÇÃO: LOOP DOS PROJÉTEIS 🔥
+            // Projéteis
             for (int i = listaProjeteis.size - 1; i >= 0; i--) {
                 Projetil p = listaProjeteis.get(i);
-                p.atualizar(delta);
-
-                // Apenas dá o dano. Se o inimigo morrer, o loop lá de cima cuida de remover e dar o dinheiro!
+                p.atualizar(deltaFinal);
                 p.checarColisao(listaInimigos);
-
                 if (!p.ativo) listaProjeteis.removeIndex(i);
             }
         }
-        // ==========================================
 
-        // --- 3. DESENHO NA TELA ---
+        // --- 3. RENDERIZAÇÃO ---
         batch.setProjectionMatrix(camera.combined);
+        shape.setProjectionMatrix(camera.combined);
+
+        // Fundo e Mapa
         batch.begin();
         mapa.desenharMapa(batch);
         batch.end();
 
+        // Camada de Formas (Shapes) - Transparência ligada
         Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        shape.setProjectionMatrix(camera.combined);
         shape.begin(ShapeRenderer.ShapeType.Filled);
-
         mapa.desenharFundo(shape);
         construtor.desenharHitboxes(shape, posMouse, hud);
-
         shape.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
+        // Entidades e UI
         batch.begin();
         for (Inimigo in : listaInimigos) in.desenhar(batch);
         for (Torre t : listaTorres) t.desenhar(batch);
         for (Projetil p : listaProjeteis) p.desenhar(batch);
 
         construtor.desenharLojaEArrasto(batch, posMouse, hud);
-
         hud.desenhar(batch, vidas, dinheiro, ondas.waveAtual, posMouse.x, posMouse.y);
-
         batch.end();
 
-        // --- 4. DEPURADOR E GAME OVER ---
+        // --- 4. DEBUG E ESTADOS DE TELA ---
         if (hud.mostrarHitbox) renderizarDebugHitbox();
 
-        if (hud.voltarAoMenu) {
-            hud.voltarAoMenu = false;
+        verificarEstadosDeTroca();
 
-            Screen antiga = this;
-            game.setScreen(new MenuScreen(game));
-            antiga.dispose();
+        // --- 5. CURSOR (Desktop apenas) ---
+        renderizarCursor();
+    }
 
-            return;
-        }
-
-        if (vidas <= 0) {
+    private void verificarEstadosDeTroca() {
+        if (hud.voltarAoMenu || vidas <= 0) {
+            // Importante: Dispose primeiro para limpar memória antes de trocar
             this.dispose();
-            game.setScreen(new MenuScreen(game));
+            game.setScreen(new MenuScreen((Main) game));
         }
+    }
 
-        // ================= CURSOR =================
-
-        CursorManager.setDefault();
-
-        if(Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.iOS) {
-
+    private void renderizarCursor() {
+        if (Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.iOS) {
+            CursorManager.setDefault();
             if (hud.estaSobreAlgo(posMouse)) {
                 CursorManager.setHover();
             }
-
             CursorManager.aplicarCursorInvisivel();
-
             batch.begin();
             CursorManager.desenhar(batch, posMouse);
             batch.end();
         }
-
     }
 
     private void renderizarDebugHitbox() {
         shape.begin(ShapeRenderer.ShapeType.Line);
-
         shape.setColor(1, 0, 0, 1);
         for (Rectangle r : mapa.hitboxesCaminho) shape.rect(r.x, r.y, r.width, r.height);
-
         shape.setColor(0, 0, 1, 1);
         for (Torre t : listaTorres) shape.rect(t.hitbox.x, t.hitbox.y, t.hitbox.width, t.hitbox.height);
-
-        for (Inimigo in : listaInimigos) {
-            shape.setColor(0, 1, 0, 1);
-            shape.rect(in.posicao.x, in.posicao.y, 50, 50);
-        }
-
-        for (Projetil p : listaProjeteis) {
-            shape.setColor(1, 1, 0, 1);
-            shape.rect(p.hitbox.x, p.hitbox.y, p.hitbox.width, p.hitbox.height);
-        }
         shape.end();
     }
 
@@ -207,11 +170,15 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
-        batch.dispose();
-        shape.dispose();
-        mapa.dispose();
-        hud.dispose();
-        ondas.dispose();
-        construtor.dispose();
+        // Proteção contra múltiplos disposes
+        if (batch != null) {
+            batch.dispose();
+            shape.dispose();
+            mapa.dispose();
+            hud.dispose();
+            ondas.dispose();
+            construtor.dispose();
+            batch = null;
+        }
     }
 }

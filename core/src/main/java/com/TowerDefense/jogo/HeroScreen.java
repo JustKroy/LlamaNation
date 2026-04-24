@@ -525,72 +525,66 @@
 
         @Override
         public void render(float delta) {
-            // Limpa a tela
+            // 1. LIMPEZA E CÂMERA
             ScreenUtils.clear(0.1f, 0.1f, 0.1f, 1);
-
             viewport.apply();
             batch.setProjectionMatrix(viewport.getCamera().combined);
+
+            // --- 2. LÓGICA DE MOUSE CENTRALIZADA (ConfigManager) ---
+            Vector2 mouseCru = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+
+            // Atualizamos a variável global posMouse com os eixos corrigidos
+            posMouse.set(
+                ConfigManager.processarMouseX(mouseCru.x),
+                ConfigManager.processarMouseY(mouseCru.y)
+            );
+
             boolean clicou = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
 
-            // ------------ CURSOR (INÍCIO DO RENDER) ------------
+            // --- 3. ATUALIZAÇÃO DE CURSOR E HOVERS ---
             CursorManager.setDefault();
 
-            // BOTÕES (já define hover automaticamente)
+            // Botões de Heróis
             for (Botao btn : botoesHerois) {
-                btn.atualizarCursor(posMouse);
+                if (btn != null) btn.atualizarCursor(posMouse);
             }
+
+            // Botões da HUD (Back, Select, Skins, Infos)
             for (Botao btn : HUDbtn) {
                 btn.atualizarCursor(posMouse);
             }
+
+            // Botão de Classe (Dropdown)
             btnClasse.atualizarCursor(posMouse);
 
-            // PAINEL DE SKINS / INFOS
-            if (skinsPanel.isAberto() && skinsPanel.estaSobre(posMouse)) {
-                CursorManager.setHover();
-            }
-
+            // Opções do Dropdown (se aberto)
             if (menuAberto) {
                 for (Botao b : opcoesClasse) {
                     b.atualizarCursor(posMouse);
                 }
             }
 
-            // ATUALIZA O MOUSE EM TODO FRAME
-            posMouse = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
-
-            // Inicializa os botões de acordo com a classe selecionada
-            HeroType[] heroisAtuais = heroisPorClasse[getIndiceClasse()];
-
-            // Inicializa as label de acordo com a llama selecionada
-            labelLlama[] labelsAtuais = labelPorLlama[getIndiceClasse()];
-
-            // Se estiver sobre algum botão, vira mão
-            for (Botao btn : botoesHerois) {
-                btn.atualizarCursor(posMouse);
-            }
-            for(Botao btn : HUDbtn) {
-                btn.atualizarCursor(posMouse);
+            // Painel de Skins/Infos
+            if (skinsPanel.isAberto() && skinsPanel.estaSobre(posMouse)) {
+                CursorManager.setHover();
             }
 
-            // ----------- ANIMACAO -------------
+            // --- 4. LÓGICA DE ANIMAÇÃO E FADE ---
             tempoAnimacao += delta;
-
-            // Aumenta o alpha com o tempo (fade in)
             if (alpha < 1f) {
-                alpha += delta * 3f; // velocidade do fade
+                alpha += delta * 3f;
                 if (alpha > 1f) alpha = 1f;
             }
-
-            // SCALE (zoom suave)
             if (scaleAtual < 1f) {
                 scaleAtual += delta * 2.5f;
                 if (scaleAtual > 1f) scaleAtual = 1f;
             }
 
-            // ------------ FUNDO -----------
+            // --- 5. RENDERIZAÇÃO DO FUNDO (PARALLAX COM MOUSE PROCESSADO) ---
             fbo.begin();
             ScreenUtils.clear(0, 0, 0, 1);
             batch.begin();
+            // O efeito de parallax agora segue a lógica de inversão do ConfigManager
             float offsetX = (posMouse.x - 960) * 0.01f;
             float offsetY = (posMouse.y - 540) * 0.01f;
             batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
@@ -602,243 +596,145 @@
 
             batch.setShader(blurShader);
             batch.begin();
-            batch.draw(fboTexture, 0, 1080, 1920, -1080);
+            batch.draw(fboTexture, 0, 1080, 1920, -1080); // Corrigindo inversão Y do FBO
             batch.end();
-
-            // SEMPRE resetar shader
             batch.setShader(null);
+
+            // --- 6. DESENHO DO HERÓI E GLOW ---
             batch.begin();
-
-            float tempo = tempoAnimacao;
-
-            // Pulsação suave (0 a 1)
-            float pulso = (float) Math.sin(tempo * 3f) * 0.5f + 0.5f;
-
-            // Calcula posição e escala
-            float largura = heroSelecionado.largura;
-            float altura = heroSelecionado.altura;
-            float larguraEscalada = largura * scaleAtual;
-            float alturaEscalada = altura * scaleAtual;
-
-            float x = 1050 + (largura - larguraEscalada) / 2;
-            float y = 580 + (altura - alturaEscalada) / 2;
-
-            float floatY = (float) Math.sin(tempo * 2f) * 8f * HoverAlpha;
-            float yFinal = y + floatY;
-
-            // ------------- GLOW 1: FUNDO SUAVE (Sempre visível e BEM APARENTE) -------------
-            // Aumentei a opacidade base de 0.5f para 0.85f.
-            // Isso deixa a cor do glow muito mais densa e forte mesmo sem o mouse.
-            float alphaBaseLayer = 0.85f + (0.15f * HoverAlpha);
-            batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaBaseLayer);
-            batch.draw(HUDimg[6], x - 220, yFinal - 190, 750, 750);
-
-            // ------------- GLOW 2: BRILHO INTENSO (LUZ REAL) -------------
-            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
-
-            // Aumentei o aditivo base de 0.15f para 0.3f para dar um toque mais vivo,
-            // mas ainda seguro o suficiente para não "lavar" a tela de branco.
-            float alphaAditivo = 0.3f + (0.5f * HoverAlpha * pulso);
-
-            batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaAditivo);
-            batch.draw(HUDimg[6], x - 250, yFinal - 220, 850, 850);
-
-            batch.setColor(corBackground.r, corBackground.g, corBackground.b, alphaAditivo * 0.8f);
-            batch.draw(HUDimg[6], x - 150, yFinal - 120, 650, 650);
-
-            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
-            // ------------- GLOW INTERNO -------------
-            // Aumentei a visibilidade base aqui também (de 0.4f para 0.7f)
-            batch.setColor(corBackground.r, corBackground.g, corBackground.b, 0.7f + (0.3f * HoverAlpha));
-            batch.draw(HUDimg[6], 880, 400, 600, 600);
-
-            // Reseta a cor ANTES de desenhar o herói para não afetar a Llama
-            batch.setColor(1f, 1f, 1f, 1f);
-
-            // ------------- ATUALIZA O HOVER DA LLAMA -------------
-            Rectangle areaLlama = new Rectangle(x, yFinal, larguraEscalada, alturaEscalada);
-            boolean hoverLlama = areaLlama.contains(posMouse);
-            float velocidade = 6f;
-
-            if (hoverLlama) {
-                HoverAlpha += delta * velocidade;
-            } else {
-                HoverAlpha -= delta * velocidade;
-            }
-            HoverAlpha = Math.max(0f, Math.min(1f, HoverAlpha));
-
-            // ------------- DESENHO DA SOMBRA -------------
-            float alphaFinal = alpha * (0.8f + 0.2f * HoverAlpha);
-            batch.setColor(0f, 0f, 0f, 0.25f * (0.5f + HoverAlpha * 0.5f));
-            float sombraOffsetX = 10f;
-            float sombraOffsetY = -10f;
-
-            if (heroAnimacaoAtual != null) {
-                TextureRegion frame = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true);
-                batch.draw(frame, x + sombraOffsetX, yFinal + sombraOffsetY, larguraEscalada, alturaEscalada);
-            } else {
-                batch.draw(heroImagemEstatica, x + sombraOffsetX, yFinal + sombraOffsetY, larguraEscalada, alturaEscalada);
-            }
-
-            // ------------- DESENHO DA LLAMA (HERÓI) -------------
-            batch.setColor(1f, 1f, 1f, alphaFinal);
-
-            if (heroAnimacaoAtual != null) {
-                TextureRegion frame = heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true);
-                batch.draw(frame, x, yFinal, larguraEscalada, alturaEscalada);
-            } else {
-                batch.draw(heroImagemEstatica, x, yFinal, larguraEscalada, alturaEscalada);
-            }
-
-            // Reseta tudo no final
-            batch.setColor(1f, 1f, 1f, 1f);
-
-            // ------------- LABEL -------------
+            renderizarHeroiComGlow(delta);
             if (labelAtual != null) {
                 batch.draw(labelAtual, 700, 900, 700, 150);
             }
-
             batch.end();
-            batch.setShader(null);
 
-            // ------------ SOMBRAS (SHAPE RENDERER) ------------
+            // --- 7. SHAPES (SOMBRAS) ---
             shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
             Gdx.gl.glEnable(GL20.GL_BLEND);
-            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
-            for (Botao btn : HUDbtn) {
-                Rectangle r = btn.getArea();
-                shapeRenderer.setColor(0, 0, 0, 0.08f);
-                shapeRenderer.rect(r.x + 6, r.y - 6, r.width, r.height);
-                shapeRenderer.setColor(0, 0, 0, 0.2f);
-                shapeRenderer.rect(r.x + 3, r.y - 3, r.width, r.height);
-            }
+            renderizarSombrasBotoes();
             shapeRenderer.end();
-            Gdx.gl.glDisable(GL20.GL_BLEND);
 
-            // ------------ BOTOES ------------
+            // --- 8. DESENHO DE BOTÕES E UI ---
             batch.begin();
-            for (Botao btn : botoesHerois) {
-                if (btn != null && btn.getArea() != null) {
-                    btn.Exibir(batch, posMouse);
-                }
-            }
-            for(Botao btn : HUDbtn) {
-                btn.Exibir(batch, posMouse);
-            }
+            for (Botao btn : botoesHerois) btn.Exibir(batch, posMouse);
+            for (Botao btn : HUDbtn) btn.Exibir(batch, posMouse);
             btnClasse.Exibir(batch, posMouse);
 
-            batch.end();
             if (menuAberto) {
-                batch.begin();
-
                 for (int i = 0; i < opcoesClasse.length; i++) {
                     opcoesClasse[i].Exibir(batch, posMouse);
-
-                    // TEXTO POR CIMA (opcional)
-                    fonteNormal.draw(batch,
-                        HeroClasse.values()[i].name(),
-                        opcoesClasse[i].getArea().x + 20,
-                        opcoesClasse[i].getArea().y + 50
-                    );
+                    fonteNormal.draw(batch, HeroClasse.values()[i].name(),
+                        opcoesClasse[i].getArea().x + 20, opcoesClasse[i].getArea().y + 50);
                 }
-
-                batch.end();
             }
+            batch.end();
 
-            // ----------------------------------------------------
+            // --- 9. PAINEL DE SKINS ---
             if (skinsPanel.isAberto()) {
-                // Passa a câmera para a caixa preta não ficar torta/tamanho errado
                 skinsPanel.renderShapes(viewport.getCamera().combined);
-
                 batch.begin();
                 skinsPanel.render(batch);
                 batch.end();
             }
-            // ----------------------------------------------------
 
-            stage.act(delta);
-            stage.draw();
-
-            // ------------- CLIQUE -------------
+            // --- 10. TRATAMENTO DE CLIQUES ---
             if (clicou) {
-
-                if (HUDbtn[0].foiClicado(posMouse, clicou)) {
-                    game.setScreen(new MenuScreen(game));
-                }
-
-                for (int i = 0; i < botoesHerois.length; i++) {
-                    if (botoesHerois[i].foiClicado(posMouse, clicou)) {
-                        for (Botao btn : botoesHerois) {
-                            btn.setSelecionado(false);
-                        }
-
-                        botoesHerois[i].setSelecionado(true);
-                        botoesHerois[i].setCorBorda(getCorBordaClasse());
-
-                        if (i < heroisAtuais.length) {
-                            trocarHeroi(heroisAtuais[i]);
-                        }
-                        if (i < labelsAtuais.length) {
-                            trocarLabel(labelsAtuais[i]);
-                        }
-                        trocarBackground(backgroundSelecionado != null ? backgroundSelecionado : BackgroundType.CLASSICO);
-                    }
-                }
-
-                // Se clicou em SKINS
-                if (HUDbtn[2].foiClicado(posMouse, clicou)) {
-                    // Se já estava aberto, fecha. Se estava fechado, abre e FECHA o de infos
-                    skinsPanel.toggleSkins();
-                }
-
-                // Se clicou em INFOS
-                if (HUDbtn[3].foiClicado(posMouse, clicou)) {
-                    skinsPanel.toggleInfos();
-                }
-
-                // Repassa o clique para o painel tratar (seja aba de skin ou info)
-                if (skinsPanel.isAberto()) {
-                    skinsPanel.detectarClique(posMouse.x, posMouse.y);
-                }
-
-                // ABRIR / FECHAR MENU
-                if (btnClasse.foiClicado(posMouse, clicou)) {
-                    menuAberto = !menuAberto;
-                }
-
-                // CLICAR NAS OPÇÕES
-                if (menuAberto) {
-                    HeroClasse[] classes = HeroClasse.values();
-
-                    for (int i = 0; i < classes.length; i++) {
-                        if (opcoesClasse[i].foiClicado(posMouse, clicou)) {
-
-                            classeSelecionada = HeroClasse.values()[i];
-                            setBotoesClasseAtual();
-
-                            menuAberto = false;
-                            break;
-                        }
-                    }
-                }
+                tratarCliquesHeroScreen();
             }
 
-            // =================================================================
-            // FEEDBACK VISUAL: Destaca qual aba está aberta no momento
-            // =================================================================
-            HUDbtn[2].setSelecionado(skinsPanel.getAbaAtual() == PainelSkins.AbaAtiva.SKINS);
-            HUDbtn[3].setSelecionado(skinsPanel.getAbaAtual() == PainelSkins.AbaAtiva.INFOS);
-
-            //------------- CURSOR -------------
+            // --- 11. CURSOR FINAL ---
             if(Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.iOS) {
                 CursorManager.aplicarCursorInvisivel();
-
                 batch.begin();
                 CursorManager.desenhar(batch, posMouse);
                 batch.end();
+            }
+        }
+
+        private void renderizarHeroiComGlow(float delta) {
+            float tempo = tempoAnimacao;
+            float pulso = (float) Math.sin(tempo * 3f) * 0.5f + 0.5f;
+
+            float larguraEscalada = heroSelecionado.largura * scaleAtual;
+            float alturaEscalada = heroSelecionado.altura * scaleAtual;
+            float x = 1050 + (heroSelecionado.largura - larguraEscalada) / 2;
+            float y = 580 + (heroSelecionado.altura - alturaEscalada) / 2;
+            float floatY = (float) Math.sin(tempo * 2f) * 8f * HoverAlpha;
+            float yFinal = y + floatY;
+
+            // Glow
+            batch.setColor(corBackground.r, corBackground.g, corBackground.b, 0.85f + (0.15f * HoverAlpha));
+            batch.draw(HUDimg[6], x - 220, yFinal - 190, 750, 750);
+
+            // Lógica de Hover da Llama
+            Rectangle areaLlama = new Rectangle(x, yFinal, larguraEscalada, alturaEscalada);
+            if (areaLlama.contains(posMouse)) HoverAlpha += delta * 6f;
+            else HoverAlpha -= delta * 6f;
+            HoverAlpha = Math.max(0f, Math.min(1f, HoverAlpha));
+
+            // Desenho do Herói (Sombra + Sprite)
+            batch.setColor(0f, 0f, 0f, 0.25f * (0.5f + HoverAlpha * 0.5f));
+            if (heroAnimacaoAtual != null) {
+                batch.draw(heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true), x + 10, yFinal - 10, larguraEscalada, alturaEscalada);
+                batch.setColor(1, 1, 1, alpha);
+                batch.draw(heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true), x, yFinal, larguraEscalada, alturaEscalada);
+            } else {
+                batch.draw(heroImagemEstatica, x + 10, yFinal - 10, larguraEscalada, alturaEscalada);
+                batch.setColor(1, 1, 1, alpha);
+                batch.draw(heroImagemEstatica, x, yFinal, larguraEscalada, alturaEscalada);
+            }
+            batch.setColor(1, 1, 1, 1);
+        }
+
+        private void renderizarSombrasBotoes() {
+            for (Botao btn : HUDbtn) {
+                Rectangle r = btn.getArea();
+                shapeRenderer.setColor(0, 0, 0, 0.2f);
+                shapeRenderer.rect(r.x + 3, r.y - 3, r.width, r.height);
+            }
+        }
+
+        private void tratarCliquesHeroScreen() {
+            // Back Button
+            if (HUDbtn[0].foiClicado(posMouse, true)) {
+                game.setScreen(new MenuScreen(game));
+                return;
+            }
+
+            // Seleção de Heróis da Grade
+            HeroType[] heroisAtuais = heroisPorClasse[getIndiceClasse()];
+            labelLlama[] labelsAtuais = labelPorLlama[getIndiceClasse()];
+
+            for (int i = 0; i < botoesHerois.length; i++) {
+                if (botoesHerois[i].foiClicado(posMouse, true)) {
+                    for (Botao btn : botoesHerois) btn.setSelecionado(false);
+                    botoesHerois[i].setSelecionado(true);
+                    botoesHerois[i].setCorBorda(getCorBordaClasse());
+
+                    if (i < heroisAtuais.length) trocarHeroi(heroisAtuais[i]);
+                    if (i < labelsAtuais.length) trocarLabel(labelsAtuais[i]);
+                }
+            }
+
+            // Botões de Painel
+            if (HUDbtn[2].foiClicado(posMouse, true)) skinsPanel.toggleSkins();
+            if (HUDbtn[3].foiClicado(posMouse, true)) skinsPanel.toggleInfos();
+
+            if (skinsPanel.isAberto()) skinsPanel.detectarClique(posMouse.x, posMouse.y);
+
+            // Dropdown de Classe
+            if (btnClasse.foiClicado(posMouse, true)) menuAberto = !menuAberto;
+
+            if (menuAberto) {
+                for (int i = 0; i < HeroClasse.values().length; i++) {
+                    if (opcoesClasse[i].foiClicado(posMouse, true)) {
+                        classeSelecionada = HeroClasse.values()[i];
+                        setBotoesClasseAtual();
+                        menuAberto = false;
+                        break;
+                    }
+                }
             }
         }
 
