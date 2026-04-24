@@ -89,14 +89,14 @@
             // Se for a aba de SKINS
             if (abaAtual == AbaAtiva.SKINS) {
                 fonteTitulo.draw(batch, "SKINS: " + heroiAtual.nome, areaPainel.x + 20, areaPainel.y + areaPainel.height - 20);
-                fonteNormal.draw(batch, "Skins disponíveis para " + heroiAtual.nome + ":\n- Padrão\n- Dourada", areaPainel.x + 20, areaPainel.y + areaPainel.height - 70);
+                fonteNormal.draw(batch, "Unlocked skins for " + heroiAtual.nome + ":\n- Default\n- Gold", areaPainel.x + 20, areaPainel.y + areaPainel.height - 70);
 
                 // No futuro, você pode colocar imagens das skins dependendo do heroiAtual
             }
 
             // Se for a aba de INFOS
             else if (abaAtual == AbaAtiva.INFOS) {
-                fonteTitulo.draw(batch, "INFORMAÇÕES", areaPainel.x + 20, areaPainel.y + areaPainel.height - 20);
+                fonteTitulo.draw(batch, "INFOS", areaPainel.x + 20, areaPainel.y + areaPainel.height - 20);
 
                 // Puxa o status direto do enum da Llama!
                 fonteNormal.draw(batch, heroiAtual.status, areaPainel.x + 20, areaPainel.y + areaPainel.height - 70);
