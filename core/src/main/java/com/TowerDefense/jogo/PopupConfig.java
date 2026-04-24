@@ -17,9 +17,9 @@ public class PopupConfig {
 
     private final ShapeRenderer shapeRenderer;
     private final BitmapFont fonte;
-    private Rectangle botaoSalvar;
     private final Color COR_BOTAO = new Color(0.2f, 0.7f, 0.3f, 1f);
     private final Color COR_BOTAO_HOVER = new Color(0.3f, 0.8f, 0.4f, 1f);
+    private Rectangle botaoSalvar;
 
     private Rectangle[] opcoesMenu;
     private Map<TipoConfig, List<OpcaoConfig>> opcoes = new HashMap<>();
@@ -61,7 +61,7 @@ public class PopupConfig {
         fonteNormal = generator.generateFont(param);
         generator.dispose();
 
-        imagensMenu = new Texture[7];
+        imagensMenu = new Texture[9];
         imagensMenu[0] = new Texture("Settings_Button.png");
         imagensMenu[1] = new Texture("Settings_Audio.png");
         imagensMenu[2] = new Texture("Settings_Video.png");
@@ -69,6 +69,8 @@ public class PopupConfig {
         imagensMenu[4] = new Texture("Settings_Acessibility.png");
         imagensMenu[5] = new Texture("ui/On_ButtonWBall.png");
         imagensMenu[6] = new Texture("ui/Off_ButtonWBall.png");
+        imagensMenu[7] = new Texture("Button_Save.png");
+        imagensMenu[8] = new Texture("Button_SaveHover.png");
 
         tipoSelecionado = TipoConfig.GERAL;
 
@@ -103,11 +105,20 @@ public class PopupConfig {
             batch.draw(imagensMenu[i], x, y, width, height);
         }
         batch.setColor(Color.WHITE);
-
         desenharConteudo(batch);
 
-        fonteTitulo.setColor(Color.WHITE);
-        desenharTextoCentralizado(fonteTitulo, batch, "SALVAR", botaoSalvar);
+        // DESENHO DO BOTÃO SALVAR
+        boolean hoverSalvar = botaoSalvar.contains(mouseX, mouseY);
+        Texture texSalvar = hoverSalvar ? imagensMenu[8] : imagensMenu[7]; // 7 normal, 8 hover
+
+        // Efeito de escala suave opcional para o botão salvar (mesma lógica dos ícones do topo)
+        float escalaBotao = hoverSalvar ? 1.05f : 1.0f;
+        float larguraReal = botaoSalvar.width * escalaBotao;
+        float alturaReal = botaoSalvar.height * escalaBotao;
+        float posX = botaoSalvar.x - (larguraReal - botaoSalvar.width) / 2;
+        float posY = botaoSalvar.y - (alturaReal - botaoSalvar.height) / 2;
+
+        batch.draw(texSalvar, posX, posY, larguraReal, alturaReal);
     }
 
     public void renderShapes(float mouseX, float mouseY) {
@@ -147,11 +158,6 @@ public class PopupConfig {
         } else {
             shapeRenderer.setColor(COR_BOTAO);
         }
-        shapeRenderer.end();
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(hoverSalvar ? COR_BOTAO_HOVER : COR_BOTAO);
-        shapeRenderer.rect(botaoSalvar.x, botaoSalvar.y, botaoSalvar.width, botaoSalvar.height);
         shapeRenderer.end();
 
         List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
@@ -680,8 +686,8 @@ public class PopupConfig {
             );
         }
 
-        float larguraSalvar = 250;
-        float alturaSalvar = 60;
+        float larguraSalvar = 250; // Ajuste conforme o tamanho da sua PNG
+        float alturaSalvar = 80;   // Ajuste conforme o tamanho da sua PNG
         botaoSalvar = new Rectangle(
             areaPopup.x + (areaPopup.width - larguraSalvar) / 2,
             areaPopup.y + 40,
