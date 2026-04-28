@@ -68,6 +68,8 @@ Configurações<br>
 - Lenda: Sinner, NO INFO
 - Lenda: Atleta, DANO
 - Lenda: BUFF/DANO
+- Ideia de cada Lhma ter nome proprio e nacionalide(Exemplo: Firrer que nasceu na australia )
+- Ideia de ter um mapa  para cada lhama
 <br>
 
 ## PADRONIZAÇÃO DE NOME DE ARQUIVO
