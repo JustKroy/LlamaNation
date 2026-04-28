@@ -1,4 +1,6 @@
-# TowerDefense
+# LLAMANATION: A TOWER DEFENSE GAME
+## LANGUAGE VERSION
+- JAVA -> 21.0.10
 
 A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
 
