@@ -135,8 +135,6 @@ public class GameScreen extends ScreenAdapter {
 
     private void verificarEstadosDeTroca() {
         if (hud.voltarAoMenu || vidas <= 0) {
-            // Importante: Dispose primeiro para limpar memória antes de trocar
-            this.dispose();
             game.setScreen(new MenuScreen((Main) game));
         }
     }

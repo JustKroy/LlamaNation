@@ -3,8 +3,6 @@
     import com.badlogic.gdx.Application;
     import com.badlogic.gdx.Gdx;
     import com.badlogic.gdx.Input;
-    import com.badlogic.gdx.InputAdapter;
-    import com.badlogic.gdx.InputMultiplexer;
     import com.badlogic.gdx.ScreenAdapter;
     import com.badlogic.gdx.graphics.Color;
     import com.badlogic.gdx.graphics.Cursor;
@@ -15,19 +13,14 @@
     import com.badlogic.gdx.graphics.g2d.BitmapFont;
     import com.badlogic.gdx.graphics.g2d.SpriteBatch;
     import com.badlogic.gdx.graphics.g2d.TextureRegion;
-    import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
     import com.badlogic.gdx.graphics.glutils.FrameBuffer;
     import com.badlogic.gdx.graphics.glutils.ShaderProgram;
     import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-    import com.badlogic.gdx.math.Matrix4;
     import com.badlogic.gdx.math.Rectangle;
     import com.badlogic.gdx.math.Vector2;
-    import com.badlogic.gdx.scenes.scene2d.Actor;
     import com.badlogic.gdx.scenes.scene2d.Stage;
     import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
     import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-    import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-    import com.badlogic.gdx.utils.Align;
     import com.badlogic.gdx.utils.ScreenUtils;
     import com.badlogic.gdx.utils.viewport.ScreenViewport;
     import com.badlogic.gdx.utils.viewport.StretchViewport;
@@ -49,8 +42,8 @@
         private final Stage stage; //Variável que permite desenhar na tela
         private final Skin skin; //Variável que permite carregar imagens
         private SelectBox<HeroClasse> listaClasse; //Variável que inicia um SelectBox
-        private Map<labelLlama, Texture> labels = new HashMap<>();
-        private Map<FramePorClasse, Texture> frames = new HashMap<>();
+        private Map<labelLlama, Texture> labels;
+        private Map<FramePorClasse, Texture> frames;
         private final FrameBuffer fbo;
         private Texture fboTexture;
         private final ShaderProgram blurShader;
@@ -64,6 +57,7 @@
             //--------- ARRAY ---------
         //Variável que permite carregar imagens
         private Texture[] HUDimg; //Variável que permite carregar imagens
+        private Texture[] Dropdown;
         private HeroType[][] heroisPorClasse;
         private labelLlama[][] labelPorLlama;
         private FramePorClasse[][] framesPorClasse;
@@ -93,41 +87,49 @@
             alpha = 0f;
             HoverAlpha = 0f;
 
-            FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Raleway-Regular.ttf"));
-            FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
+            this.fonte = game.fonte;
+            this.fonteTitulo = game.fonteTitulo;
+            this.fonteNormal = game.fonteNormal;
 
-            param.size = 28;
-            param.color = Color.WHITE;
-            param.minFilter = Texture.TextureFilter.Linear;
-            param.magFilter = Texture.TextureFilter.Linear;
+            HUDimg = new Texture[7];
+            HUDimg[0] = new Texture("MenuScreen_Background.png");
+            HUDimg[1] = new Texture("Painel.jpg");
+            HUDimg[2] = new Texture("Frame_aerial.png");
+            HUDimg[3] = new Texture("Frame_classic.png");
+            HUDimg[4] = new Texture("Frame_legend.png");
+            HUDimg[5] = new Texture("Frame_support.png");
+            HUDimg[6] = new Texture("Glow.png");
+            HUDimg[6].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            HUDimg[6].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
-            fonte = generator.generateFont(param);
-            param.size = 32;
-            fonteTitulo = generator.generateFont(param);
-            param.size = 22;
-            fonteNormal = generator.generateFont(param);
-            generator.dispose();
+            Dropdown = new Texture[16];
+            Dropdown[0] = new Texture ("dropdown/Dropdown_Aerial.png");
+            Dropdown[1] = new Texture("dropdown/Dropdown_AerialArrow.png");
+            Dropdown[2] = new Texture("dropdown/Dropdown_AerialArrowHover.png");
+            Dropdown[3] = new Texture("dropdown/Dropdown_AerialHover.png");
+            Dropdown[4] = new Texture("dropdown/Dropdown_Classics.png");
+            Dropdown[5] = new Texture("dropdown/Dropdown_ClassicsArrow.png");
+            Dropdown[6] = new Texture("dropdown/Dropdown_ClassicsArrowHover.png");
+            Dropdown[7] = new Texture("dropdown/Dropdown_ClassicsHover.png");
+            Dropdown[8] = new Texture("dropdown/Dropdown_Legend.png");
+            Dropdown[9] = new Texture("dropdown/Dropdown_LegendArrow.png");
+            Dropdown[10] = new Texture("dropdown/Dropdown_LegendArrowHover.png");
+            Dropdown[11] = new Texture("dropdown/Dropdown_LegendHover.png");
+            Dropdown[12] = new Texture("dropdown/Dropdown_Support.png");
+            Dropdown[13] = new Texture("dropdown/Dropdown_SupportArrow.png");
+            Dropdown[14] = new Texture("dropdown/Dropdown_SupportArrowHover.png");
+            Dropdown[15] = new Texture("dropdown/Dropdown_SupportHover.png");
 
 
-
-            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
-
-            //--------- SHADER ---------)
-            ShaderProgram.pedantic = false;
-
-            blurShader = new ShaderProgram(
-                Gdx.files.internal("blur.vert"),
-                Gdx.files.internal("blur.frag")
-            );
-
-            if (!blurShader.isCompiled()) {
-                System.out.println(blurShader.getLog());
-            }
+                labels = new HashMap<>();
+            frames = new HashMap<>();
 
             //--------- COMBOBOX ---------
+            // Inicializa o botão principal com a classe padrão (CLASSICOS)
+            int baseIndexPrincipal = getDropdownBaseIndex(HeroClasse.CLASSICOS);
             btnClasse = new Botao(
-                new Texture("Painel.jpg"), //normal - ui/Dropdown_Button.png
-                new Texture("Painel.jpg"), //hover - Dropdown_ButtonHover
+                Dropdown[baseIndexPrincipal + 1], // Normal com Seta
+                Dropdown[baseIndexPrincipal + 2], // Hover com Seta
                 100, 850, 300, 80
             );
 
@@ -135,10 +137,11 @@
             opcoesClasse = new Botao[classes.length];
 
             for (int i = 0; i < classes.length; i++) {
+                int baseIndex = getDropdownBaseIndex(classes[i]);
 
                 opcoesClasse[i] = new Botao(
-                    new Texture("Painel.jpg"),       // normal - Dropdown_Classe
-                    new Texture("Painel.jpg"), // hover - Dropdown_ClasseHover
+                    Dropdown[baseIndex],       // Normal sem seta
+                    Dropdown[baseIndex + 3],   // Hover sem seta
                     100,
                     850 - (i + 1) * 80,
                     300,
@@ -156,111 +159,17 @@
 
             pixmap.dispose();
 
-
-            //--------- Imagens -----------
-
-            heroisPorClasse = new HeroType[4][];
-
-                //CLASSICOS
-                heroisPorClasse[0] = new HeroType[]{
-                    HeroType.LLAMA,
-                    HeroType.MAGELLAMA,
-                    HeroType.NINJALLAMA,
-                    HeroType.ROBOTLLAMA
-                };
-
-                //SUPORTES
-                heroisPorClasse[1] = new HeroType[]{
-                    HeroType.BURGUESA,
-                    HeroType.YETI
-                };
-
-                //AEREOS
-                heroisPorClasse[2] = new HeroType[]{
-                    HeroType.ANJOLLAMA
-                };
-
-                //LENDAS
-                heroisPorClasse[3] = new HeroType[]{
-                    HeroType.CHEF
-                };
-
-            labelPorLlama = new labelLlama[4][];
-
-                //CLÁSSICOS
-                labelPorLlama[0] = new labelLlama[]{
-                    labelLlama.LABEL_LLAMA,
-                    labelLlama.LABEL_MAGELLAMA,
-                    labelLlama.LABEL_NINJALLAMA,
-                    labelLlama.LABEL_ROBOTLLAMA
-                };
-
-                //SUPORTES
-                labelPorLlama[1] = new labelLlama[]{
-                    labelLlama.LABEL_BURGUESA
-                };
-
-                //AEREOS
-                labelPorLlama[2] = new labelLlama[] {
-                    labelLlama.LABEL_ANJOLLAMA
-                };
-
-                //LENDAS
-                labelPorLlama[3] = new labelLlama[] {
-                    labelLlama.LABEL_CHEF
-                };
-
-            framesPorClasse = new FramePorClasse[4][];
-
-                framesPorClasse[0] = new FramePorClasse[]{
-                    FramePorClasse.LLAMACLASSIC,
-                    FramePorClasse.MAGECLASSIC,
-                    FramePorClasse.NINJACLASSIC,
-                    FramePorClasse.CYBORGCLASSIC
-                };
-
-                framesPorClasse[1] = new FramePorClasse[]{
-                    FramePorClasse.BURGUESSUPPORT,
-                    FramePorClasse.YETISUPPORT
-                };
-
-                framesPorClasse[2] = new FramePorClasse[]{
-                    FramePorClasse.ANGELAERIAL
-                };
-
-                framesPorClasse[3] = new FramePorClasse[]{
-                    FramePorClasse.CHEFLEGEND
-                };
-
-
-            HUDimg = new Texture[7];
-                HUDimg[0] = new Texture("MenuScreen_Background.png");
-                HUDimg[1] = new Texture("Painel.jpg");
-                HUDimg[2] = new Texture("Frame_aerial.png");
-                HUDimg[3] = new Texture("Frame_classic.png");
-                HUDimg[4] = new Texture("Frame_legend.png");
-                HUDimg[5] = new Texture("Frame_support.png");
-                HUDimg[6] = new Texture("Glow.png");
-                HUDimg[6].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-
-            //--------- LABEL LLAMAS -----------
-            for (labelLlama l : labelLlama.values()) {
-                labels.put(l, new Texture(Gdx.files.internal(l.label)));
-            }
-
-            //--------- FRAMES -----------
-            for (FramePorClasse f : FramePorClasse.values()) {
-                frames.put(f, new Texture(Gdx.files.internal(f.frame)));
-            }
-
-            //-------- PADRÃO ---------
+            // -------- CONFIGURAÇÃO INICIAL --------
             classeSelecionada = HeroClasse.CLASSICOS;
             frameAtual = HUDimg[3];
+
+            inicializarArraysDados();
+
             trocarBackground(BackgroundType.CLASSICO);
             trocarHeroi(HeroType.LLAMA);
             trocarLabel(labelLlama.LABEL_LLAMA);
-            setBotoesClasseAtual();
 
+            setBotoesClasseAtual();
             HUDbtn = new Botao[4];
                 //Voltar
                 HUDbtn[0] = new Botao(
@@ -280,18 +189,70 @@
                 //Skins
                 HUDbtn[2] = new Botao(
                     new Texture("Skins_Button.png"),
-                    new Texture("Skins_Button.png"),
+                    new Texture("Skins_ButtonHover.png"),
                     850, 430, 100, 100
                 );
 
                 //Infos
                 HUDbtn[3] = new Botao(
                     new Texture("Infos_Button.png"),
-                    new Texture("Infos_Button.png"),
+                    new Texture("Infos_ButtonHover.png"),
                     700, 430, 100, 100
                 );
+            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
+            //--------- SHADER ---------)
+            ShaderProgram.pedantic = false;
 
+            blurShader = new ShaderProgram(
+                Gdx.files.internal("blur.vert"),
+                Gdx.files.internal("blur.frag")
+            );
 
+            if (!blurShader.isCompiled()) {
+                System.out.println(blurShader.getLog());
+            }
+
+        }
+        private void inicializarArraysDados() {
+            // Inicializa os arrays principais
+            heroisPorClasse = new HeroType[4][];
+            labelPorLlama = new labelLlama[4][];
+            framesPorClasse = new FramePorClasse[4][];
+
+            // --- CLASSICOS ---
+            heroisPorClasse[0] = new HeroType[]{
+                HeroType.LLAMA, HeroType.MAGELLAMA, HeroType.NINJALLAMA, HeroType.ROBOTLLAMA
+            };
+            labelPorLlama[0] = new labelLlama[]{
+                labelLlama.LABEL_LLAMA, labelLlama.LABEL_MAGELLAMA, labelLlama.LABEL_NINJALLAMA, labelLlama.LABEL_ROBOTLLAMA
+            };
+            framesPorClasse[0] = new FramePorClasse[]{
+                FramePorClasse.LLAMACLASSIC, FramePorClasse.MAGECLASSIC, FramePorClasse.NINJACLASSIC, FramePorClasse.CYBORGCLASSIC
+            };
+
+            // --- SUPORTES ---
+            heroisPorClasse[1] = new HeroType[]{ HeroType.BURGUESA, HeroType.YETI };
+            labelPorLlama[1] = new labelLlama[]{ labelLlama.LABEL_BURGUESA };
+            framesPorClasse[1] = new FramePorClasse[]{ FramePorClasse.BURGUESSUPPORT, FramePorClasse.YETISUPPORT };
+
+            // --- AEREOS ---
+            heroisPorClasse[2] = new HeroType[]{ HeroType.ANJOLLAMA };
+            labelPorLlama[2] = new labelLlama[]{ labelLlama.LABEL_ANJOLLAMA };
+            framesPorClasse[2] = new FramePorClasse[]{ FramePorClasse.ANGELAERIAL };
+
+            // --- LENDAS ---
+            heroisPorClasse[3] = new HeroType[]{ HeroType.CHEF };
+            labelPorLlama[3] = new labelLlama[]{ labelLlama.LABEL_CHEF };
+            framesPorClasse[3] = new FramePorClasse[]{ FramePorClasse.CHEFLEGEND };
+        }
+
+        private int getDropdownBaseIndex(HeroClasse classe) {
+            return switch (classe) {
+                case AEREOS -> 0;    // 0 a 3
+                case CLASSICOS -> 4; // 4 a 7
+                case LENDAS -> 8;    // 8 a 11
+                case SUPORTES -> 12; // 12 a 15
+            };
         }
 
         private int getIndiceClasse() {
@@ -328,10 +289,10 @@
 
                 Texture texturaFrame;
 
-                if (i < framesAtuais.length && frames.get(framesAtuais[i]) != null) {
-                    texturaFrame = frames.get(framesAtuais[i]);
+                if (i < framesAtuais.length) {
+                    texturaFrame = getFrameTextura(framesAtuais[i]);
                 } else {
-                    texturaFrame = frameAtual; // fallback
+                    texturaFrame = frameAtual;
                 }
 
                 float x = 20 + (i % 2) * 250;
@@ -370,6 +331,9 @@
                     trocarLabel(labelLlama.LABEL_CHEF);
                     break;
             }
+
+            int baseIndex = getDropdownBaseIndex(classeSelecionada);
+            btnClasse.setTextura(Dropdown[baseIndex + 1], Dropdown[baseIndex + 2]);
         }
 
         //Função que inicializa imagem de acordo com o tipo(animação ou estática)
@@ -413,20 +377,18 @@
             heroSelecionado = tipo; //Salva o tipo
 
             //--------- LIMPA A MEMÓRIA ---------
-            if(heroSpriteSheetAtual != null){
-                heroSpriteSheetAtual.dispose();
-            }
+            if (heroSpriteSheetAtual != null) heroSpriteSheetAtual.dispose();
+            if (heroImagemEstatica != null) heroImagemEstatica.dispose();
 
-            if(heroImagemEstatica != null){
-                heroImagemEstatica.dispose();
-            }
+            // Carrega apenas UMA VEZ
+            Texture texturaBase = new Texture(Gdx.files.internal(tipo.sprite));
 
             //--------- CARREGA A IMG ---------
             if(tipo.animado){ //Se for animação
 
-                heroSpriteSheetAtual = new Texture(tipo.sprite); //Carrega a imagem
+                heroSpriteSheetAtual = texturaBase; //Carrega a imagem
 
-                TextureRegion[][] tmp = TextureRegion.split(heroSpriteSheetAtual, 64, 64); //Quebra a imagem em partes  de 64x64(Split)
+                TextureRegion[][] tmp = TextureRegion.split(texturaBase, 64, 64); //Quebra a imagem em partes  de 64x64(Split)
 
                 heroAnimacaoAtual = new Animation<>(0.08f, tmp[0]); //Cria a animação, juntando essas partes
 
@@ -436,10 +398,11 @@
 
             }else{
                 //Carrega a imagem estática
-                heroImagemEstatica = new Texture(tipo.sprite);
+                heroImagemEstatica = texturaBase;
 
                 //Limpa a animação
                 heroAnimacaoAtual = null;
+                heroSpriteSheetAtual = null;
             }
 
             tempoAnimacao = 0; //Limpa o tempo da animação
@@ -463,9 +426,20 @@
 
         }
 
-            private void trocarLabel(labelLlama label) {
-                labelAtual = labels.get(label);
+            private void trocarLabel(labelLlama tipo) {
+                // Se a textura ainda não foi carregada, carregue-a agora
+                if (!labels.containsKey(tipo)) {
+                    labels.put(tipo, new Texture(Gdx.files.internal(tipo.label)));
+                }
+                labelAtual = labels.get(tipo);
             }
+
+        private Texture getFrameTextura(FramePorClasse tipo) {
+            if (!frames.containsKey(tipo)) {
+                frames.put(tipo, new Texture(Gdx.files.internal(tipo.frame)));
+            }
+            return frames.get(tipo);
+        }
 
         public enum BackgroundType {
             CLASSICO,
@@ -619,8 +593,13 @@
             batch.begin();
             for (Botao btn : botoesHerois) btn.Exibir(batch, posMouse);
             for (Botao btn : HUDbtn) btn.Exibir(batch, posMouse);
-            btnClasse.Exibir(batch, posMouse);
 
+            // Desenha o botão principal e o texto da classe selecionada nele
+            btnClasse.Exibir(batch, posMouse);
+            fonteNormal.draw(batch, classeSelecionada.name(),
+                btnClasse.getArea().x + 20, btnClasse.getArea().y + 50);
+
+            // Desenha as opções da lista caso o menu esteja aberto
             if (menuAberto) {
                 for (int i = 0; i < opcoesClasse.length; i++) {
                     opcoesClasse[i].Exibir(batch, posMouse);
