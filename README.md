@@ -1,40 +1,16 @@
-# LLAMANATION: A TOWER DEFENSE GAME
-## LANGUAGE VERSION
-- JAVA -> 21.0.10
+# LlamaNation: A TOWER DEFENSE GAME
 
-A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
+O LlamaNation é um projeto desenvolvido por um grupo de alunos do curso de Técnico em Desenvolvimento de sistemas programado inteiramente em Java, utilizando o libGDX como framework principal. Trata-se de um jogo no estilo Tower Defense (Defesa de Torres) em 2D de Llamas que protegem o seu campo contra caramujos invasores que a todo custo tentam invadir a sua base. O jogo estará disponível tanto para Desktop quanto para aplicativos móveis.
 
-This project was generated with a template including simple application launchers and an `ApplicationAdapter` extension that draws libGDX logo.
+## Como começar
 
-## Platforms
+### Pré-requisitos
+* Java 21.0.10
+* LibGdx
 
-- `core`: Main module with the application logic shared by all platforms.
-- `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
-- `android`: Android mobile platform. Needs Android SDK.
+### Instalação
 
-## Gradle
-
-This project uses [Gradle](https://gradle.org/) to manage dependencies.
-The Gradle wrapper was included, so you can run Gradle tasks using `gradlew.bat` or `./gradlew` commands.
-Useful Gradle tasks and flags:
-
-- `--continue`: when using this flag, errors will not stop the tasks from running.
-- `--daemon`: thanks to this flag, Gradle daemon will be used to run chosen tasks.
-- `--offline`: when using this flag, cached dependency archives will be used.
-- `--refresh-dependencies`: this flag forces validation of all dependencies. Useful for snapshot versions.
-- `android:lint`: performs Android project validation.
-- `build`: builds sources and archives of every project.
-- `cleanEclipse`: removes Eclipse project data.
-- `cleanIdea`: removes IntelliJ project data.
-- `clean`: removes `build` folders, which store compiled classes and built archives.
-- `eclipse`: generates Eclipse project data.
-- `idea`: generates IntelliJ project data.
-- `lwjgl3:jar`: builds application's runnable jar, which can be found at `lwjgl3/build/libs`.
-- `lwjgl3:run`: starts the application.
-- `test`: runs unit tests (if any).
-
-Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
-For example, `core:clean` removes `build` folder only from the `core` project.
-"# eqweqw" 
-"# LlamaNation" 
-"# LlamaNation" 
+1. Clone o repositório:
+   ```bash
+   git clone [https://github.com/JustKroy/LlamaNation.git](https://github.com/JustKroy/LlamaNation.git)
+   cd LlamaNation
