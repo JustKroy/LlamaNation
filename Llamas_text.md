@@ -6,7 +6,7 @@ Ninja Llama: A Llama trained in the arts of Ninjutsu who came back home to help 
 
 Mage Llama: The Mage trained for three years in Scotland and is Master in Llamagic now. When he isn't killing snails with fireballs, he likes to do crosswords and drink coffee with other Mages.
 
-Angel Llama: The holy entity of all Llamas who pray for their "Guardian Angel". He was sent by GodLlama to Protect the Llamas against the snails who atack them.
+Angel Llama: The holy entity of all Llamas who pray for their "Guardian Angel". He was sent by GodLlama to Protect the Llamas against the snails who attack them.
 
 Burgeoise Llama: the Burgeoise is a rich, sucessful Llama who runs the clothes shop at LlamaTown. In his Free time, he likes to play golf and gamble at Horse races.
 
