@@ -1,6 +1,6 @@
 Inglês
 
-Llama: An ordinary Llama who came from the Andes to destroy snails! He spits on them like a mad cow and defends his space.
+Llama(Rámon): An ordinary Llama who came from the Andes to destroy snails! He spits on them like a mad cow and defends his space.
 
 Ninja Llama: A Llama trained in the arts of Ninjutsu who came back home to help in the war against the evil ones.
 
