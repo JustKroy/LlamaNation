@@ -70,6 +70,7 @@ Configurações<br>
 - Lenda: BUFF/DANO
 - Ideia de cada Lhma ter nome proprio e nacionalide(Exemplo: Firrer que nasceu na australia )
 - Ideia de ter um mapa  para cada lhama
+- Tutorial básico de como jogar o jogo, pode ser com uma lhama falando como jogar
 <br>
 
 ## PADRONIZAÇÃO DE NOME DE ARQUIVO
