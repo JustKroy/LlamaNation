@@ -1,6 +1,6 @@
 Inglês
 
-Llama(Rámon): An ordinary Llama who came from the Andes to destroy snails! He spits on them like a mad cow and defends his space.
+Llama(Ramón): An ordinary Llama who came from the Andes to destroy snails! He spits on them like a mad cow and defends his space.
 
 Ninja Llama: A Llama trained in the arts of Ninjutsu who came back home to help in the war against the evil ones.
 
@@ -16,6 +16,7 @@ Yeti Llama: The Abominable monster who terrifies kids in their dreams and has an
 
 Operator Llama: He was Employee of the month 32 times at the LlamaFactory, but he was never promoted by his chef, Bob the Snail. Now, he hates snails more than anything and will do everything he can to help in the war, even if it means building his own factory.
 
+Priest Llama: He was the Well-Known Priest who preached rituals in Machu Picchu's Temples for the common llamas who believe in multiple Gods. Dressed as the Sun God, he Fullfilled the Llamas' faith and morale, and even melted some Snails who were bothering his worshipers.
 
 Portugues
 
@@ -34,3 +35,4 @@ Llama Chefe: Este Chefe altamente habilidoso tem uma vida prazerosa trabalhando 
 Llama Yeti: O Abominável Monstro das neves que aterroriza crianças em seus sonhos e nutre um ódio secreto por caracóis. quando ele soube que Os caracóis estavam atacando a ViLlama, ele não pensou duas vezes e desceu do ponto mais alto do Everest para ajudar.
 
 Llama Operária: Ele foi Funcionário do mês 32 vezes na FabriLlama, mas nunca foi promovido pelo seu chefe, Bob o Caracol. Agora, ele odeia caracóis mais do que tudo e vai fazer tudo que ele pode para ajudar na Guerra, mesmo que isso signifique construir sua própria Fábrica.
+
