@@ -37,15 +37,10 @@ public class MenuScreen extends ScreenAdapter {
         this.batch = new SpriteBatch();
         this.shapeRenderer = new ShapeRenderer();
         this.viewport = new StretchViewport(1920, 1080);
+        this.fbo = game.fbo;
+        this.blurShader = game.blurShader;
 
-        popup = new PopupConfig();
-        fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
-
-        ShaderProgram.pedantic = false;
-        blurShader = new ShaderProgram(
-            Gdx.files.internal("blur.vert"),
-            Gdx.files.internal("blur.frag")
-        );
+        popup = new PopupConfig(game);
 
         inicializarComponentes();
     }

@@ -1,22 +1,31 @@
 package com.TowerDefense.jogo;
 
+import static com.TowerDefense.jogo.ConfigManager.isFullscreen;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
 // A classe Main herda de "Game" do LibGDX.
 // Ela é o motor principal que gerencia as múltiplas telas do seu jogo (Menu, Jogo, Game Over).
 public class Main extends Game {
 
     public BitmapFont fonte, fonte32, fonteNormal, fonteTitulo;
+    public PopupConfig popup;
+    public ShaderProgram blurShader;
+    public FrameBuffer fbo;
 
     // --- MÉTODO CREATE (O "Start" do Motor) ---
     // É chamado automaticamente pelo sistema apenas UMA VEZ, assim que você abre o jogo.
     @Override
     public void create() {
+        ConfigManager.construtor();
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Raleway-Regular.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -38,11 +47,17 @@ public class Main extends Game {
 
         CursorManager.init();
 
-        // ESSA LINHA É OBRIGATÓRIA:
-        ConfigManager.carregar();
+        fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
 
-        // Se você quiser que o jogo já abra na resolução salva:
-        ConfigManager.aplicarVideo();
+        ShaderProgram.pedantic = false;
+        blurShader = new ShaderProgram(
+            Gdx.files.internal("blur.vert"),
+            Gdx.files.internal("blur.frag")
+        );
+
+        ConfigManager.aplicarTudo();
+        popup = new PopupConfig(this);
+        this.setScreen(new MenuScreen(this));
 
         // Define a tela inicial como o Menu
 

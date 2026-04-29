@@ -15,11 +15,11 @@ import java.util.*;
 
 public class PopupConfig {
 
+    private final Main game;
     private final ShapeRenderer shapeRenderer;
-    private final BitmapFont fonte;
     private final Color COR_BOTAO = new Color(0.2f, 0.7f, 0.3f, 1f);
     private final Color COR_BOTAO_HOVER = new Color(0.3f, 0.8f, 0.4f, 1f);
-    private Rectangle botaoSalvar;
+    private Rectangle botaoSalvar, botaoExit;
 
     private Rectangle[] opcoesMenu;
     private Map<TipoConfig, List<OpcaoConfig>> opcoes = new HashMap<>();
@@ -34,43 +34,40 @@ public class PopupConfig {
     private final Color COR_HOVER = new Color(1,1,1,0.05f);
     BitmapFont fonteTitulo;
     BitmapFont fonteNormal;
+    BitmapFont fonte;
     private Vector2 mouse = new Vector2();
     private StretchViewport viewport;
+    private static Texture[] texturasCompartilhadas;
 
-    public PopupConfig() {
+    public PopupConfig(Main game) {
+        this.game = game;
         shapeRenderer = new ShapeRenderer();
         aberto = false;
         viewport = new StretchViewport(1920, 1080);
+
+        this.fonteTitulo = game.fonteTitulo;
+        this.fonteNormal = game.fonteNormal;
+        this.fonte = game.fonte;
 
         opcoesMenu = new Rectangle[textosMenu.length];
         escalaMenu = new float[textosMenu.length];
         Arrays.fill(escalaMenu, 1f);
 
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Raleway-Regular.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
-
-        param.size = 28;
-        param.color = Color.WHITE;
-        param.minFilter = Texture.TextureFilter.Linear;
-        param.magFilter = Texture.TextureFilter.Linear;
-
-        fonte = generator.generateFont(param);
-        param.size = 32;
-        fonteTitulo = generator.generateFont(param);
-        param.size = 22;
-        fonteNormal = generator.generateFont(param);
-        generator.dispose();
-
-        imagensMenu = new Texture[9];
-        imagensMenu[0] = new Texture("Settings_Button.png");
-        imagensMenu[1] = new Texture("Settings_Audio.png");
-        imagensMenu[2] = new Texture("Settings_Video.png");
-        imagensMenu[3] = new Texture("Settings_Controls.png");
-        imagensMenu[4] = new Texture("Settings_Acessibility.png");
-        imagensMenu[5] = new Texture("ui/On_ButtonWBall.png");
-        imagensMenu[6] = new Texture("ui/Off_ButtonWBall.png");
-        imagensMenu[7] = new Texture("Button_Save.png");
-        imagensMenu[8] = new Texture("Button_SaveHover.png");
+        if (texturasCompartilhadas == null) {
+            texturasCompartilhadas = new Texture[11];
+            texturasCompartilhadas[0] = new Texture("Settings_Button.png");
+            texturasCompartilhadas[1] = new Texture("Settings_Audio.png");
+            texturasCompartilhadas[2] = new Texture("Settings_Video.png");
+            texturasCompartilhadas[3] = new Texture("Settings_Controls.png");
+            texturasCompartilhadas[4] = new Texture("Settings_Acessibility.png");
+            texturasCompartilhadas[5] = new Texture("ui/On_ButtonWBall.png");
+            texturasCompartilhadas[6] = new Texture("ui/Off_ButtonWBall.png");
+            texturasCompartilhadas[7] = new Texture("Button_Save.png");
+            texturasCompartilhadas[8] = new Texture("Button_SaveHover.png");
+            texturasCompartilhadas[9] = new Texture("Button_ExitGame.png");
+            texturasCompartilhadas[10] = new Texture("Button_ExitGameHover.png");
+        }
+        this.imagensMenu = texturasCompartilhadas;
 
         tipoSelecionado = TipoConfig.GERAL;
 
@@ -107,18 +104,30 @@ public class PopupConfig {
         batch.setColor(Color.WHITE);
         desenharConteudo(batch);
 
-        // DESENHO DO BOTÃO SALVAR
+        // --- DESENHO DO BOTÃO SALVAR ---
         boolean hoverSalvar = botaoSalvar.contains(mouseX, mouseY);
-        Texture texSalvar = hoverSalvar ? imagensMenu[8] : imagensMenu[7]; // 7 normal, 8 hover
+        Texture texSalvar = hoverSalvar ? imagensMenu[8] : imagensMenu[7];
 
-        // Efeito de escala suave opcional para o botão salvar (mesma lógica dos ícones do topo)
-        float escalaBotao = hoverSalvar ? 1.05f : 1.0f;
-        float larguraReal = botaoSalvar.width * escalaBotao;
-        float alturaReal = botaoSalvar.height * escalaBotao;
-        float posX = botaoSalvar.x - (larguraReal - botaoSalvar.width) / 2;
-        float posY = botaoSalvar.y - (alturaReal - botaoSalvar.height) / 2;
+        float escalaSalvar = hoverSalvar ? 1.05f : 1.0f;
+        float wS = botaoSalvar.width * escalaSalvar;
+        float hS = botaoSalvar.height * escalaSalvar;
+        float xS = botaoSalvar.x - (wS - botaoSalvar.width) / 2;
+        float yS = botaoSalvar.y - (hS - botaoSalvar.height) / 2;
 
-        batch.draw(texSalvar, posX, posY, larguraReal, alturaReal);
+        batch.draw(texSalvar, xS, yS, wS, hS);
+
+        // --- DESENHO DO BOTÃO EXIT ---
+        boolean hoverExit = botaoExit.contains(mouseX, mouseY);
+        Texture texExit = hoverExit ? imagensMenu[9] : imagensMenu[10];
+
+        // CORREÇÃO AQUI: Criamos variáveis exclusivas para a escala do Exit
+        float escalaExit = hoverExit ? 1.05f : 1.0f;
+        float wE = botaoExit.width * escalaExit;
+        float hE = botaoExit.height * escalaExit;
+        float xE = botaoExit.x - (wE - botaoExit.width) / 2;
+        float yE = botaoExit.y - (hE - botaoExit.height) / 2;
+
+        batch.draw(texExit, xE, yE, wE, hE);
     }
 
     public void renderShapes(float mouseX, float mouseY) {
@@ -154,6 +163,13 @@ public class PopupConfig {
 
         boolean hoverSalvar = botaoSalvar.contains(mouseX, mouseY);
         if (hoverSalvar) {
+            shapeRenderer.setColor(COR_BOTAO_HOVER);
+        } else {
+            shapeRenderer.setColor(COR_BOTAO);
+        }
+
+        boolean hoverExit = botaoExit.contains(mouseX, mouseY);
+        if(hoverExit) {
             shapeRenderer.setColor(COR_BOTAO_HOVER);
         } else {
             shapeRenderer.setColor(COR_BOTAO);
@@ -199,8 +215,7 @@ public class PopupConfig {
 
 
         }
-
-        // CÓDIGO DO DROPDOWN REMOVIDO DAQUI
+        renderDropdownFundo(shapeRenderer, mouseX, mouseY);
         shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
@@ -215,6 +230,9 @@ public class PopupConfig {
 
         // Botão salvar
         if (botaoSalvar.contains(mouse.x, mouse.y)) return true;
+        if (botaoExit.contains(mouse.x, mouse.y)) return true;
+
+        // Botões de opções (slider, toggle, etc)
 
         // Opções (slider, toggle, etc)
         List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
@@ -311,6 +329,8 @@ public class PopupConfig {
 
         // Botão salvar
         if (botaoSalvar.contains(mouse.x, mouse.y)) return true;
+        if (botaoExit.contains(mouse.x, mouse.y)) return true;
+
 
         // Opções (slider, toggle, etc)
         List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
@@ -340,6 +360,8 @@ public class PopupConfig {
     public void handleInput(float mouseX, float mouseY) {
         if (!aberto) return;
 
+        this.mouse.set(mouseX, mouseY);
+
         // CLIQUE NO BOTÃO SALVAR
         if (Gdx.input.justTouched() && botaoSalvar.contains(mouseX, mouseY)) {
             ConfigManager.salvar();
@@ -350,6 +372,10 @@ public class PopupConfig {
             return;
         }
 
+        if (Gdx.input.justTouched() && botaoExit.contains(mouseX, mouseY)) {
+            Gdx.app.exit();
+        }
+
         if (Gdx.input.justTouched()) {
             for (int i = 0; i < opcoesMenu.length; i++) {
                 if (opcoesMenu[i].contains(mouseX, mouseY)) {
@@ -358,12 +384,9 @@ public class PopupConfig {
             }
         }
 
+        OpcaoConfig dropdownAberto = null;
         List<OpcaoConfig> lista = opcoes.get(tipoSelecionado);
         if (lista == null) return;
-
-        atualizarAreasOpcoes(lista);
-
-        OpcaoConfig dropdownAberto = null;
         for (OpcaoConfig op : lista) {
             if (op.tipo == TipoOpcao.DROPDOWN && op.aberto) {
                 dropdownAberto = op;
@@ -371,27 +394,10 @@ public class PopupConfig {
             }
         }
 
+        atualizarAreasOpcoes(lista);
+
         if (dropdownAberto != null) {
-            boolean clicouEmOpcao = false;
-            for (int j = 0; j < dropdownAberto.opcoes.length; j++) {
-                float dropdownWidth = 200;
-                float dropdownX = dropdownAberto.area.x + dropdownAberto.area.width - dropdownWidth - 20;
-                Rectangle r = new Rectangle(dropdownX, dropdownAberto.area.y - (j + 1) * 50, dropdownWidth, 50);
-
-                if (Gdx.input.justTouched() && r.contains(mouseX, mouseY)) {
-                    dropdownAberto.selecionado = j;
-                    dropdownAberto.aberto = false;
-                    clicouEmOpcao = true;
-
-                    // Apenas atualiza a variável na memória, não aplica no jogo ainda!
-                    if (dropdownAberto.texto.equalsIgnoreCase("Resolution")) {
-                        ConfigManager.resolucao = dropdownAberto.opcoes[j];
-                    } else if (dropdownAberto.texto.equalsIgnoreCase("Exibition Mode")) {
-                        ConfigManager.isFullscreen = (j == 1);
-                    }
-                }
-            }
-            if (Gdx.input.justTouched() && !clicouEmOpcao) dropdownAberto.aberto = false;
+            processarCliqueDropdown(dropdownAberto, mouseX, mouseY);
             return;
         }
 
@@ -406,10 +412,10 @@ public class PopupConfig {
                         if (op.texto.equalsIgnoreCase("Show FPS")) ConfigManager.showFps = op.estado;
                         if (op.texto.equalsIgnoreCase("Map Effects")) ConfigManager.mapEffects = op.estado;
                         // Sincroniza IMEDIATAMENTE com o ConfigManager para teste em tempo real
-                        if (op.texto.equals("Invert Camera-X-Asis")) ConfigManager.invertCameraX = op.estado;
-                        if (op.texto.equals("Invert Camera-Y-Asis")) ConfigManager.invertCameraY = op.estado;
-                        if (op.texto.equals("Invert Mouse-X-Asis")) ConfigManager.invertMouseX = op.estado;
-                        if (op.texto.equals("Invert Mouse-Y-Asis")) ConfigManager.invertMouseY = op.estado;
+                        if (op.texto.equals("Invert Camera-X-Axis")) ConfigManager.invertCameraX = op.estado;
+                        if (op.texto.equals("Invert Camera-Y-Axis")) ConfigManager.invertCameraY = op.estado;
+                        if (op.texto.equals("Invert Mouse-X-Axis")) ConfigManager.invertMouseX = op.estado;
+                        if (op.texto.equals("Invert Mouse-Y-Axis")) ConfigManager.invertMouseY = op.estado;
                         break;
                     case SLIDER:
                         op.arrastando = true;
@@ -445,6 +451,27 @@ public class PopupConfig {
                     }
                 }
             }
+        }
+    }
+
+    private void processarCliqueDropdown(OpcaoConfig op, float mx, float my) {
+        if (Gdx.input.justTouched()) {
+            float dropdownWidth = 200;
+            float dx = op.area.x + op.area.width - dropdownWidth - 20;
+
+            boolean clicouEmAlgo = false;
+            for (int j = 0; j < op.opcoes.length; j++) {
+                Rectangle r = new Rectangle(dx, op.area.y - (j + 1) * 50, dropdownWidth, 50);
+                if (r.contains(mx, my)) {
+                    op.selecionado = j;
+                    op.aberto = false;
+                    clicouEmAlgo = true;
+                    // Sincroniza com ConfigManager
+                    if (op.texto.contains("Resolution")) ConfigManager.resolucao = op.opcoes[j];
+                    if (op.texto.contains("Mode")) ConfigManager.isFullscreen = (j == 1);
+                }
+            }
+            if (!clicouEmAlgo) op.aberto = false; // Fecha se clicar fora
         }
     }
 
@@ -686,13 +713,22 @@ public class PopupConfig {
             );
         }
 
-        float larguraSalvar = 250; // Ajuste conforme o tamanho da sua PNG
-        float alturaSalvar = 80;   // Ajuste conforme o tamanho da sua PNG
+        float larguraSalvar = 300;
+        float alturaSalvar = 80;
         botaoSalvar = new Rectangle(
-            areaPopup.x + (areaPopup.width - larguraSalvar) / 2,
+            areaPopup.x + (areaPopup.width - larguraSalvar) / 3f,
             areaPopup.y + 40,
             larguraSalvar,
             alturaSalvar
+        );
+
+        float larguraExit = 300;
+        float alturaExit = 80;
+        botaoExit = new Rectangle(
+            areaPopup.x + (areaPopup.width - larguraExit) / 1.4f,
+            areaPopup.y + 40,
+            larguraExit,
+            alturaExit
         );
     }
 
@@ -705,5 +741,9 @@ public class PopupConfig {
 
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+    }
+
+    public void dispose() {
+        shapeRenderer.dispose();
     }
 }
