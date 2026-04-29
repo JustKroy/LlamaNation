@@ -466,9 +466,31 @@ public class PopupConfig {
                     op.selecionado = j;
                     op.aberto = false;
                     clicouEmAlgo = true;
-                    // Sincroniza com ConfigManager
-                    if (op.texto.contains("Resolution")) ConfigManager.resolucao = op.opcoes[j];
-                    if (op.texto.contains("Mode")) ConfigManager.isFullscreen = (j == 1);
+
+                    boolean precisaAplicarVideo = false;
+
+                    // 1. Sincroniza com ConfigManager na memória
+                    if (op.texto.equalsIgnoreCase("Resolution")) {
+                        ConfigManager.resolucao = op.opcoes[j];
+                        precisaAplicarVideo = true;
+                    } else if (op.texto.equalsIgnoreCase("Exibition Mode")) {
+                        ConfigManager.isFullscreen = (j == 1);
+                        precisaAplicarVideo = true;
+                    }
+
+                    // 2. APLICA A RESOLUÇÃO IMEDIATAMENTE (Preview)
+                    if (precisaAplicarVideo) {
+                        try {
+                            String[] res = ConfigManager.resolucao.split("x");
+                            int w = Integer.parseInt(res[0]);
+                            int h = Integer.parseInt(res[1]);
+
+                            // Aplica a janela/fullscreen na hora
+                            ConfigManager.aplicarResolucao(w, h, ConfigManager.isFullscreen);
+                        } catch (Exception e) {
+                            System.out.println("Erro ao testar resolução: " + e.getMessage());
+                        }
+                    }
                 }
             }
             if (!clicouEmAlgo) op.aberto = false; // Fecha se clicar fora
@@ -634,19 +656,19 @@ public class PopupConfig {
         // GERAL
         List<OpcaoConfig> geral = new ArrayList<>();
 
-        OpcaoConfig invCamX = criarToggle("Invert Camera-X-Asis");
+        OpcaoConfig invCamX = criarToggle("Invert Camera-X-Axis");
         invCamX.estado = ConfigManager.invertCameraX; // Puxa do ConfigManager
         geral.add(invCamX);
 
-        OpcaoConfig invCamY = criarToggle("Invert Camera-Y-Asis");
+        OpcaoConfig invCamY = criarToggle("Invert Camera-Y-Axis");
         invCamY.estado = ConfigManager.invertCameraY;
         geral.add(invCamY);
 
-        OpcaoConfig invMouseX = criarToggle("Invert Mouse-X-Asis");
+        OpcaoConfig invMouseX = criarToggle("Invert Mouse-X-Axis");
         invMouseX.estado = ConfigManager.invertMouseX;
         geral.add(invMouseX);
 
-        OpcaoConfig invMouseY = criarToggle("Invert Mouse-Y-Asis");
+        OpcaoConfig invMouseY = criarToggle("Invert Mouse-Y-Axis");
         invMouseY.estado = ConfigManager.invertMouseY;
         geral.add(invMouseY);
 
