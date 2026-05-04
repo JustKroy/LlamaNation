@@ -86,6 +86,10 @@
             scaleAtual = 1.0f;
             alpha = 0f;
             HoverAlpha = 0f;
+            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
+            fboTexture = fbo.getColorBufferTexture();
+            fboTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
 
             this.fonte = game.fonte;
             this.fonteTitulo = game.fonteTitulo;
@@ -130,7 +134,7 @@
             btnClasse = new Botao(
                 Dropdown[baseIndexPrincipal + 1], // Normal com Seta
                 Dropdown[baseIndexPrincipal + 2], // Hover com Seta
-                100, 850, 300, 80
+                100, 850, 300, 80, game.somClique
             );
 
             HeroClasse[] classes = HeroClasse.values();
@@ -145,7 +149,8 @@
                     100,
                     850 - (i + 1) * 80,
                     300,
-                    80
+                    80,
+                    game.somClique
                 );
             }
 
@@ -176,30 +181,29 @@
                     new Texture("Back_Button.png"),
                     //hover
                     new Texture("Back_Button.png"),
-                    20,975,180,80
+                    20,975,180,80, game.somClique
                 );
 
                 //Select
                 HUDbtn[1] = new Botao(
                     new Texture("Select_Button.png"),
                     new Texture("Select_ButtonHover.png"),
-                    1000, 430, 400, 100
+                    1000, 430, 400, 100, game.somClique
                 );
 
                 //Skins
                 HUDbtn[2] = new Botao(
                     new Texture("Skins_Button.png"),
                     new Texture("Skins_ButtonHover.png"),
-                    850, 430, 100, 100
+                    850, 430, 100, 100, game.somClique
                 );
 
                 //Infos
                 HUDbtn[3] = new Botao(
                     new Texture("Infos_Button.png"),
                     new Texture("Infos_ButtonHover.png"),
-                    700, 430, 100, 100
+                    700, 430, 100, 100, game.somClique
                 );
-            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, 1920, 1080, false);
             //--------- SHADER ---------)
             ShaderProgram.pedantic = false;
 
@@ -298,7 +302,7 @@
                 float x = 20 + (i % 2) * 250;
                 float y = 580 - (i / 2) * 250;
 
-                botoesHerois[i] = new Botao(texturaFrame, texturaFrame, x, y, 200, 200);
+                botoesHerois[i] = new Botao(texturaFrame, texturaFrame, x, y, 200, 200, game.somClique);
             }
 
             // Atualiza padrão da classe
@@ -504,6 +508,9 @@
             viewport.apply();
             batch.setProjectionMatrix(viewport.getCamera().combined);
 
+            float offsetX = (posMouse.x - 960) * 0.01f;
+            float offsetY = (posMouse.y - 540) * 0.01f;
+
             // --- 2. LÓGICA DE MOUSE CENTRALIZADA (ConfigManager) ---
             Vector2 mouseCru = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
@@ -554,25 +561,38 @@
                 if (scaleAtual > 1f) scaleAtual = 1f;
             }
 
+            // --- 10. TRATAMENTO DE CLIQUES ---
+            if (clicou) {
+                tratarCliquesHeroScreen();
+            }
+
             // --- 5. RENDERIZAÇÃO DO FUNDO (PARALLAX COM MOUSE PROCESSADO) ---
-            fbo.begin();
-            ScreenUtils.clear(0, 0, 0, 1);
-            batch.begin();
-            // O efeito de parallax agora segue a lógica de inversão do ConfigManager
-            float offsetX = (posMouse.x - 960) * 0.01f;
-            float offsetY = (posMouse.y - 540) * 0.01f;
-            batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
-            batch.end();
-            fbo.end();
+            if (skinsPanel.isAberto()) {
 
-            fboTexture = fbo.getColorBufferTexture();
-            fboTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+                // 1. Renderiza no FBO
+                fbo.begin();
+                ScreenUtils.clear(0, 0, 0, 1);
 
-            batch.setShader(blurShader);
-            batch.begin();
-            batch.draw(fboTexture, 0, 1080, 1920, -1080); // Corrigindo inversão Y do FBO
-            batch.end();
-            batch.setShader(null);
+                batch.begin();
+                batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
+                batch.end();
+
+                fbo.end();
+
+                // 2. Aplica blur
+                batch.setShader(blurShader);
+                batch.begin();
+                batch.draw(fboTexture, 0, 1080, 1920, -1080);
+                batch.end();
+                batch.setShader(null);
+
+            } else {
+
+                // Normal (SEM shader)
+                batch.begin();
+                batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
+                batch.end();
+            }
 
             // --- 6. DESENHO DO HERÓI E GLOW ---
             batch.begin();
@@ -609,19 +629,6 @@
             }
             batch.end();
 
-            // --- 9. PAINEL DE SKINS ---
-            if (skinsPanel.isAberto()) {
-                skinsPanel.renderShapes(viewport.getCamera().combined);
-                batch.begin();
-                skinsPanel.render(batch);
-                batch.end();
-            }
-
-            // --- 10. TRATAMENTO DE CLIQUES ---
-            if (clicou) {
-                tratarCliquesHeroScreen();
-            }
-
             // --- 11. CURSOR FINAL ---
             if(Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.iOS) {
                 CursorManager.aplicarCursorInvisivel();
@@ -653,7 +660,7 @@
             HoverAlpha = Math.max(0f, Math.min(1f, HoverAlpha));
 
             // Desenho do Herói (Sombra + Sprite)
-            batch.setColor(0f, 0f, 0f, 0.25f * (0.5f + HoverAlpha * 0.5f));
+            batch.setColor(0f, 0f, 0f, 0.35f * (0.5f + HoverAlpha * 0.5f));
             if (heroAnimacaoAtual != null) {
                 batch.draw(heroAnimacaoAtual.getKeyFrame(tempoAnimacao, true), x + 10, yFinal - 10, larguraEscalada, alturaEscalada);
                 batch.setColor(1, 1, 1, alpha);
@@ -676,7 +683,7 @@
 
         private void tratarCliquesHeroScreen() {
             // Back Button
-            if (HUDbtn[0].foiClicado(posMouse, true)) {
+            if (HUDbtn[0].foiClicado(posMouse)) {
                 game.setScreen(new MenuScreen(game));
                 return;
             }
@@ -686,7 +693,7 @@
             labelLlama[] labelsAtuais = labelPorLlama[getIndiceClasse()];
 
             for (int i = 0; i < botoesHerois.length; i++) {
-                if (botoesHerois[i].foiClicado(posMouse, true)) {
+                if (botoesHerois[i].foiClicado(posMouse)) {
                     for (Botao btn : botoesHerois) btn.setSelecionado(false);
                     botoesHerois[i].setSelecionado(true);
                     botoesHerois[i].setCorBorda(getCorBordaClasse());
@@ -697,17 +704,17 @@
             }
 
             // Botões de Painel
-            if (HUDbtn[2].foiClicado(posMouse, true)) skinsPanel.toggleSkins();
-            if (HUDbtn[3].foiClicado(posMouse, true)) skinsPanel.toggleInfos();
+            if (HUDbtn[2].foiClicado(posMouse)) skinsPanel.toggleSkins();
+            if (HUDbtn[3].foiClicado(posMouse)) skinsPanel.toggleInfos();
 
             if (skinsPanel.isAberto()) skinsPanel.detectarClique(posMouse.x, posMouse.y);
 
             // Dropdown de Classe
-            if (btnClasse.foiClicado(posMouse, true)) menuAberto = !menuAberto;
+            if (btnClasse.foiClicado(posMouse)) menuAberto = !menuAberto;
 
             if (menuAberto) {
                 for (int i = 0; i < HeroClasse.values().length; i++) {
-                    if (opcoesClasse[i].foiClicado(posMouse, true)) {
+                    if (opcoesClasse[i].foiClicado(posMouse)) {
                         classeSelecionada = HeroClasse.values()[i];
                         setBotoesClasseAtual();
                         menuAberto = false;

@@ -1,5 +1,6 @@
 package com.TowerDefense.jogo;
 
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -16,13 +17,16 @@ public class Botao {
     private float scaleAtual = 1.0f;
     private float alpha = 0f;
     private boolean selecionado = false; //Variável que permite mudar o estado do botão
+    private Sound somClique;
 
 
-    public Botao(Texture imagem, Texture hover, float x, float y, float largura, float altura) {
+
+    public Botao(Texture imagem, Texture hover, float x, float y, float largura, float altura, Sound somClique) {
         this.imagem = imagem;
         this.hover = hover;
         this.area = new Rectangle(x, y, largura, altura);
-        corBorda = new Color(1,1,1,1);
+        this.corBorda = new Color(1,1,1,1);
+        this.somClique = somClique;
     }
 
     public Rectangle getArea() {
@@ -49,8 +53,14 @@ public class Botao {
         return area.contains(mouse.x, mouse.y);
     }
 
-    public boolean foiClicado(Vector2 mouse, boolean clicou) {
-        return estaSobre(mouse) && clicou;
+    public boolean foiClicado(Vector2 mouse) {
+        if (estaSobre(mouse) && Gdx.input.justTouched()) {
+            if (somClique != null) {
+                somClique.play(1.0f);
+            }
+            return true;
+        }
+        return false;
     }
 
     public void atualizarCursor(Vector2 mouse) {
@@ -69,7 +79,7 @@ public class Botao {
         // 1. ANIMAÇÕES DE ESCALA:
         // Se estiver selecionado (aba aberta), ele trava afundado em 0.95f.
         // Se não, segue a lógica normal de clique e hover.
-        boolean clicando = estaSobre(mouse) && Gdx.input.isTouched();
+        boolean clicando = false;
         float targetScale = selecionado ? 0.95f : (clicando ? 0.97f : (hoverAtivo ? 1.05f : 1.0f));
         scaleAtual += (targetScale - scaleAtual) * 0.15f;
 
@@ -107,6 +117,7 @@ public class Botao {
     }
 
     public void dispose() {
+        // NÃO dispose som aqui
     }
 
 }

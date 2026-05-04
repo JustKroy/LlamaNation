@@ -4,6 +4,7 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -31,6 +32,8 @@ public class MenuScreen extends ScreenAdapter {
     private FrameBuffer fbo;
     private Texture fboTexture;
     private ShaderProgram blurShader;
+    private Music BackgroundMusic;
+
 
     public MenuScreen(Main game) {
         this.game = game;
@@ -39,6 +42,10 @@ public class MenuScreen extends ScreenAdapter {
         this.viewport = new StretchViewport(1920, 1080);
         this.fbo = game.fbo;
         this.blurShader = game.blurShader;
+        BackgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("musics/BackgroundMenuScreen.mp3"));
+        BackgroundMusic.setLooping(true);
+        BackgroundMusic.setVolume(0.5f);
+        BackgroundMusic.play();
 
         popup = new PopupConfig(game);
 
@@ -47,10 +54,10 @@ public class MenuScreen extends ScreenAdapter {
 
     private void inicializarComponentes() {
         HUDbtn = new Botao[4];
-        HUDbtn[0] = new Botao(new Texture("Play_Button.png"), new Texture("Play_ButtonHover.png"), 760, 720, 400, 100);
-        HUDbtn[1] = new Botao(new Texture("Heroes_Button.png"), new Texture("Heroes_ButtonHover.png"), 760, 520, 400, 100);
-        HUDbtn[2] = new Botao(new Texture("Settings_Button.png"), new Texture("Settings_Button.png"), 1800, 950, 100, 100);
-        HUDbtn[3] = new Botao(new Texture("Shop_Button.png"), new Texture("Shop_ButtonHover.png"), 760, 320, 400, 100);
+        HUDbtn[0] = new Botao(new Texture("Play_Button.png"), new Texture("Play_ButtonHover.png"), 760, 720, 400, 100, game.somClique);
+        HUDbtn[1] = new Botao(new Texture("Heroes_Button.png"), new Texture("Heroes_ButtonHover.png"), 760, 520, 400, 100, game.somClique);
+        HUDbtn[2] = new Botao(new Texture("Settings_Button.png"), new Texture("Settings_Button.png"), 1800, 950, 100, 100, game.somClique);
+        HUDbtn[3] = new Botao(new Texture("Shop_Button.png"), new Texture("Shop_ButtonHover.png"), 760, 320, 400, 100, game.somClique);
 
         HUDimg = new Texture[5];
         HUDimg[0] = new Texture("MenuScreen_Background.png");
@@ -68,7 +75,6 @@ public class MenuScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
-        boolean clicou = Gdx.input.justTouched();
         CursorManager.setDefault();
 
         viewport.apply();
@@ -106,14 +112,13 @@ public class MenuScreen extends ScreenAdapter {
             btn.atualizarCursor(posMouse);
         }
 
-        if (clicou) {
-            if (HUDbtn[2].foiClicado(posMouse, clicou)) {
-                popup.toggle();
-            } else if (!popup.isAberto()) {
-                if (HUDbtn[0].foiClicado(posMouse, clicou)) game.setScreen(new TelaSelecaoDeck(game));
-                if (HUDbtn[1].foiClicado(posMouse, clicou)) game.setScreen(new HeroScreen(game));
-            }
+        if (HUDbtn[2].foiClicado(posMouse)) {
+            popup.toggle();
+        } else if (!popup.isAberto()) {
+            if (HUDbtn[0].foiClicado(posMouse)) game.setScreen(new TelaSelecaoDeck(game));
+            if (HUDbtn[1].foiClicado(posMouse)) game.setScreen(new HeroScreen(game));
         }
+
 
         // --- DESENHO DO FUNDO (PARALLAX) ---
         fbo.begin();
@@ -205,5 +210,6 @@ public class MenuScreen extends ScreenAdapter {
         blurShader.dispose();
         for(Botao btn : HUDbtn) btn.dispose();
         for(Texture t : HUDimg) t.dispose();
+        BackgroundMusic.dispose();
     }
 }

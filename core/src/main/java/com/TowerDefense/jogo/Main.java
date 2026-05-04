@@ -4,6 +4,9 @@ import static com.TowerDefense.jogo.ConfigManager.isFullscreen;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -22,6 +25,10 @@ public class Main extends Game {
     public ShaderProgram blurShader;
     public FrameBuffer fbo;
     public SpriteBatch batch;
+    public Music BackgroundMusic;
+    public Sound somClique;
+    public AssetManager manager;
+
 
     // --- MÉTODO CREATE (O "Start" do Motor) ---
     // É chamado automaticamente pelo sistema apenas UMA VEZ, assim que você abre o jogo.
@@ -29,6 +36,18 @@ public class Main extends Game {
     public void create() {
         ConfigManager.construtor();
         this.batch = new SpriteBatch();
+        manager = new AssetManager();
+
+        BackgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("musics/BackgroundMenuScreen.mp3"));
+        BackgroundMusic.setLooping(true);
+        BackgroundMusic.setVolume(0.5f);
+        BackgroundMusic.play();
+
+        manager.load("sounds/somClique.wav", Sound.class);
+        manager.finishLoading();
+        this.somClique = manager.get("sounds/somClique.wav", Sound.class);
+        somClique.play(0.01f);
+
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Raleway-Regular.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter param = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -66,7 +85,6 @@ public class Main extends Game {
 
         ConfigManager.aplicarTudo();
         popup = new PopupConfig(this);
-        this.setScreen(new MenuScreen(this));
 
         // Define a tela inicial como o Menu
 
@@ -107,5 +125,10 @@ public class Main extends Game {
 
             batch.end();
         }
+    }
+
+    @Override
+    public void dispose() {
+        manager.dispose();
     }
 }
