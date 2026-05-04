@@ -69,7 +69,11 @@ public class ConfigManager {
         prefs.flush(); // OBRIGATÓRIO: Grava as mudanças no arquivo físico
     }
 
-    // 3. Aplica as configurações de VÍDEO
+    //============================================
+    // ------------- VÍDEO ---------------
+    //============================================
+
+    // -------------------- RESOLUÇÃO ------------------
     public static void aplicarResolucao(int largura, int altura, boolean isFullscreen) {
         if (isFullscreen) {
             // TELA CHEIA SEM BORDAS (ALT+TAB INSTANTÂNEO)
@@ -88,6 +92,11 @@ public class ConfigManager {
         }
     }
 
+
+    //============================================
+    // ------------- AUDIO ---------------
+    //============================================
+
     // 4. Aplica as configurações de ÁUDIO
     public static void aplicarAudio() {
         // Como o volume é de 0.0 a 1.0, se estiver mutado, passamos 0.
@@ -95,6 +104,10 @@ public class ConfigManager {
 
         System.out.println("Áudio aplicado: Volume = " + (volumeReal * 100) + "%");
     }
+
+    //============================================
+    // ------------- GERAL ---------------
+    //============================================
 
     // 5. Aplica as configurações GERAIS
     public static void aplicarGeral() {

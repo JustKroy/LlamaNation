@@ -366,6 +366,7 @@ public class PopupConfig {
         if (Gdx.input.justTouched() && botaoSalvar.contains(mouseX, mouseY)) {
             ConfigManager.salvar();
             ConfigManager.aplicarTudo();
+
             atualizarLayout();
             System.out.println("Configurações salvas e aplicadas com sucesso!");
             toggle();
