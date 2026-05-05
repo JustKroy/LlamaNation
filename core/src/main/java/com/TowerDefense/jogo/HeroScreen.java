@@ -503,18 +503,15 @@
 
         @Override
         public void render(float delta) {
-            // 1. LIMPEZA E CÂMERA
+
+            // --- 1. LIMPAR TELA ---
             ScreenUtils.clear(0.1f, 0.1f, 0.1f, 1);
             viewport.apply();
             batch.setProjectionMatrix(viewport.getCamera().combined);
 
-            float offsetX = (posMouse.x - 960) * 0.01f;
-            float offsetY = (posMouse.y - 540) * 0.01f;
-
-            // --- 2. LÓGICA DE MOUSE CENTRALIZADA (ConfigManager) ---
+            // --- 2. MOUSE ---
             Vector2 mouseCru = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
-            // Atualizamos a variável global posMouse com os eixos corrigidos
             posMouse.set(
                 ConfigManager.processarMouseX(mouseCru.x),
                 ConfigManager.processarMouseY(mouseCru.y)
@@ -522,116 +519,97 @@
 
             boolean clicou = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
 
-            // --- 3. ATUALIZAÇÃO DE CURSOR E HOVERS ---
+            // --- 3. CURSOR ---
             CursorManager.setDefault();
 
-            // Botões de Heróis
-            for (Botao btn : botoesHerois) {
-                if (btn != null) btn.atualizarCursor(posMouse);
-            }
-
-            // Botões da HUD (Back, Select, Skins, Infos)
-            for (Botao btn : HUDbtn) {
-                btn.atualizarCursor(posMouse);
-            }
-
-            // Botão de Classe (Dropdown)
+            for (Botao btn : botoesHerois) if (btn != null) btn.atualizarCursor(posMouse);
+            for (Botao btn : HUDbtn) btn.atualizarCursor(posMouse);
             btnClasse.atualizarCursor(posMouse);
 
-            // Opções do Dropdown (se aberto)
             if (menuAberto) {
-                for (Botao b : opcoesClasse) {
-                    b.atualizarCursor(posMouse);
-                }
+                for (Botao b : opcoesClasse) b.atualizarCursor(posMouse);
             }
 
-            // Painel de Skins/Infos
             if (skinsPanel.isAberto() && skinsPanel.estaSobre(posMouse)) {
                 CursorManager.setHover();
             }
 
-            // --- 4. LÓGICA DE ANIMAÇÃO E FADE ---
+            // --- 4. ANIMAÇÃO ---
             tempoAnimacao += delta;
-            if (alpha < 1f) {
-                alpha += delta * 3f;
-                if (alpha > 1f) alpha = 1f;
-            }
-            if (scaleAtual < 1f) {
-                scaleAtual += delta * 2.5f;
-                if (scaleAtual > 1f) scaleAtual = 1f;
-            }
 
-            // --- 10. TRATAMENTO DE CLIQUES ---
+            if (alpha < 1f) alpha = Math.min(1f, alpha + delta * 3f);
+            if (scaleAtual < 1f) scaleAtual = Math.min(1f, scaleAtual + delta * 2.5f);
+
+            // --- 5. CLIQUES ---
             if (clicou) {
                 tratarCliquesHeroScreen();
             }
 
-            // --- 5. RENDERIZAÇÃO DO FUNDO (PARALLAX COM MOUSE PROCESSADO) ---
-            if (skinsPanel.isAberto()) {
+            // --- 6. FUNDO ---
+            float offsetX = (posMouse.x - 960) * 0.01f;
+            float offsetY = (posMouse.y - 540) * 0.01f;
 
-                // 1. Renderiza no FBO
-                fbo.begin();
-                ScreenUtils.clear(0, 0, 0, 1);
-
-                batch.begin();
-                batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
-                batch.end();
-
-                fbo.end();
-
-                // 2. Aplica blur
-                batch.setShader(blurShader);
-                batch.begin();
-                batch.draw(fboTexture, 0, 1080, 1920, -1080);
-                batch.end();
-                batch.setShader(null);
-
-            } else {
-
-                // Normal (SEM shader)
-                batch.begin();
-                batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
-                batch.end();
-            }
-
-            // --- 6. DESENHO DO HERÓI E GLOW ---
             batch.begin();
+            batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
+            batch.end();
+
+            // --- 7. HERÓI + LABEL ---
+            batch.begin();
+
             renderizarHeroiComGlow(delta);
+
             if (labelAtual != null) {
                 batch.draw(labelAtual, 700, 900, 700, 150);
             }
+
             batch.end();
 
-            // --- 7. SHAPES (SOMBRAS) ---
-            shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
-            Gdx.gl.glEnable(GL20.GL_BLEND);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            renderizarSombrasBotoes();
-            shapeRenderer.end();
-
-            // --- 8. DESENHO DE BOTÕES E UI ---
+            // --- 8. BOTÕES ---
             batch.begin();
+
             for (Botao btn : botoesHerois) btn.Exibir(batch, posMouse);
             for (Botao btn : HUDbtn) btn.Exibir(batch, posMouse);
 
-            // Desenha o botão principal e o texto da classe selecionada nele
             btnClasse.Exibir(batch, posMouse);
-            fonteNormal.draw(batch, classeSelecionada.name(),
-                btnClasse.getArea().x + 20, btnClasse.getArea().y + 50);
 
-            // Desenha as opções da lista caso o menu esteja aberto
+            // texto da classe
+            fonteNormal.draw(batch, classeSelecionada.name(),
+                btnClasse.getArea().x + 20,
+                btnClasse.getArea().y + 50
+            );
+
             if (menuAberto) {
                 for (int i = 0; i < opcoesClasse.length; i++) {
                     opcoesClasse[i].Exibir(batch, posMouse);
                     fonteNormal.draw(batch, HeroClasse.values()[i].name(),
-                        opcoesClasse[i].getArea().x + 20, opcoesClasse[i].getArea().y + 50);
+                        opcoesClasse[i].getArea().x + 20,
+                        opcoesClasse[i].getArea().y + 50);
                 }
             }
+
             batch.end();
 
+            // --- 9. SOMBRAS ---
+            shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            renderizarSombrasBotoes();
+            shapeRenderer.end();
+
+            // --- 10. PAINEL (SEMPRE POR CIMA) ---
+            if (skinsPanel.isAberto()) {
+                batch.begin();
+                skinsPanel.render(batch);
+                batch.end();
+            }
+
             // --- 11. CURSOR FINAL ---
-            if(Gdx.app.getType() != Application.ApplicationType.Android && Gdx.app.getType() != Application.ApplicationType.iOS) {
+            if (Gdx.app.getType() != Application.ApplicationType.Android &&
+                Gdx.app.getType() != Application.ApplicationType.iOS) {
+
                 CursorManager.aplicarCursorInvisivel();
+
                 batch.begin();
                 CursorManager.desenhar(batch, posMouse);
                 batch.end();

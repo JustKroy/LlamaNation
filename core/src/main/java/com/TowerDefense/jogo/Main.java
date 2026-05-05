@@ -39,14 +39,16 @@ public class Main extends Game {
         manager = new AssetManager();
 
         BackgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("musics/BackgroundMenuScreen.mp3"));
+        ConfigManager.musicaAtual = BackgroundMusic;
+
         BackgroundMusic.setLooping(true);
-        BackgroundMusic.setVolume(0.5f);
+        BackgroundMusic.setVolume(ConfigManager.getVolumeReal());
         BackgroundMusic.play();
 
         manager.load("sounds/somClique.wav", Sound.class);
         manager.finishLoading();
         this.somClique = manager.get("sounds/somClique.wav", Sound.class);
-        somClique.play(0.01f);
+        ConfigManager.tocarEfeito(somClique);
 
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/Raleway-Regular.ttf"));

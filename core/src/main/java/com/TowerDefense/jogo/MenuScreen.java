@@ -32,8 +32,6 @@ public class MenuScreen extends ScreenAdapter {
     private FrameBuffer fbo;
     private Texture fboTexture;
     private ShaderProgram blurShader;
-    private Music BackgroundMusic;
-
 
     public MenuScreen(Main game) {
         this.game = game;
@@ -42,10 +40,6 @@ public class MenuScreen extends ScreenAdapter {
         this.viewport = new StretchViewport(1920, 1080);
         this.fbo = game.fbo;
         this.blurShader = game.blurShader;
-        BackgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("musics/BackgroundMenuScreen.mp3"));
-        BackgroundMusic.setLooping(true);
-        BackgroundMusic.setVolume(0.5f);
-        BackgroundMusic.play();
 
         popup = new PopupConfig(game);
 
@@ -210,6 +204,5 @@ public class MenuScreen extends ScreenAdapter {
         blurShader.dispose();
         for(Botao btn : HUDbtn) btn.dispose();
         for(Texture t : HUDimg) t.dispose();
-        BackgroundMusic.dispose();
     }
 }

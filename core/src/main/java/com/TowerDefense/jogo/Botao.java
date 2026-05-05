@@ -56,7 +56,7 @@ public class Botao {
     public boolean foiClicado(Vector2 mouse) {
         if (estaSobre(mouse) && Gdx.input.justTouched()) {
             if (somClique != null) {
-                somClique.play(1.0f);
+                somClique.play(0.3f);
             }
             return true;
         }

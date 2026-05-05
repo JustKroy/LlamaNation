@@ -409,7 +409,10 @@ public class PopupConfig {
                 switch (op.tipo) {
                     case TOGGLE:
                         op.estado = !op.estado;
-                        if (op.texto.equalsIgnoreCase("Mute")) ConfigManager.mute = op.estado;
+                        if (op.texto.equalsIgnoreCase("Mute")) {
+                            ConfigManager.mute = op.estado;
+                            ConfigManager.aplicarAudio();
+                        }
                         if (op.texto.equalsIgnoreCase("Show FPS")) ConfigManager.showFps = op.estado;
                         if (op.texto.equalsIgnoreCase("Map Effects")) ConfigManager.mapEffects = op.estado;
                         // Sincroniza IMEDIATAMENTE com o ConfigManager para teste em tempo real
@@ -433,15 +436,20 @@ public class PopupConfig {
 
             if (!Gdx.input.isTouched() && op.arrastando) {
                 op.arrastando = false;
-                if (op.texto.equalsIgnoreCase("Volume")) ConfigManager.volume = op.valor;
             }
 
             if (op.tipo == TipoOpcao.SLIDER && op.arrastando) {
                 float barWidth = 150;
                 float paddingRight = 20;
                 float barX = op.area.x + op.area.width - barWidth - paddingRight;
+
                 op.valor = (mouseX - barX) / barWidth;
                 op.valor = Math.max(0f, Math.min(1f, op.valor));
+
+                if (op.texto.equalsIgnoreCase("Volume")) {
+                    ConfigManager.volume = op.valor;
+                    ConfigManager.aplicarAudio();
+                }
             }
 
             if (op.tipo == TipoOpcao.KEYBIND && op.esperandoTecla) {

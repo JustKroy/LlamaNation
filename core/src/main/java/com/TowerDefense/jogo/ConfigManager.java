@@ -3,6 +3,7 @@ package com.TowerDefense.jogo;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.audio.Music;
 
 public class ConfigManager {
 
@@ -11,6 +12,7 @@ public class ConfigManager {
     // --- VARIÁVEIS DE ÁUDIO ---
     public static float volume;
     public static boolean mute;
+    public static Music musicaAtual;
 
     // --- VARIÁVEIS DE VÍDEO ---
     public static boolean isFullscreen;
@@ -25,7 +27,9 @@ public class ConfigManager {
     public static boolean invertMouseX;
     public static boolean invertMouseY;
 
-    // 1. Inicializa e carrega os dados salvos
+    //============================================
+    // ------------- CONSTRUTOR ---------------
+    //============================================
     public static void construtor() {
         prefs = Gdx.app.getPreferences("TowerDefenseConfigs");
 
@@ -46,7 +50,9 @@ public class ConfigManager {
         Graphics.DisplayMode[] modes = Gdx.graphics.getDisplayModes();
     }
 
-    // 2. Salva os dados no disco
+    //============================================
+    // ------------- SALVAR CONFIGS ---------------
+    //============================================
     public static void salvar() {
         if (prefs == null) {
             Gdx.app.error("CONFIG", "Tentativa de salvar sem carregar o ConfigManager!");
@@ -97,19 +103,39 @@ public class ConfigManager {
     // ------------- AUDIO ---------------
     //============================================
 
-    // 4. Aplica as configurações de ÁUDIO
-    public static void aplicarAudio() {
-        // Como o volume é de 0.0 a 1.0, se estiver mutado, passamos 0.
-        float volumeReal = mute ? 0f : volume;
-
-        System.out.println("Áudio aplicado: Volume = " + (volumeReal * 100) + "%");
+    public static float getVolumeReal() {
+        return mute ? 0f : volume;
     }
+
+    // O facilitador que criamos antes fica ainda mais limpo:
+    public static void tocarEfeito(com.badlogic.gdx.audio.Sound som) {
+        som.play(getVolumeReal());
+    }
+
+    public static void aplicarAudio() {
+        float volumeReal = getVolumeReal();
+
+        if (musicaAtual != null) {
+            if (mute) {
+                musicaAtual.pause(); // ou stop()
+            } else {
+                musicaAtual.setVolume(volumeReal);
+                if (!musicaAtual.isPlaying()) musicaAtual.play();
+            }
+        }
+    }
+
+    public static void aplicarMute(){
+        mute = !mute;
+        salvar();
+        aplicarAudio();
+    }
+
 
     //============================================
     // ------------- GERAL ---------------
     //============================================
 
-    // 5. Aplica as configurações GERAIS
     public static void aplicarGeral() {
 
         System.out.println("Configurações Gerais (Inversões) atualizadas na memória!");
