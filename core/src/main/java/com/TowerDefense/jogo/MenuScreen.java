@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
@@ -24,7 +25,7 @@ public class MenuScreen extends ScreenAdapter {
     private final StretchViewport viewport;
     private Vector2 posMouse = new Vector2();
 
-    private Botao[] HUDbtn;
+    private Array<Botao> HUDbtn;
     private Texture[] HUDimg;
 
     private PopupConfig popup;
@@ -47,18 +48,24 @@ public class MenuScreen extends ScreenAdapter {
     }
 
     private void inicializarComponentes() {
-        HUDbtn = new Botao[4];
-        HUDbtn[0] = new Botao(new Texture("Play_Button.png"), new Texture("Play_ButtonHover.png"), 760, 720, 400, 100, game.somClique);
-        HUDbtn[1] = new Botao(new Texture("Heroes_Button.png"), new Texture("Heroes_ButtonHover.png"), 760, 520, 400, 100, game.somClique);
-        HUDbtn[2] = new Botao(new Texture("Settings_Button.png"), new Texture("Settings_Button.png"), 1800, 950, 100, 100, game.somClique);
-        HUDbtn[3] = new Botao(new Texture("Shop_Button.png"), new Texture("Shop_ButtonHover.png"), 760, 320, 400, 100, game.somClique);
+        HUDbtn = new Array<>();
+        HUDbtn.add(new Botao(Assets.get("Play_Button.png"), Assets.get("Play_ButtonHover.png"), 760, 720, 400, 100, game.somClique));
+        HUDbtn.add(new Botao(Assets.get("Heroes_Button.png"), Assets.get("Heroes_ButtonHover.png"), 760, 520, 400, 100, game.somClique));
+        HUDbtn.add(new Botao(Assets.get("Settings_Button.png"), Assets.get("Settings_Button.png"), 1800, 950, 100, 100, game.somClique));
+        HUDbtn.add(new Botao(Assets.get("Shop_Button.png"), Assets.get("Shop_ButtonHover.png"), 760, 320, 400, 100, game.somClique));
+
+        HUDbtn.get(0).setOnClick(() -> game.setScreen(new TelaSelecaoDeck(game)));
+        HUDbtn.get(1).setOnClick(() -> game.setScreen(new HeroScreen(game)));
+        HUDbtn.get(2).setOnClick(() -> popup.toggle());
+        HUDbtn.get(3).setOnClick(() -> game.setScreen(new ShopScreen(game)));
+
 
         HUDimg = new Texture[5];
-        HUDimg[0] = new Texture("MenuScreen_Background.png");
-        HUDimg[1] = new Texture("Popup_Background.png");
-        HUDimg[2] = new Texture("Painel.jpg");
-        HUDimg[3] = new Texture("Cursor_normal.png");
-        HUDimg[4] = new Texture("Cursor_selected.png");
+        HUDimg[0] = Assets.get("MenuScreen_Background.png");
+        HUDimg[1] = Assets.get("Popup_Background.png");
+        HUDimg[2] = Assets.get("Painel.jpg");
+        HUDimg[3] = Assets.get("Cursor_normal.png");
+        HUDimg[4] = Assets.get("Cursor_selected.png");
     }
 
     @Override
@@ -76,10 +83,12 @@ public class MenuScreen extends ScreenAdapter {
 
         // --- LÓGICA DE MOUSE CENTRALIZADA ---
         // 1. Processamos o Mouse (Aqui ele inverte se a config de mouse mandar)
-        Vector2 mouseCru = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
+        posMouse.set(Gdx.input.getX(), Gdx.input.getY());
+        viewport.unproject(posMouse);
+
         posMouse.set(
-            ConfigManager.processarMouseX(mouseCru.x),
-            ConfigManager.processarMouseY(mouseCru.y)
+            ConfigManager.processarMouseX(posMouse.x),
+            ConfigManager.processarMouseY(posMouse.y)
         );
 
         // 2. Cálculo do Parallax focado APENAS no Cursor Visual (posMouse)
@@ -93,6 +102,8 @@ public class MenuScreen extends ScreenAdapter {
         float offsetX = (posMouse.x - 960) * 0.01f * direcaoCamX;
         float offsetY = (posMouse.y - 540) * 0.01f * direcaoCamY;
 
+        boolean pressionando = Gdx.input.isButtonPressed(Input.Buttons.LEFT); // estado
+
         // LÓGICA DE INPUT
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && popup.isAberto()) {
             popup.toggle();
@@ -102,17 +113,9 @@ public class MenuScreen extends ScreenAdapter {
             popup.handleInput(posMouse.x, posMouse.y);
         }
 
-        for(Botao btn : HUDbtn) {
-            btn.atualizarCursor(posMouse);
+        for (Botao btn : HUDbtn) {
+            btn.atualizar(posMouse, pressionando);
         }
-
-        if (HUDbtn[2].foiClicado(posMouse)) {
-            popup.toggle();
-        } else if (!popup.isAberto()) {
-            if (HUDbtn[0].foiClicado(posMouse)) game.setScreen(new TelaSelecaoDeck(game));
-            if (HUDbtn[1].foiClicado(posMouse)) game.setScreen(new HeroScreen(game));
-        }
-
 
         // --- DESENHO DO FUNDO (PARALLAX) ---
         fbo.begin();
@@ -137,7 +140,7 @@ public class MenuScreen extends ScreenAdapter {
         renderizarSombras();
 
         batch.begin();
-        for (Botao btn : HUDbtn) btn.Exibir(batch, posMouse);
+        for (Botao btn : HUDbtn) btn.Exibir(batch, posMouse, pressionando);
         batch.end();
 
         // --- DESENHO DO POPUP ---
@@ -202,7 +205,5 @@ public class MenuScreen extends ScreenAdapter {
         shapeRenderer.dispose();
         fbo.dispose();
         blurShader.dispose();
-        for(Botao btn : HUDbtn) btn.dispose();
-        for(Texture t : HUDimg) t.dispose();
     }
 }

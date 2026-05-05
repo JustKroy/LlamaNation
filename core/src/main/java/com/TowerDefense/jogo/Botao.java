@@ -18,7 +18,8 @@ public class Botao {
     private float alpha = 0f;
     private boolean selecionado = false; //Variável que permite mudar o estado do botão
     private Sound somClique;
-
+    private Runnable onClick;
+    private boolean estavaPressionado = false;
 
 
     public Botao(Texture imagem, Texture hover, float x, float y, float largura, float altura, Sound somClique) {
@@ -27,6 +28,24 @@ public class Botao {
         this.area = new Rectangle(x, y, largura, altura);
         this.corBorda = new Color(1,1,1,1);
         this.somClique = somClique;
+    }
+
+    public void setOnClick(Runnable action) {
+        this.onClick = action;
+    }
+    public void atualizar(Vector2 mouse, boolean pressionando) {
+        boolean hover = estaSobre(mouse);
+
+        if (hover) {
+            CursorManager.setHover();
+        }
+
+        if (!pressionando && estavaPressionado && hover) {
+            if (somClique != null) ConfigManager.tocarEfeito(somClique);
+            if (onClick != null) onClick.run();
+        }
+
+        estavaPressionado = pressionando;
     }
 
     public Rectangle getArea() {
@@ -53,34 +72,22 @@ public class Botao {
         return area.contains(mouse.x, mouse.y);
     }
 
-    public boolean foiClicado(Vector2 mouse) {
-        if (estaSobre(mouse) && Gdx.input.justTouched()) {
-            if (somClique != null) {
-                somClique.play(0.3f);
-            }
-            return true;
-        }
-        return false;
-    }
-
     public void atualizarCursor(Vector2 mouse) {
         if (area.contains(mouse)) {
             CursorManager.setHover();
         }
     }
 
-    public void Exibir(SpriteBatch batch, Vector2 mouse) {
+    public void Exibir(SpriteBatch batch, Vector2 mouse, boolean clicandoGlobal) {
 
         boolean hoverAtivo = estaSobre(mouse);
+        boolean clicando = hoverAtivo && clicandoGlobal;
+
         Texture texturaAtual = hoverAtivo && hover != null ? hover : imagem;
 
-        if (texturaAtual == null) return;
+        float targetScale = selecionado ? 0.95f :
+            (clicando ? 0.97f : (hoverAtivo ? 1.05f : 1.0f));
 
-        // 1. ANIMAÇÕES DE ESCALA:
-        // Se estiver selecionado (aba aberta), ele trava afundado em 0.95f.
-        // Se não, segue a lógica normal de clique e hover.
-        boolean clicando = false;
-        float targetScale = selecionado ? 0.95f : (clicando ? 0.97f : (hoverAtivo ? 1.05f : 1.0f));
         scaleAtual += (targetScale - scaleAtual) * 0.15f;
 
         alpha += (1f - alpha) * 0.05f;
@@ -117,7 +124,6 @@ public class Botao {
     }
 
     public void dispose() {
-        // NÃO dispose som aqui
     }
 
 }

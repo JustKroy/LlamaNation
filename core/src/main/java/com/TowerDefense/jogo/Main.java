@@ -37,6 +37,8 @@ public class Main extends Game {
         ConfigManager.construtor();
         this.batch = new SpriteBatch();
         manager = new AssetManager();
+        Assets.load();
+        Assets.finish();
 
         BackgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("musics/BackgroundMenuScreen.mp3"));
         ConfigManager.musicaAtual = BackgroundMusic;

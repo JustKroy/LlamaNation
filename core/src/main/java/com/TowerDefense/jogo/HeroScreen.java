@@ -21,6 +21,7 @@
     import com.badlogic.gdx.scenes.scene2d.Stage;
     import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
     import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+    import com.badlogic.gdx.utils.Array;
     import com.badlogic.gdx.utils.ScreenUtils;
     import com.badlogic.gdx.utils.viewport.ScreenViewport;
     import com.badlogic.gdx.utils.viewport.StretchViewport;
@@ -49,14 +50,12 @@
         private final ShaderProgram blurShader;
         private final ShapeRenderer shapeRenderer;
         private float scaleAtual, alpha, HoverAlpha;
-        private Botao btnClasse;
         private Boolean menuAberto = false;
         BitmapFont fonteTitulo;
         BitmapFont fonteNormal;
 
             //--------- ARRAY ---------
         //Variável que permite carregar imagens
-        private Texture[] HUDimg; //Variável que permite carregar imagens
         private Texture[] Dropdown;
         private HeroType[][] heroisPorClasse;
         private labelLlama[][] labelPorLlama;
@@ -64,11 +63,13 @@
         private Botao[] botoesHerois;
         private float[] posX = {20, 270, 20, 270, 20};
         private float[] posY = {580, 580, 330, 330, 80};
-        private Botao[] HUDbtn;
         private Botao[] opcoesClasse;
         private Texture heroSpriteSheetAtual, heroImagemEstatica, frameAtual, labelAtual;
         private PainelSkins skinsPanel;
         private final BitmapFont fonte;
+        private Array<Texture> HUDimg;
+        private Array<Botao> HUDbtn;
+        private Botao btnClasse;
 
         // Vetor para armazenar a posição do mouse convertida para o sistema do jogo
         private Vector2 posMouse = new Vector2();
@@ -90,24 +91,23 @@
             fboTexture = fbo.getColorBufferTexture();
             fboTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
-
             this.fonte = game.fonte;
             this.fonteTitulo = game.fonteTitulo;
             this.fonteNormal = game.fonteNormal;
 
-            HUDimg = new Texture[7];
-            HUDimg[0] = new Texture("MenuScreen_Background.png");
-            HUDimg[1] = new Texture("Painel.jpg");
-            HUDimg[2] = new Texture("Frame_aerial.png");
-            HUDimg[3] = new Texture("Frame_classic.png");
-            HUDimg[4] = new Texture("Frame_legend.png");
-            HUDimg[5] = new Texture("Frame_support.png");
-            HUDimg[6] = new Texture("Glow.png");
-            HUDimg[6].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-            HUDimg[6].setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            HUDimg = new Array<>();
+            HUDimg.add(new Texture("MenuScreen_Background.png"));
+            HUDimg.add(new Texture("Painel.jpg"));
+            HUDimg.add(new Texture("Frame_aerial.png"));
+            HUDimg.add(new Texture("Frame_classic.png"));
+            HUDimg.add(new Texture("Frame_legend.png"));
+            HUDimg.add(new Texture("Frame_support.png"));
+            HUDimg.add(new Texture("Glow.png"));
+            HUDimg.get(6).setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            HUDimg.get(6).setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
 
             Dropdown = new Texture[16];
-            Dropdown[0] = new Texture ("dropdown/Dropdown_Aerial.png");
+            Dropdown[0] = new Texture("dropdown/Dropdown_Aerial.png");
             Dropdown[1] = new Texture("dropdown/Dropdown_AerialArrow.png");
             Dropdown[2] = new Texture("dropdown/Dropdown_AerialArrowHover.png");
             Dropdown[3] = new Texture("dropdown/Dropdown_AerialHover.png");
@@ -125,7 +125,7 @@
             Dropdown[15] = new Texture("dropdown/Dropdown_SupportHover.png");
 
 
-                labels = new HashMap<>();
+            labels = new HashMap<>();
             frames = new HashMap<>();
 
             //--------- COMBOBOX ---------
@@ -140,7 +140,8 @@
             HeroClasse[] classes = HeroClasse.values();
             opcoesClasse = new Botao[classes.length];
 
-            for (int i = 0; i < classes.length; i++) {
+            int i;
+            for (i = 0; i < classes.length; i++) {
                 int baseIndex = getDropdownBaseIndex(classes[i]);
 
                 opcoesClasse[i] = new Botao(
@@ -166,7 +167,7 @@
 
             // -------- CONFIGURAÇÃO INICIAL --------
             classeSelecionada = HeroClasse.CLASSICOS;
-            frameAtual = HUDimg[3];
+            frameAtual = HUDimg.get(3);
 
             inicializarArraysDados();
 
@@ -175,35 +176,35 @@
             trocarLabel(labelLlama.LABEL_LLAMA);
 
             setBotoesClasseAtual();
-            HUDbtn = new Botao[4];
-                //Voltar
-                HUDbtn[0] = new Botao(
-                    new Texture("Back_Button.png"),
-                    //hover
-                    new Texture("Back_Button.png"),
-                    20,975,180,80, game.somClique
-                );
+            HUDbtn = new Array<>();
+            //Voltar
+            HUDbtn.add(new Botao(
+                new Texture("Back_Button.png"),
+                //hover
+                new Texture("Back_Button.png"),
+                20, 975, 180, 80, game.somClique
+            ));
 
-                //Select
-                HUDbtn[1] = new Botao(
-                    new Texture("Select_Button.png"),
-                    new Texture("Select_ButtonHover.png"),
-                    1000, 430, 400, 100, game.somClique
-                );
+            //Select
+            HUDbtn.add(new Botao(
+                new Texture("Select_Button.png"),
+                new Texture("Select_ButtonHover.png"),
+                1000, 430, 400, 100, game.somClique
+            ));
 
-                //Skins
-                HUDbtn[2] = new Botao(
-                    new Texture("Skins_Button.png"),
-                    new Texture("Skins_ButtonHover.png"),
-                    850, 430, 100, 100, game.somClique
-                );
+            //Skins
+            HUDbtn.add(new Botao(
+                new Texture("Skins_Button.png"),
+                new Texture("Skins_ButtonHover.png"),
+                850, 430, 100, 100, game.somClique
+            ));
 
-                //Infos
-                HUDbtn[3] = new Botao(
-                    new Texture("Infos_Button.png"),
-                    new Texture("Infos_ButtonHover.png"),
-                    700, 430, 100, 100, game.somClique
-                );
+            //Infos
+            HUDbtn.add(new Botao(
+                new Texture("Infos_Button.png"),
+                new Texture("Infos_ButtonHover.png"),
+                700, 430, 100, 100, game.somClique
+            ));
             //--------- SHADER ---------)
             ShaderProgram.pedantic = false;
 
@@ -214,6 +215,23 @@
 
             if (!blurShader.isCompiled()) {
                 System.out.println(blurShader.getLog());
+            }
+
+            HeroType[] heroisAtuais = heroisPorClasse[getIndiceClasse()];
+
+            HUDbtn.get(0).setOnClick(() -> game.setScreen(new MenuScreen(game)));
+            HUDbtn.get(2).setOnClick(() -> skinsPanel.toggleSkins());
+            HUDbtn.get(3).setOnClick(() -> skinsPanel.toggleInfos());
+
+            btnClasse.setOnClick(() -> menuAberto = !menuAberto);
+            for (i = 0; i < opcoesClasse.length; i++) {
+                final int index = i;
+
+                opcoesClasse[i].setOnClick(() -> {
+                    classeSelecionada = HeroClasse.values()[index];
+                    setBotoesClasseAtual();
+                    menuAberto = false;
+                });
             }
 
         }
@@ -286,6 +304,7 @@
 
             HeroType[] heroisAtuais = heroisPorClasse[getIndiceClasse()];
             FramePorClasse[] framesAtuais = framesPorClasse[getIndiceClasse()];
+            labelLlama[] labelsAtuais = labelPorLlama[getIndiceClasse()];
 
             botoesHerois = new Botao[heroisAtuais.length];
 
@@ -303,33 +322,45 @@
                 float y = 580 - (i / 2) * 250;
 
                 botoesHerois[i] = new Botao(texturaFrame, texturaFrame, x, y, 200, 200, game.somClique);
+
+                final int index = i;
+
+                botoesHerois[i].setOnClick(() -> {
+                    for (Botao btn : botoesHerois) btn.setSelecionado(false);
+
+                    botoesHerois[index].setSelecionado(true);
+                    botoesHerois[index].setCorBorda(getCorBordaClasse());
+
+                    if (index < heroisAtuais.length) trocarHeroi(heroisAtuais[index]);
+                    if (index < labelsAtuais.length) trocarLabel(labelsAtuais[index]);
+                });
             }
 
             // Atualiza padrão da classe
             switch (classeSelecionada) {
                 case CLASSICOS:
-                    frameAtual = HUDimg[3];
+                    frameAtual = HUDimg.get(3);
                     trocarBackground(BackgroundType.CLASSICO);
                     trocarHeroi(HeroType.LLAMA);
                     trocarLabel(labelLlama.LABEL_LLAMA);
                     break;
 
                 case SUPORTES:
-                    frameAtual = HUDimg[5];
+                    frameAtual = HUDimg.get(5);
                     trocarBackground(BackgroundType.SUPPORT);
                     trocarHeroi(HeroType.BURGUESA);
                     trocarLabel(labelLlama.LABEL_BURGUESA);
                     break;
 
                 case AEREOS:
-                    frameAtual = HUDimg[2];
+                    frameAtual = HUDimg.get(2);
                     trocarBackground(BackgroundType.AERIAL);
                     trocarHeroi(HeroType.ANJOLLAMA);
                     trocarLabel(labelLlama.LABEL_ANJOLLAMA);
                     break;
 
                 case LENDAS:
-                    frameAtual = HUDimg[4];
+                    frameAtual = HUDimg.get(4);
                     trocarBackground(BackgroundType.LENDA);
                     trocarHeroi(HeroType.CHEF);
                     trocarLabel(labelLlama.LABEL_CHEF);
@@ -517,18 +548,11 @@
                 ConfigManager.processarMouseY(mouseCru.y)
             );
 
-            boolean clicou = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
+            boolean clicou = Gdx.input.justTouched(); // evento
+            boolean pressionando = Gdx.input.isButtonPressed(Input.Buttons.LEFT); // estado
 
             // --- 3. CURSOR ---
             CursorManager.setDefault();
-
-            for (Botao btn : botoesHerois) if (btn != null) btn.atualizarCursor(posMouse);
-            for (Botao btn : HUDbtn) btn.atualizarCursor(posMouse);
-            btnClasse.atualizarCursor(posMouse);
-
-            if (menuAberto) {
-                for (Botao b : opcoesClasse) b.atualizarCursor(posMouse);
-            }
 
             if (skinsPanel.isAberto() && skinsPanel.estaSobre(posMouse)) {
                 CursorManager.setHover();
@@ -541,16 +565,14 @@
             if (scaleAtual < 1f) scaleAtual = Math.min(1f, scaleAtual + delta * 2.5f);
 
             // --- 5. CLIQUES ---
-            if (clicou) {
-                tratarCliquesHeroScreen();
-            }
+            tratarCliquesHeroScreen();
 
             // --- 6. FUNDO ---
             float offsetX = (posMouse.x - 960) * 0.01f;
             float offsetY = (posMouse.y - 540) * 0.01f;
 
             batch.begin();
-            batch.draw(HUDimg[0], offsetX, offsetY, 1920, 1080);
+            batch.draw(HUDimg.get(0), offsetX, offsetY, 1920, 1080);
             batch.end();
 
             // --- 7. HERÓI + LABEL ---
@@ -567,10 +589,10 @@
             // --- 8. BOTÕES ---
             batch.begin();
 
-            for (Botao btn : botoesHerois) btn.Exibir(batch, posMouse);
-            for (Botao btn : HUDbtn) btn.Exibir(batch, posMouse);
+            for (Botao btn : botoesHerois) btn.Exibir(batch, posMouse, pressionando);
+            for (Botao btn : HUDbtn) btn.Exibir(batch, posMouse, pressionando);
 
-            btnClasse.Exibir(batch, posMouse);
+            btnClasse.Exibir(batch, posMouse, pressionando);
 
             // texto da classe
             fonteNormal.draw(batch, classeSelecionada.name(),
@@ -580,7 +602,7 @@
 
             if (menuAberto) {
                 for (int i = 0; i < opcoesClasse.length; i++) {
-                    opcoesClasse[i].Exibir(batch, posMouse);
+                    opcoesClasse[i].Exibir(batch, posMouse,pressionando);
                     fonteNormal.draw(batch, HeroClasse.values()[i].name(),
                         opcoesClasse[i].getArea().x + 20,
                         opcoesClasse[i].getArea().y + 50);
@@ -629,7 +651,7 @@
 
             // Glow
             batch.setColor(corBackground.r, corBackground.g, corBackground.b, 0.85f + (0.15f * HoverAlpha));
-            batch.draw(HUDimg[6], x - 220, yFinal - 190, 750, 750);
+            batch.draw(HUDimg.get(6), x - 220, yFinal - 190, 750, 750);
 
             // Lógica de Hover da Llama
             Rectangle areaLlama = new Rectangle(x, yFinal, larguraEscalada, alturaEscalada);
@@ -660,51 +682,28 @@
         }
 
         private void tratarCliquesHeroScreen() {
-            // Back Button
-            if (HUDbtn[0].foiClicado(posMouse)) {
-                game.setScreen(new MenuScreen(game));
-                return;
-            }
 
-            // Seleção de Heróis da Grade
-            HeroType[] heroisAtuais = heroisPorClasse[getIndiceClasse()];
-            labelLlama[] labelsAtuais = labelPorLlama[getIndiceClasse()];
+            boolean pressionando = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 
-            for (int i = 0; i < botoesHerois.length; i++) {
-                if (botoesHerois[i].foiClicado(posMouse)) {
-                    for (Botao btn : botoesHerois) btn.setSelecionado(false);
-                    botoesHerois[i].setSelecionado(true);
-                    botoesHerois[i].setCorBorda(getCorBordaClasse());
+            for (Botao btn : botoesHerois) btn.atualizar(posMouse, pressionando);
+            for (Botao btn : HUDbtn) btn.atualizar(posMouse, pressionando);
 
-                    if (i < heroisAtuais.length) trocarHeroi(heroisAtuais[i]);
-                    if (i < labelsAtuais.length) trocarLabel(labelsAtuais[i]);
-                }
-            }
 
-            // Botões de Painel
-            if (HUDbtn[2].foiClicado(posMouse)) skinsPanel.toggleSkins();
-            if (HUDbtn[3].foiClicado(posMouse)) skinsPanel.toggleInfos();
-
-            if (skinsPanel.isAberto()) skinsPanel.detectarClique(posMouse.x, posMouse.y);
-
-            // Dropdown de Classe
-            if (btnClasse.foiClicado(posMouse)) menuAberto = !menuAberto;
+            btnClasse.atualizar(posMouse, pressionando);
 
             if (menuAberto) {
-                for (int i = 0; i < HeroClasse.values().length; i++) {
-                    if (opcoesClasse[i].foiClicado(posMouse)) {
-                        classeSelecionada = HeroClasse.values()[i];
-                        setBotoesClasseAtual();
-                        menuAberto = false;
-                        break;
-                    }
+                for (Botao b : opcoesClasse) {
+                    b.atualizar(posMouse, pressionando);
                 }
+            }
+
+            if (skinsPanel.isAberto()) {
+                skinsPanel.detectarClique(posMouse.x, posMouse.y);
             }
         }
 
         @Override
         public void resize(int width, int height) {
-
             viewport.update(width, height, true); //Atualiza o viewport de acordo com o tamanho da tela
             stage.getViewport().update(width, height, true); //Atualiza o stage de acordo com o tamanho da tela
         }
