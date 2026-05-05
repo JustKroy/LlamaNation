@@ -38,7 +38,8 @@ Menu de Heróis completo<br>
 Background das Llamas<br>
 Banco de dados<br>
 Menu Principal, incluindo integração com banco<br>
-Configurações<br>
+Popup de configurações<br>
+Menu de loja<br>
 
 ## TAREFAS FUTURAS
 ### UI GLOBAIS
@@ -46,12 +47,13 @@ Configurações<br>
 ### BOTÕES TELA DE HERÓIS
 - Labels Llamas
 - Background menu heróis
-- Refazer infos e skins
-- Botão Menu Dropdown + hover de todas as classes
 ### BOTÕES TELA PRINCIPAL
 - Background menu principal
 - Background configs
-- Botão salvar
+### BOTÕES SHOP
+- Background - fazer por camadas
+- Painel onde as skins vão aparecer
+- UI gemas
 ### BOTÕES TELA DE JOGO
 
 ## IDEIAS
