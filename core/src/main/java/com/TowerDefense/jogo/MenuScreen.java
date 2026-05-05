@@ -109,12 +109,20 @@ public class MenuScreen extends ScreenAdapter {
             popup.toggle();
         }
 
+        boolean clicandoHUD = pressionando;
+
         if (popup.isAberto()) {
             popup.handleInput(posMouse.x, posMouse.y);
+
+            if (popup.estaSobreElementoInterativo(posMouse)) {
+                clicandoHUD = false;
+            } else {
+                clicandoHUD = false;
+            }
         }
 
         for (Botao btn : HUDbtn) {
-            btn.atualizar(posMouse, pressionando);
+            btn.atualizar(posMouse, clicandoHUD);
         }
 
         // --- DESENHO DO FUNDO (PARALLAX) ---
